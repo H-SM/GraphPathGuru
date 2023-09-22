@@ -1,0 +1,1 @@
+// connection to our database and all the schemas for the applicaion will exist here 
