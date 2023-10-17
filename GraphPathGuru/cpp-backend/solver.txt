@@ -1,3 +1,4 @@
 // A case example
-{{1,2},{1,2},{1,2},{1,2},{1,2},{1,2}}
-2
+Will be specific to every algo.
+
+Read me specific to every algo is also present in each folder/source code.
