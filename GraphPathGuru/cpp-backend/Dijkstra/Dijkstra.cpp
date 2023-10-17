@@ -143,7 +143,7 @@ int main() {
     // }
 
     // Fill in this string to the path in your workspace 
-    std::string env_path = "D:\\Me\\UPES\\Sem 5\\Minor\\remote repo\\GraphPathGuru\\GraphPathGuru\\cpp-backend\\Dijkstra";
+    std::string env_path = "";
     if (env_path.size() == 0) {
         std::cout << "Please enter in an environemnt path for the output file.";
     }
