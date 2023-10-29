@@ -33,18 +33,29 @@ pair<vector<int>, vector<int>> dijkstra(int V, vector<vector<pair<int, int>>>& a
     // and traverse for all its adjacent nodes.
     while (!pq.empty()) {
         auto copy = pq;
-        output += "<pq>\n\t";
-        while (copy.size()) {
-            output += std::to_string(copy.top().first) + " " + std::to_string(copy.top().second) + " ";
+        output += "<ds>\n\t";   // begin <ds>
+        while (copy.size()) {   // putting PQ to output
+            output += std::to_string(copy.top().first) + "," + std::to_string(copy.top().second) + " ";
             copy.pop();
         }
-        output += "\n</pq>\n";
+        output += "\n\t";
+        for (auto &d: distTo) { // Putting dist to output
+            if (d == INT_MAX)
+                output += "INF ";
+            else
+                output += std::to_string(d) + " ";
+        }
+        output += "\n\t";
+        for (auto &p: pred) {   // putting pred to output
+            output += std::to_string(p) + " ";
+        }
+        output += "\n</ds>\n";  // <ds> stops here
 
         int node = pq.top().second;
         int dis = pq.top().first;
         pq.pop();
 
-        output += "<adj>\n\t";
+        output += "<adj>\n\t";  // Adj begins here
         output += std::to_string(node) + ", " + std::to_string(dis) + ":";
         // Check for all adjacent nodes of the popped out
         // element whether the prev dist is larger than current or not.
@@ -62,12 +73,12 @@ pair<vector<int>, vector<int>> dijkstra(int V, vector<vector<pair<int, int>>>& a
                 f = 1;
             }
             // This is for output gen logic
-            if (f) 
+            if (f)  // outputing different things depending on comparision result
                 output += "1, " + std::to_string(pred[v]) + ", " + std::to_string(distTo[v]);
             else    
                 output += "0, -1, -1";
         }
-        output += "\n</adj>\n";
+        output += "\n</adj>\n"; // adj ends here
     }
     return {distTo, pred};
 }
@@ -137,16 +148,13 @@ int main() {
     output += "\n</result>\n";
     // 
 
-    // output += "The path is: ";
-    // for (auto i: path) {
-        // output += std::to_string(i) + ",";
-    // }
-
-    // Fill in this string to the path in your workspace 
+    // Fill in this string to the path in your Environment 
     std::string env_path = "";
+
     if (env_path.size() == 0) {
         std::cout << "Please enter in an environemnt path for the output file.";
     }
+
     std::ofstream outputFile(env_path + "\\output.txt");
 
     if (outputFile.is_open()) {
@@ -156,7 +164,7 @@ int main() {
         std::cerr << "Failed to open the output file." << std::endl;
     }
 
-    // std::cout << output;  // Print the accumulated output. For debug.
+    // std::cout << output;  // Print the accumulated output. For debugging.
 
     return 0;
 }
