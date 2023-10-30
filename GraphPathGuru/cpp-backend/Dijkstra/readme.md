@@ -29,7 +29,7 @@ Adjacent nodes to some "focus" node will be formatted in the following format:
 
 <adj>
     current node, current distance: 
-    check node, check distance, comparision result, new_pred[current node], new_dist[check_node]    ***
+    check node, check distance, comparision result, new_pred[check_node], new_dist[check_node]    ***
 </adj>
 
 
@@ -41,7 +41,7 @@ int dtypes: current node, curent distance, check node, check distance, new_pred[
 Boolean dtyepes: Comparision result
 
 
-NOTE: new_pred[current node], new_dist[check_node] will be -1 if comparision result is false.
+NOTE: new_pred[check node], new_dist[check_node] will be -1 if comparision result is false.
 
 
 
