@@ -2,8 +2,8 @@ import React from 'react'
 
 const Details = () => {
   return (
-    <div>
-      
+    <div className='flex justify-center'>
+      Details
     </div>
   )
 }

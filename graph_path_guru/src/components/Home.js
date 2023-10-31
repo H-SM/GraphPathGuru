@@ -19,7 +19,9 @@ const initialNodes = [
         id: '0',
         data: { label: 'Node 0 -> ok' },
         position: { x: 0, y: 50 },
-        style: { height: "50px", width: "80px" }
+        style: { height: "50px", width: "80px" },
+        targetPosition: 'right',
+        sourcePosition: 'right',
     },
 ];
 
@@ -31,6 +33,7 @@ const fitViewOptions = {
 };
 
 
+
 const AddNodeOnEdgeDrop = () => {
 
     const reactFlowWrapper = useRef(null);
@@ -39,50 +42,132 @@ const AddNodeOnEdgeDrop = () => {
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const { project } = useReactFlow();
     // const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
-    const [targetId, setTargetId] = useState(0);
-    // useEffect to handle node color changes after 10 seconds
+
+    const checkNode = [
+        [1], [2, 3], [], [],
+    ];
+
+    const result = [[1], [1, 0], [], []];
+
+
+
+    const [currentNode, setCurrentNode] = useState(0);
+    const [currentEdge, setCurrentEdge] = useState(1);
+    const [index, setIndex] = useState(0);
+
     useEffect(() => {
 
         const updatedNodes = [];
 
-        const timer = setTimeout(() => {
+        const timer= setTimeout(() => {
 
-            // Use map to update matching nodes and accumulate all nodes
             nodes.forEach(node => {
-                if (node.id === targetId.toString()) {
-                    // If the ID matches, update the style as needed
+                if (parseInt(node.id) === currentNode) {
                     console.log("hel");
                     updatedNodes.push({
                         ...node,
                         style: {
                             ...node.style,
-                            // Add or modify style properties here
-                            backgroundColor: 'red', // For example, change the background color to red
+                            backgroundColor: 'red',
                         }
                     });
-                } else {
-                    console.log("hel1");
-                    // If the ID doesn't match, add the original object unchanged
+                }
+                else if (checkNode[currentNode][index] === parseInt(node.id)) {
                     updatedNodes.push({
                         ...node,
                         style: {
                             ...node.style,
-                            // Add or modify style properties here
-                            backgroundColor: 'white', // For example, change the background color to red
+                            backgroundColor: 'blue',
+                        }
+                    });
+                }
+                else {
+                    updatedNodes.push({
+                        ...node,
+                        style: {
+                            ...node.style,
+                            backgroundColor: 'white',
                         }
                     });
                 }
             });
 
             setNodes(updatedNodes);
-            setTargetId(prevTargetId => prevTargetId + 1);
-            console.log(targetId);
+
+            const updatedEdges = [];
+
+            edges.forEach(edge => {
+                if (parseInt(edge.id) == currentEdge) {
+
+                    updatedEdges.push({
+                        ...edge,
+                        animated: true
+                    });
+                }
+                else {
+                    updatedEdges.push({
+                        ...edge,
+                        animated: false
+                    });
+                }
+            });
+
+            setEdges(updatedEdges);
+
+            setTimeout(() => {
+
+                const updatedNodes = [];
+                nodes.forEach(node => {
+                    if ((parseInt(node.id) === currentNode || parseInt(node.id) === checkNode[currentNode][index])&& result[currentNode][index] === 1) {
+                        updatedNodes.push({
+                            ...node,
+                            style: {
+                                ...node.style,
+                                backgroundColor: 'green',
+                            }
+                        });
+                    }
+                    else if((parseInt(node.id) === currentNode || checkNode[currentNode][index] === parseInt(node.id)) && result[currentNode][index] === 0){
+                        updatedNodes.push({
+                            ...node,
+                            style: {
+                                ...node.style,
+                                backgroundColor: 'black',
+                            }
+                        });
+                    }
+                    else {
+                        updatedNodes.push({
+                            ...node,
+                            style: {
+                                ...node.style,
+                                backgroundColor: 'white',
+                            }
+                        });
+                    }
+                });
+                setNodes(updatedNodes);
+
+                if (index == checkNode[currentNode].length - 1) {
+                    setIndex(0);
+                    setCurrentNode(prevTargetId => prevTargetId + 1);
+                } else {
+                    setIndex(prevIndex => prevIndex + 1)
+                }
+
+                setCurrentEdge(prevTargetId => prevTargetId + 1);
+
+                console.log(currentNode);
+            }, 2000);
+
 
         }, 5000);
+
 
         return () => clearTimeout(timer);
 
     }, [nodes]);
+
 
     const onConnect = useCallback(
         (params) => {
@@ -110,8 +195,8 @@ const AddNodeOnEdgeDrop = () => {
                     id,
                     position: project({ x: event.clientX - left - 75, y: event.clientY - top }),
                     data: { label: `Node ${id}` },
-                    // targetPosition: 'top',
-                    // sourcePosition: 'bottom',
+                    targetPosition: 'left',
+                    sourcePosition: 'left',
                 };
 
                 setNodes((nds) => nds.concat(newNode));
@@ -143,7 +228,7 @@ const AddNodeOnEdgeDrop = () => {
     );
 
     return (
-        <div className="wrapper " style={{ width: "100vw", height: "100vh" }} ref={reactFlowWrapper}>
+        <div className="wrapper " style={{ width: "100%", height: "100vh", borderColor: "black", borderWidth: "3px" }} ref={reactFlowWrapper}>
             <ReactFlow
                 nodes={nodes}
                 edges={edges}
