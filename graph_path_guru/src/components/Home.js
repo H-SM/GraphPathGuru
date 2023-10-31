@@ -32,7 +32,9 @@ const fitViewOptions = {
     padding: 3,
 };
 
-
+let currentNode = 0;
+let currentEdge = 1;
+let index = 0;
 
 const AddNodeOnEdgeDrop = () => {
 
@@ -49,21 +51,30 @@ const AddNodeOnEdgeDrop = () => {
 
     const result = [[1], [1, 0], [], []];
 
+    const [isProcessing, setIsProcessing] = useState(false);
 
 
-    const [currentNode, setCurrentNode] = useState(0);
-    const [currentEdge, setCurrentEdge] = useState(1);
-    const [index, setIndex] = useState(0);
 
-    useEffect(() => {
+
+
+    const startProcess = () => {
+        setIsProcessing(true);
+        visualise();
+    };
+
+    const visualise = () => {
+
+        if (checkNode[currentNode].length === 0) {
+            setIsProcessing(false);
+            return;
+        }
 
         const updatedNodes = [];
 
-        const timer= setTimeout(() => {
+        setTimeout(() => {
 
             nodes.forEach(node => {
                 if (parseInt(node.id) === currentNode) {
-                    console.log("hel");
                     updatedNodes.push({
                         ...node,
                         style: {
@@ -101,13 +112,15 @@ const AddNodeOnEdgeDrop = () => {
 
                     updatedEdges.push({
                         ...edge,
-                        animated: true
+                        animated: true,
+                        label: "dist[red] + weight-red-blue < dist[blue] "
                     });
                 }
                 else {
                     updatedEdges.push({
                         ...edge,
-                        animated: false
+                        animated: false,
+                        label: ""
                     });
                 }
             });
@@ -118,7 +131,7 @@ const AddNodeOnEdgeDrop = () => {
 
                 const updatedNodes = [];
                 nodes.forEach(node => {
-                    if ((parseInt(node.id) === currentNode || parseInt(node.id) === checkNode[currentNode][index])&& result[currentNode][index] === 1) {
+                    if ((parseInt(node.id) === currentNode || parseInt(node.id) === checkNode[currentNode][index]) && result[currentNode][index] === 1) {
                         updatedNodes.push({
                             ...node,
                             style: {
@@ -127,7 +140,7 @@ const AddNodeOnEdgeDrop = () => {
                             }
                         });
                     }
-                    else if((parseInt(node.id) === currentNode || checkNode[currentNode][index] === parseInt(node.id)) && result[currentNode][index] === 0){
+                    else if ((parseInt(node.id) === currentNode || checkNode[currentNode][index] === parseInt(node.id)) && result[currentNode][index] === 0) {
                         updatedNodes.push({
                             ...node,
                             style: {
@@ -149,24 +162,21 @@ const AddNodeOnEdgeDrop = () => {
                 setNodes(updatedNodes);
 
                 if (index == checkNode[currentNode].length - 1) {
-                    setIndex(0);
-                    setCurrentNode(prevTargetId => prevTargetId + 1);
+                    index = 0;
+                    currentNode++;
                 } else {
-                    setIndex(prevIndex => prevIndex + 1)
+                    index++;
                 }
 
-                setCurrentEdge(prevTargetId => prevTargetId + 1);
+                currentEdge++;
 
-                console.log(currentNode);
             }, 2000);
 
+            visualise();
 
         }, 5000);
 
-
-        return () => clearTimeout(timer);
-
-    }, [nodes]);
+    };
 
 
     const onConnect = useCallback(
@@ -227,21 +237,110 @@ const AddNodeOnEdgeDrop = () => {
         [nodes, edges]
     );
 
+    const options = Array.from({ length: checkNode.length }, (_, index) => (
+        <option key={index} value={index}>
+            {index}
+        </option>
+    ));
+
+    const [node1, setnode1] = useState('0');
+    const [node2, setnode2] = useState('0');
+
+    const handleSelectChange1 = (event) => {
+        setnode1(event.target.value);
+    };
+
+    const handleSelectChange2 = (event) => {
+        setnode2(event.target.value);
+    };
+
+    const [val, setval] = useState('');
+
+    const handleValChange = (event) => {
+        setval(event.target.value);
+    };
+
+    const changeWeights = (node2, val) => {
+        const updatedEdges = [];
+        console.log(node2, " ",val);
+        edges.forEach(edge => {
+            if (edge.id === node2) {
+
+                updatedEdges.push({
+                    ...edge,
+                    label: val.toString()
+                });
+            }
+            else {
+                updatedEdges.push({
+                    ...edge,
+                });
+            }
+        });
+
+        setEdges(updatedEdges);
+    }
+
     return (
-        <div className="wrapper " style={{ width: "100%", height: "100vh", borderColor: "black", borderWidth: "3px" }} ref={reactFlowWrapper}>
-            <ReactFlow
-                nodes={nodes}
-                edges={edges}
-                onNodesChange={onNodesChange}
-                onEdgesChange={onEdgesChange}
-                onConnect={onConnect}
-                onNodesDelete={onNodesDelete}
-                onConnectStart={onConnectStart}
-                onConnectEnd={onConnectEnd}
-                fitView
-                fitViewOptions={fitViewOptions}
-            />
-        </div>
+        <>
+            <div className="wrapper " style={{ width: "100%", height: "100vh", borderColor: "black", borderWidth: "3px" }} ref={reactFlowWrapper}>
+                <ReactFlow
+                    nodes={nodes}
+                    edges={edges}
+                    onNodesChange={onNodesChange}
+                    onEdgesChange={onEdgesChange}
+                    onConnect={onConnect}
+                    onNodesDelete={onNodesDelete}
+                    onConnectStart={onConnectStart}
+                    onConnectEnd={onConnectEnd}
+                    fitView
+                    fitViewOptions={fitViewOptions}
+                />
+            </div>
+
+            <div className='absolute bottom-80 left-[1150px]'>
+                <button onClick={startProcess} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    Visualise
+                </button>
+
+                <div className='m-4 p-4 gap-5 flex flex-col'>
+                    <div>
+                        <label htmlFor="select1"> From: </label>
+                        <select id="select1" value={node1} onChange={handleSelectChange1}>
+                            {options}
+                        </select>
+                    </div>
+
+                    <div>
+                        <label htmlFor="select2">To : </label>
+                        <select id="select2" value={node2} onChange={handleSelectChange2}>
+                            {options}
+                        </select>
+                    </div>
+
+                    <div >
+                        <label className=" text-gray-700 text-sm font-bold ">
+                            Enter Weight
+                        </label>
+                        <input
+                            value={val}
+                            onChange={handleValChange}
+                            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            id="val"
+                            type="text" />
+                    </div>
+
+                    <button onClick={() => changeWeights(node2, val)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Change
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+        </>
     );
 };
 
