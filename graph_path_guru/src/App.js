@@ -5,11 +5,17 @@ function App() {
   return (
     <>
       <div style={{ display: "flex", justifyContent: "center", fontWeight: "bold", fontSize: "22px", marginTop: "22px" }}>
-        GM_LoneWolf
+        GraphPathGuru
       </div>
-      <div>
-        <Home />
-        <Details />
+      <div className="flex">
+        <div className="w-[80%]">
+          <Home />
+        </div>
+
+        <div className="w-[20%]">
+          <Details />
+        </div>
+
       </div>
 
     </>
