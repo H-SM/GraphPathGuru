@@ -17,9 +17,9 @@ import 'reactflow/dist/style.css';
 const initialNodes = [
     {
         id: '0',
-        data: { label: 'Node 0 -> ok' },
+        data: { label: '0' },
         position: { x: 0, y: 50 },
-        style: { height: "50px", width: "80px" },
+        style: { height: "50px", width: "50px", borderRadius: "100px" },
         targetPosition: 'right',
         sourcePosition: 'right',
     },
@@ -53,11 +53,10 @@ const AddNodeOnEdgeDrop = () => {
 
     const [isProcessing, setIsProcessing] = useState(false);
 
-
-
-
-
     const startProcess = () => {
+        currentNode = 0;
+        currentEdge = 1;
+        index = 0;
         setIsProcessing(true);
         visualise();
     };
@@ -108,19 +107,22 @@ const AddNodeOnEdgeDrop = () => {
             const updatedEdges = [];
 
             edges.forEach(edge => {
+
+                const weight = edge.label;
+                console.log(weight);
+
                 if (parseInt(edge.id) == currentEdge) {
 
                     updatedEdges.push({
                         ...edge,
                         animated: true,
-                        label: "dist[red] + weight-red-blue < dist[blue] "
+                        label: "dist[red] + weight[node] < dist[blue]"
                     });
                 }
                 else {
                     updatedEdges.push({
                         ...edge,
                         animated: false,
-                        label: ""
                     });
                 }
             });
@@ -184,6 +186,7 @@ const AddNodeOnEdgeDrop = () => {
             const redEdge = {
                 ...params,
                 style: { stroke: 'red', strokeWidth: 1 },
+                type:"straight",
             };
             setEdges((els) => addEdge(redEdge, els));
         },
@@ -204,13 +207,14 @@ const AddNodeOnEdgeDrop = () => {
                 const newNode = {
                     id,
                     position: project({ x: event.clientX - left - 75, y: event.clientY - top }),
-                    data: { label: `Node ${id}` },
+                    style: { height: "50px", width: "50px", borderRadius: "100px" },
+                    data: { label: `${id}` },
                     targetPosition: 'left',
                     sourcePosition: 'left',
                 };
 
                 setNodes((nds) => nds.concat(newNode));
-                setEdges((eds) => eds.concat({ id, source: connectingNodeId.current, target: id, style: { stroke: "red", strokeWidth: 1 } }));
+                setEdges((eds) => eds.concat({ id, source: connectingNodeId.current, type:"straight", target: id, style: { stroke: "red", strokeWidth: 1 } }));
             }
         },
         [project]
@@ -262,7 +266,7 @@ const AddNodeOnEdgeDrop = () => {
 
     const changeWeights = (node2, val) => {
         const updatedEdges = [];
-        console.log(node2, " ",val);
+        console.log(node2, " ", val);
         edges.forEach(edge => {
             if (edge.id === node2) {
 
@@ -298,7 +302,7 @@ const AddNodeOnEdgeDrop = () => {
                 />
             </div>
 
-            <div className='absolute bottom-80 left-[1150px]'>
+            <div className='absolute bottom-80 top-40 left-[1150px]'>
                 <button onClick={startProcess} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                     Visualise
                 </button>

@@ -15,6 +15,7 @@ function App() {
         <div className="w-[20%]">
           <Details />
         </div>
+        
 
       </div>
 
