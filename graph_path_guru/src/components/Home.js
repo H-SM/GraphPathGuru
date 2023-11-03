@@ -60,6 +60,15 @@ const AddNodeOnEdgeDrop = () => {
         visualise();
     };
 
+    useEffect(() => {
+        console.log(edges);
+
+
+    }, [edges])
+
+
+    // data visualisation
+
     const visualise = () => {
 
         if (checkNode[currentNode].length === 0) {
@@ -182,12 +191,16 @@ const AddNodeOnEdgeDrop = () => {
 
     const onConnect = useCallback(
         (params) => {
+            const id = getId();
+            
             const redEdge = {
                 ...params,
+                id: `${connectingNodeId.current}_${params.target}`,
                 style: { stroke: 'red', strokeWidth: 1 },
                 type: "straight",
             };
             setEdges((els) => addEdge(redEdge, els));
+            console.log(edges);
         },
         []
     );
@@ -214,9 +227,12 @@ const AddNodeOnEdgeDrop = () => {
 
                 setNodes((nds) => nds.concat(newNode));
                 setEdges((eds) => eds.concat({ id: `${connectingNodeId.current}_${id}`, source: connectingNodeId.current, type: "straight", target: id, style: { stroke: "red", strokeWidth: 1 } }));
+                console.log(edges);
             }
         },
         [project]
+
+
     );
 
     const onNodesDelete = useCallback(
