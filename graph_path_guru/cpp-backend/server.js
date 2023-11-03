@@ -26,8 +26,30 @@ app.post('/write-file', (req, res) => {
     try {
         const { nodes, edges } = req.body;
 
-        console.log(nodes, edges);
+        console.log(nodes);
+        console.log(edges);
+        let output = "";
+        const mp = {};
+        for (var i = 0; i < edges.length; i++) {
+            edge = edges[i];
+            if (!(edge.source in mp)) {
+                mp[edge.source] = [];
+            }
+            mp[edge.source].push(edge.target);
+        }
+        console.log(mp);
+        for (var i = 0; i < nodes.length; i++) {
+            node = nodes[i];
+            output += node.id;
 
+            output += ' ' + node.position.x.toString().slice(0,5) + ' ' + node.position.y.toString().slice(0,5) +': ';
+            for (let j = 0; j < mp[node.id]; j++) {
+                output += mp[node.id] + ' ';
+            }
+            console.log(output);
+            output += '\n'
+        }
+        
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Failed to save data to file' });
