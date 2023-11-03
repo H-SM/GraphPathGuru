@@ -8,7 +8,6 @@ import ReactFlow, {
     getIncomers,
     getOutgoers,
     getConnectedEdges,
-    useOnSelectionChange
 } from 'reactflow';
 
 import 'reactflow/dist/style.css';
@@ -109,9 +108,9 @@ const AddNodeOnEdgeDrop = () => {
             edges.forEach(edge => {
 
                 const weight = edge.label;
-                console.log(weight);
+                // console.log(edge.id, " ", currentNode.toString() + '_' + checkNode[currentNode][index].toString());
 
-                if (parseInt(edge.id) == currentEdge) {
+                if (checkNode[currentNode][index] && edge.id === currentNode.toString() + '_' + checkNode[currentNode][index].toString()) {
 
                     updatedEdges.push({
                         ...edge,
@@ -186,7 +185,7 @@ const AddNodeOnEdgeDrop = () => {
             const redEdge = {
                 ...params,
                 style: { stroke: 'red', strokeWidth: 1 },
-                type:"straight",
+                type: "straight",
             };
             setEdges((els) => addEdge(redEdge, els));
         },
@@ -214,7 +213,7 @@ const AddNodeOnEdgeDrop = () => {
                 };
 
                 setNodes((nds) => nds.concat(newNode));
-                setEdges((eds) => eds.concat({ id, source: connectingNodeId.current, type:"straight", target: id, style: { stroke: "red", strokeWidth: 1 } }));
+                setEdges((eds) => eds.concat({ id: `${connectingNodeId.current}_${id}`, source: connectingNodeId.current, type: "straight", target: id, style: { stroke: "red", strokeWidth: 1 } }));
             }
         },
         [project]
@@ -264,11 +263,13 @@ const AddNodeOnEdgeDrop = () => {
         setval(event.target.value);
     };
 
-    const changeWeights = (node2, val) => {
+    const changeWeights = (node1, node2, val) => {
         const updatedEdges = [];
-        console.log(node2, " ", val);
+
+        const check = node1 + '_' + node2;
+
         edges.forEach(edge => {
-            if (edge.id === node2) {
+            if (edge.id === check) {
 
                 updatedEdges.push({
                     ...edge,
@@ -283,6 +284,21 @@ const AddNodeOnEdgeDrop = () => {
         });
 
         setEdges(updatedEdges);
+    }
+
+    const writeFile = () => {
+        const data = {
+            nodes: nodes,
+            edges: edges,
+        };
+
+        fetch('http://localhost:8000/write-file', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        })
     }
 
     return (
@@ -334,8 +350,12 @@ const AddNodeOnEdgeDrop = () => {
                             type="text" />
                     </div>
 
-                    <button onClick={() => changeWeights(node2, val)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    <button onClick={() => changeWeights(node1, node2, val)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                         Change
+                    </button>
+
+                    <button onClick={() => writeFile()} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Save
                     </button>
 
                 </div>
