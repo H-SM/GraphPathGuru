@@ -190,9 +190,7 @@ const AddNodeOnEdgeDrop = () => {
 
 
     const onConnect = useCallback(
-        (params) => {
-            const id = getId();
-            
+        (params) => {  
             const redEdge = {
                 ...params,
                 id: `${connectingNodeId.current}_${params.target}`,
