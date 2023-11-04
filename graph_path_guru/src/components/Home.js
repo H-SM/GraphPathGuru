@@ -46,11 +46,10 @@ const AddNodeOnEdgeDrop = () => {
     const { project } = useReactFlow();
     // const onConnect = useCallback((params) => setEdges((eds) => addEdge(params, eds)), []);
 
-    const checkNode = [
-        [1], [2, 3], [], [],
-    ];
 
-    const result = [[1], [1, 0], [], []];
+
+    var checkNode = [];
+    var result = [];
 
     const [isProcessing, setIsProcessing] = useState(false);
 
@@ -73,7 +72,23 @@ const AddNodeOnEdgeDrop = () => {
 
     const visualise = () => {
 
-        if (checkNode[currentNode].length === 0) {
+        fetch('http://localhost:8000/read-file') 
+            .then((response) => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json(); 
+            })
+            .then((data) => {
+                console.log('Received data:', data.result);
+                result = data.result;
+                checkNode = data.checkNode;
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+
+        if (checkNode.length > 0 && checkNode[currentNode].length === 0) {
             setIsProcessing(false);
             return;
         }
