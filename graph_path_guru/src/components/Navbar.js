@@ -1,5 +1,7 @@
 import React from 'react'
 import logo from '../assests/logo.png';
+import imager from '../assests/beams-pricing.png';
+
 const Navbar = () => {
   return (
     <>

@@ -15,6 +15,7 @@ import ReactFlow, {
 } from 'reactflow';
 
 import 'reactflow/dist/style.css';
+import imager from '../assests/beams-pricing.png';
 
 import Navbar from './Navbar';
 import HeroSection from './HeroSection';
@@ -398,7 +399,7 @@ const AddNodeOnEdgeDrop = () => {
             <div className="wrapper " 
             style={{ 
                 width: "80%", 
-                height: "80vh", 
+                height: "100vh", 
                 // borderColor: "black", 
                 // borderWidth: "3px" 
             }} 
@@ -420,7 +421,9 @@ const AddNodeOnEdgeDrop = () => {
                 </ReactFlow>
             </div>
 
-            <div className='absolute bottom-80 top-40 left-[1150px]'>
+            <div 
+            // className='absolute bottom-80 top-40 left-[1150px]'
+            >
                 <button onClick={startProcess} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                     Visualise
                 </button>
@@ -481,8 +484,14 @@ const AddNodeOnEdgeDrop = () => {
 
 export default () => (
     <>
+    <div>
+    <img src={imager} alt="" class="absolute left-0 top-0 z-[-1] w-full max-w-none "/>
+    <div className='z-10'>
     <Navbar/>
     <HeroSection/>
+    </div>
+    </div>
+   
     <ReactFlowProvider>
         <AddNodeOnEdgeDrop />
     </ReactFlowProvider>
