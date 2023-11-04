@@ -399,8 +399,8 @@ const AddNodeOnEdgeDrop = () => {
         <div className='flex justify-center items-center'>
         <section class="grid grid-cols-1 gap-x-8 gap-y-6 pb-20 xl:grid-cols-4"><h2 class="text-3xl font-bold tracking-tight text-slate-900">Start Looking into it!</h2><div class="col-span-3"><div class="max-w-[54rem] text-lg leading-8 text-slate-600"><p>Welcome to our playground! You could look into your graph learning from visualizing them below using the variable features there is to offer.</p><p class="mt-6">We provide a platform for researchers to experiment, validate, and gain insights into the performance of various shortest path algorithms, fostering algorithmic innovation.</p></div></div></section>
         </div>
-        <div className='flex justify-center items-center'>
-            <div className="wrapper w-[80%] h-[90vh] ring-2 ring-zinc-200 ring-offset-2" 
+        <div className='flex flex-row justify-center items-center gap-2'>
+            <div className="wrapper w-[70%] h-[80vh] ring-2 ring-zinc-200 ring-offset-2 rounded-sm" 
             // style={{ 
             //     width: "80%", 
             //     height: "100vh", 
@@ -423,24 +423,55 @@ const AddNodeOnEdgeDrop = () => {
                     <Background />
                     <Controls />
                 </ReactFlow>
-            
-                <button onClick={startProcess} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 my-1 rounded">
-                    Visualise
-                </button>
+            </div>
+            <div className='w-[20%] h-[80vh] flex flex-col justify-start gap-4'>
+                    <button onClick={startProcess} class="relative px-5 py-3 overflow-hidden font-medium text-gray-600 bg-gray-100 border border-gray-100 rounded-lg shadow-inner group">
+                        <span class="absolute top-0 left-0 w-0 h-0 transition-all duration-200 border-t-2 border-gray-600 group-hover:w-full ease"></span>
+                        <span class="absolute bottom-0 right-0 w-0 h-0 transition-all duration-200 border-b-2 border-gray-600 group-hover:w-full ease"></span>
+                        <span class="absolute top-0 left-0 w-full h-0 transition-all duration-300 delay-200 bg-gray-600 group-hover:h-full ease"></span>
+                        <span class="absolute bottom-0 left-0 w-full h-0 transition-all duration-300 delay-200 bg-gray-600 group-hover:h-full ease"></span>
+                        <span class="absolute inset-0 w-full h-full duration-300 delay-300 bg-gray-900 opacity-0 group-hover:opacity-100"></span>
+                        <span class="relative transition-colors duration-300 delay-200 group-hover:text-white ease font-bold">Visualize</span>
+                    </button>
+                    <button onClick={() => writeFile()} class="relative px-5 py-3 overflow-hidden font-medium text-gray-600 bg-gray-100 border border-gray-100 rounded-lg shadow-inner group">
+                        <span class="absolute top-0 left-0 w-0 h-0 transition-all duration-200 border-t-2 border-gray-600 group-hover:w-full ease"></span>
+                        <span class="absolute bottom-0 right-0 w-0 h-0 transition-all duration-200 border-b-2 border-gray-600 group-hover:w-full ease"></span>
+                        <span class="absolute top-0 left-0 w-full h-0 transition-all duration-300 delay-200 bg-gray-600 group-hover:h-full ease"></span>
+                        <span class="absolute bottom-0 left-0 w-full h-0 transition-all duration-300 delay-200 bg-gray-600 group-hover:h-full ease"></span>
+                        <span class="absolute inset-0 w-full h-full duration-300 delay-300 bg-gray-900 opacity-0 group-hover:opacity-100"></span>
+                        <span class="relative transition-colors duration-300 delay-200 group-hover:text-white ease font-bold">Save</span>
+                    </button>
+                    <button onClick={flipNode}  class="relative px-5 py-3 overflow-hidden font-medium text-gray-600 bg-gray-100 border border-gray-100 rounded-lg shadow-inner group">
+                        <span class="absolute top-0 left-0 w-0 h-0 transition-all duration-200 border-t-2 border-gray-600 group-hover:w-full ease"></span>
+                        <span class="absolute bottom-0 right-0 w-0 h-0 transition-all duration-200 border-b-2 border-gray-600 group-hover:w-full ease"></span>
+                        <span class="absolute top-0 left-0 w-full h-0 transition-all duration-300 delay-200 bg-gray-600 group-hover:h-full ease"></span>
+                        <span class="absolute bottom-0 left-0 w-full h-0 transition-all duration-300 delay-200 bg-gray-600 group-hover:h-full ease"></span>
+                        <span class="absolute inset-0 w-full h-full duration-300 delay-300 bg-gray-900 opacity-0 group-hover:opacity-100"></span>
+                        <span class="relative transition-colors duration-300 delay-200 group-hover:text-white ease font-bold">Flip Node</span>
+                    </button>
+                    <button onClick={performDijktra}  class="relative px-5 py-3 overflow-hidden font-medium text-gray-600 bg-gray-100 border border-gray-100 rounded-lg shadow-inner group">
+                        <span class="absolute top-0 left-0 w-0 h-0 transition-all duration-200 border-t-2 border-gray-600 group-hover:w-full ease"></span>
+                        <span class="absolute bottom-0 right-0 w-0 h-0 transition-all duration-200 border-b-2 border-gray-600 group-hover:w-full ease"></span>
+                        <span class="absolute top-0 left-0 w-full h-0 transition-all duration-300 delay-200 bg-gray-600 group-hover:h-full ease"></span>
+                        <span class="absolute bottom-0 left-0 w-full h-0 transition-all duration-300 delay-200 bg-gray-600 group-hover:h-full ease"></span>
+                        <span class="absolute inset-0 w-full h-full duration-300 delay-300 bg-gray-900 opacity-0 group-hover:opacity-100"></span>
+                        <span class="relative transition-colors duration-300 delay-200 group-hover:text-white ease font-bold">Perform Dijktra</span>
+                    </button>
 
-                <div className='m-4 p-4 gap-5 flex flex-col'>
+                    <div className='gap-3 flex w-full justify-evenly'>
                     <div>
-                        <label htmlFor="select1"> From: </label>
-                        <select id="select1" value={node1} onChange={handleSelectChange1}>
+                        <label htmlFor="select1" className=" text-gray-700 text-sm font-bold "> From: </label>
+                        <select id="select1" className='inline-flex w-[100px] justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50' value={node1} onChange={handleSelectChange1}>
                             {options}
                         </select>
                     </div>
 
                     <div>
-                        <label htmlFor="select2">To : </label>
-                        <select id="select2" value={node2} onChange={handleSelectChange2}>
+                        <label htmlFor="select1" className=" text-gray-700 text-sm font-bold "> To: </label>
+                        <select id="select1" className='inline-flex w-[100px] justify-center gap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50' value={node2} onChange={handleSelectChange2}>
                             {options}
                         </select>
+                    </div>
                     </div>
 
                     <div >
@@ -455,27 +486,18 @@ const AddNodeOnEdgeDrop = () => {
                             type="text" />
                     </div>
 
-                    <button onClick={() => changeWeights(node1, node2, val)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                        Change
+                    <button onClick={() => changeWeights(node1, node2, val)} class="relative px-5 py-3 overflow-hidden font-medium text-gray-600 bg-gray-100 border border-gray-100 rounded-lg shadow-inner group">
+                        <span class="absolute top-0 left-0 w-0 h-0 transition-all duration-200 border-t-2 border-gray-600 group-hover:w-full ease"></span>
+                        <span class="absolute bottom-0 right-0 w-0 h-0 transition-all duration-200 border-b-2 border-gray-600 group-hover:w-full ease"></span>
+                        <span class="absolute top-0 left-0 w-full h-0 transition-all duration-300 delay-200 bg-gray-600 group-hover:h-full ease"></span>
+                        <span class="absolute bottom-0 left-0 w-full h-0 transition-all duration-300 delay-200 bg-gray-600 group-hover:h-full ease"></span>
+                        <span class="absolute inset-0 w-full h-full duration-300 delay-300 bg-gray-900 opacity-0 group-hover:opacity-100"></span>
+                        <span class="relative transition-colors duration-300 delay-200 group-hover:text-white ease font-bold">Change</span>
                     </button>
-
-                    <button onClick={() => writeFile()} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                        Save
-                    </button>
-
-                    <button onClick={flipNode} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                        Flip node
-                    </button>
-
-                    <button onClick={performDijktra} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                        Perform Dijktra
-                    </button>
-
-
-                </div>
+                    
                 </div>
             </div>
-
+            <div className='w-[200px] h-[300px]'></div>
 
 
         </>
