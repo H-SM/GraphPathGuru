@@ -19,6 +19,8 @@ import imager from '../assests/beams-pricing.png';
 
 import Navbar from './Navbar';
 import HeroSection from './HeroSection';
+import AboutUs from './aboutUs';
+import Footer from './Footer';
 
 const initialNodes = [
     {
@@ -497,9 +499,6 @@ const AddNodeOnEdgeDrop = () => {
                     
                 </div>
             </div>
-            <div className='w-[200px] h-[300px]'></div>
-
-
         </>
     );
 };
@@ -507,7 +506,7 @@ const AddNodeOnEdgeDrop = () => {
 export default () => (
     <>
     <div>
-    <img src={imager} alt="" class="absolute left-0 top-0 z-[-1] w-full max-w-none "/>
+    <img src={imager} alt="" class="absolute left-0 top-0 z-[-1] w-full max-w-none opacity-[90%]"/>
     <div className='z-10'>
     <Navbar/>
     <HeroSection/>
@@ -518,5 +517,8 @@ export default () => (
         <AddNodeOnEdgeDrop />
     </ReactFlowProvider>
 
+    <div className='w-full h-[20vh]'></div>
+    <AboutUs/>
+    <Footer/>
     </>
 );
