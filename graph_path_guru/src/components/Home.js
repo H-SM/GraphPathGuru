@@ -396,13 +396,17 @@ const AddNodeOnEdgeDrop = () => {
 
     return (
         <>
-            <div className="wrapper " 
-            style={{ 
-                width: "80%", 
-                height: "100vh", 
-                // borderColor: "black", 
-                // borderWidth: "3px" 
-            }} 
+        <div className='flex justify-center items-center'>
+        <section class="grid grid-cols-1 gap-x-8 gap-y-6 pb-20 xl:grid-cols-4"><h2 class="text-3xl font-bold tracking-tight text-slate-900">Start Looking into it!</h2><div class="col-span-3"><div class="max-w-[54rem] text-lg leading-8 text-slate-600"><p>Welcome to our playground! You could look into your graph learning from visualizing them below using the variable features there is to offer.</p><p class="mt-6">We provide a platform for researchers to experiment, validate, and gain insights into the performance of various shortest path algorithms, fostering algorithmic innovation.</p></div></div></section>
+        </div>
+        <div className='flex justify-center items-center'>
+            <div className="wrapper w-[80%] h-[90vh]" 
+            // style={{ 
+            //     width: "80%", 
+            //     height: "100vh", 
+            //     // borderColor: "black", 
+            //     // borderWidth: "3px" 
+            // }} 
             ref={reactFlowWrapper}>
                 <ReactFlow
                     nodes={nodes}
@@ -420,7 +424,7 @@ const AddNodeOnEdgeDrop = () => {
                     <Controls />
                 </ReactFlow>
             </div>
-
+        </div>
             <div 
             // className='absolute bottom-80 top-40 left-[1150px]'
             >
