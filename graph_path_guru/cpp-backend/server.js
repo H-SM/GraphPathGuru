@@ -30,26 +30,30 @@ app.post('/write-file', (req, res) => {
         console.log(edges);
         let output = "";
         const mp = {};
+        let w = 0;
+        for (var i = 0; i < nodes.length; i++) {
+            node = nodes[i];
+            mp[node.id] = [];
+        }
         for (var i = 0; i < edges.length; i++) {
             edge = edges[i];
-            if (!(edge.source in mp)) {
-                mp[edge.source] = [];
-            }
-            mp[edge.source].push(edge.target);
+            w = edge.label == undefined ? -1 : edge.label;
+            mp[edge.source].push([edge.target, w]);
         }
         console.log(mp);
         for (var i = 0; i < nodes.length; i++) {
             node = nodes[i];
             output += node.id;
 
-            output += ' ' + node.position.x.toString().slice(0,5) + ' ' + node.position.y.toString().slice(0,5) +': ';
-            for (let j = 0; j < mp[node.id]; j++) {
-                output += mp[node.id] + ' ';
-            }
-            console.log(output);
+            output += ' ' + node.position.x.toString().slice(0,5) + ' ' + node.position.y.toString().slice(0,5) +':';
+            if (mp)
+                for (let j = 0; j < mp[node.id].length; j++) {
+                    output += mp[node.id][j][0] + ',' + mp[node.id][j][1] + ' ';
+                }
             output += '\n'
         }
-        
+        console.log(output);
+        fs.writeFileSync('./input.txt', output);
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Failed to save data to file' });

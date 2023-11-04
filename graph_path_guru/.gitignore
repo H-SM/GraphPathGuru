@@ -5,6 +5,22 @@
 /.pnp
 .pnp.js
 
+# Ignore VSCode specific files and directories
+.vscode/
+.settings/
+.history/
+*.suo
+*.sln.docstates
+.project
+*.cproject
+
+# Ignore user-specific VSCode settings
+/.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
 # testing
 /coverage
 

@@ -5,12 +5,14 @@
 #include <fstream>
 #include <queue>
 #include <algorithm>
+#include <filesystem>
 
 using std::pair;
 using std::greater;
 using std::vector;
 using std::cin;
 using std::priority_queue;
+using std::string;
 
 pair<vector<int>, vector<int>> dijkstra(int V, vector<vector<pair<int, int>>>& adj, int S, std::string &output){
     // Create a priority queue for storing the nodes as a pair {dist,node}
@@ -98,36 +100,115 @@ vector<int> restore_path(int s, int t, vector<int> const& p) {
 }
 
 
-int main() {
-    int V = 8, S = 0;
-    int t = 7;
-    vector<vector<pair<int, int>> > adj(V, vector<pair<int, int>>());
-    pair<int, int> v1 = {1, 1}, v2 = {2, 6}, v3 = {2, 3}, v4 = {0, 1}, v5 = {1, 3}, v6 = {0, 6};
-    std::string output; 
- /* Example graph visualized:
-    0 ----> 1
-   |      / | \
-   |     /  |  \
-   v    v   v   v
-   3   2   4   6
-   |   |   |   |
-   v   v   v   v
-   5 <---- 7
-*/
 
-    adj[0].push_back({1, 2});
-    adj[0].push_back({3, 5});
-    adj[1].push_back({2, 3});
-    adj[1].push_back({4, 1});
-    adj[1].push_back({6, 8});
-    adj[2].push_back({5, 4});
-    adj[3].push_back({1, 2});
-    adj[3].push_back({6, 7});
-    adj[4].push_back({7, 5});
-    adj[5].push_back({0, 3});
-    adj[5].push_back({7, 2});
-    adj[6].push_back({3, 1});
-    adj[7].push_back({2, 4});
+std::string goBackDir(std::string path, int levels) {
+    std::string res;
+    int count = 0;
+    for (int i = path.size()-1; i >= 0; i--) {
+        if (count == levels) {
+            res = path.substr(0, i+1);
+        }
+        if (path[i] == '\\')
+            count++;
+        
+    }
+    return res;
+}
+
+
+pair<int,vector<vector<pair<int, int>>>> make_graph() {
+    
+    std::ifstream inputFile;
+    std::string path = std::string(__FILE__);
+    inputFile.open(goBackDir(path, 1)+"\\file io\\input.txt");
+    vector<std::string> lines;
+    if (inputFile.is_open()) {
+        std::string line;
+        while (std::getline(inputFile, line)) {
+            lines.push_back(line);
+        }
+
+        inputFile.close();
+    } else {
+        std::cerr << "Error: Unable to open the file." << std::endl;
+    }
+
+
+    pair<int,vector<vector<pair<int, int>>>> res;
+    int V = lines.size();
+    vector<vector<pair<int, int>>> adj(V, vector<pair<int, int>>());
+    for (auto line: lines) {
+        int pointer = 0;
+        string temp;
+        // extract the node value
+        while (line[pointer] != ' ') {
+            temp += line[pointer];
+            pointer++;
+        }
+        
+        int node = std::stoi(temp);
+        temp = "";
+
+        // skip past extra info
+        while (pointer < line.size() && line[pointer] != ':')
+            pointer++;
+        
+        // if the node has no neighbours, continue
+        if (pointer >= line.size()) 
+            continue;
+        pointer += 2; // skip past the ":" and the " "
+        
+        int neighbour = 0, weight = 0;
+        while (pointer < line.size()) {
+            // get num until ","
+            while (pointer < line.size() && line[pointer] != ',') {
+                temp += line[pointer];   
+                pointer++;
+            }
+            if (pointer >= line.size())
+                continue;
+
+            pointer++; // skip the ','
+            neighbour = std::stoi(temp);
+            temp = "";
+            // get the number until ' '
+            while (line[pointer] != ' ') {
+                temp += line[pointer];
+                pointer++;
+            }
+            weight = std::stoi(temp);
+            temp = "";
+            adj[node].push_back({neighbour, weight});
+        }
+    }
+    res = {V, adj};
+    return res;
+}
+
+
+void storeOutput(string output) {
+
+    std::string path = std::string(__FILE__);
+    std::ofstream outputFile(goBackDir(path, 0) + "\\output.txt");
+
+    if (outputFile.is_open()) {
+        outputFile << output << std::endl << std::endl; 
+        outputFile.close(); // Close the file
+    } else {
+        std::cerr << "Failed to open the output file." << std::endl;
+    }
+
+    return;
+}
+
+
+int main() {
+    
+    auto g = make_graph();
+    int V = g.first, S = 0;
+    int t = 2;
+    auto adj = g.second;
+    std::string output; 
 
     auto temp = dijkstra(V, adj, S, output);
 
@@ -146,24 +227,10 @@ int main() {
         output += std::to_string(dists[i]) + " ";
     }
     output += "\n</result>\n";
-    // 
-
-    // Fill in this string to the path in your Environment 
-    std::string env_path = "";
-
-    if (env_path.size() == 0) {
-        std::cout << "Please enter in an environemnt path for the output file.";
-    }
-
-    std::ofstream outputFile(env_path + "\\output.txt");
-
-    if (outputFile.is_open()) {
-        outputFile << output << std::endl << std::endl; 
-        outputFile.close(); // Close the file
-    } else {
-        std::cerr << "Failed to open the output file." << std::endl;
-    }
-
+    
+    // Storing the result for front end to read
+    storeOutput(output);
+    
     // std::cout << output;  // Print the accumulated output. For debugging.
 
     return 0;
