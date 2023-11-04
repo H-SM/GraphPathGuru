@@ -10,7 +10,7 @@ var bodyParser = require('body-parser');
 const { response } = require("express");
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-// app.use(express.static(__dirname+'/views'));
+// app.use(express.static(__dirname + '/views'));
 // let processedData = "";
 
 app.set('views', path.join(__dirname, 'views'))
@@ -61,9 +61,11 @@ app.post('/write-file', (req, res) => {
 });
 
 
-// app.get('/', (req, res) => {
-//   res.sendFile(__dirname + '/views/index.html');
-// });
+app.post('/perform-dijktra', (req, res) => {
+
+    console.log("hello i am here")
+
+});
 
 // app.post('/process-data', (req, res) => {
 //     const{ text_line }= req.body;
@@ -75,6 +77,7 @@ app.post('/write-file', (req, res) => {
 //     res.send({ response });
 
 // });
+
 const port = 8000;
 
 app.listen(port, () => {
