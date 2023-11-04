@@ -9,6 +9,7 @@ import ReactFlow, {
     getOutgoers,
     getConnectedEdges,
     MarkerType,
+    useOnSelectionChange
 } from 'reactflow';
 
 import 'reactflow/dist/style.css';
@@ -200,8 +201,8 @@ const AddNodeOnEdgeDrop = () => {
                 markerEnd: {
                     type: MarkerType.ArrowClosed,
                     width: 30,
-                    height: 30,
-                    color: 'red',
+                    height: 20,
+                    color: 'green',
                 },
             };
             setEdges((els) => addEdge(redEdge, els));
@@ -237,8 +238,8 @@ const AddNodeOnEdgeDrop = () => {
                     markerEnd: {
                         type: MarkerType.ArrowClosed,
                         width: 30,
-                        height: 30,
-                        color: 'red',
+                        height: 20,
+                        color: 'green',
                     },
                 }));
                 console.log(edges);
@@ -270,7 +271,7 @@ const AddNodeOnEdgeDrop = () => {
         [nodes, edges]
     );
 
-    const options = Array.from({ length: checkNode.length }, (_, index) => (
+    const options = Array.from({ length: nodes.length }, (_, index) => (
         <option key={index} value={index}>
             {index}
         </option>
@@ -341,11 +342,11 @@ const AddNodeOnEdgeDrop = () => {
         })
     }
 
-    const flipNode = (node1) => {
+    const flipNode = () => {
         const updatedNodes = [];
-        console.log("i am here")
+
         nodes.forEach(node => {
-            if (node.id === selectedNode.id) {
+            if (node.id === selectedNode[0]) {
                 updatedNodes.push({
                     ...node,
                     targetPosition: 'right',
@@ -365,15 +366,13 @@ const AddNodeOnEdgeDrop = () => {
     }
 
     // for flipping 
-    const [selectedNode, setSelectedNode] = useState(null);
+    const [selectedNode, setSelectedNode] = useState([]);
 
-    const handleSelectionChange = (elements) => {
-        if (elements.length === 1 && elements[0].type === 'input') {
-            setSelectedNode(elements[0]);
-        } else {
-            setSelectedNode(null);
-        }
-    };
+    useOnSelectionChange({
+        onChange: ({ nodes, edges }) => {
+            setSelectedNode(nodes.map((node) => node.id));
+        },
+    });
 
     return (
         <>
@@ -389,7 +388,6 @@ const AddNodeOnEdgeDrop = () => {
                     onConnectEnd={onConnectEnd}
                     fitView
                     fitViewOptions={fitViewOptions}
-                    onSelectionChange = {handleSelectionChange}
                 />
             </div>
 
@@ -433,7 +431,7 @@ const AddNodeOnEdgeDrop = () => {
                         Save
                     </button>
 
-                    <button onClick={() => flipNode(node1)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                    <button onClick={flipNode} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                         Flip node
                     </button>
 
