@@ -5,14 +5,14 @@
 #include <fstream>
 #include <queue>
 #include <algorithm>
-#include <filesystem>
 
 using std::pair;
 using std::greater;
 using std::vector;
-using std::cin;
 using std::priority_queue;
 using std::string;
+using std::cout;
+using std::endl;
 
 pair<vector<int>, vector<int>> dijkstra(int V, vector<vector<pair<int, int>>>& adj, int S, std::string &output){
     // Create a priority queue for storing the nodes as a pair {dist,node}
@@ -125,6 +125,7 @@ pair<int,vector<vector<pair<int, int>>>> make_graph() {
     if (inputFile.is_open()) {
         std::string line;
         while (std::getline(inputFile, line)) {
+            cout << line << endl;
             lines.push_back(line);
         }
 
@@ -189,7 +190,7 @@ pair<int,vector<vector<pair<int, int>>>> make_graph() {
 void storeOutput(string output) {
 
     std::string path = std::string(__FILE__);
-    std::ofstream outputFile(goBackDir(path, 0) + "\\output.txt");
+    std::ofstream outputFile(goBackDir(path, 1)+"\\file io\\output.txt");
 
     if (outputFile.is_open()) {
         outputFile << output << std::endl << std::endl; 

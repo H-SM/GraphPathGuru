@@ -1,10 +1,12 @@
-
+const { execFile } = require('child_process');
 const express = require("express");
 const app = express();
 const path = require('path');
-app.use(express.json());
 const fs = require('fs');
 const cors = require('cors');
+
+app.use(express.json());
+
 
 var bodyParser = require('body-parser');
 const { response } = require("express");
@@ -45,7 +47,7 @@ app.post('/write-file', (req, res) => {
             node = nodes[i];
             output += node.id;
 
-            output += ' ' + node.position.x.toString().slice(0,5) + ' ' + node.position.y.toString().slice(0,5) +':';
+            output += ' ' + Math.floor(node.position.x).toString() + ' ' + Math.floor(node.position.y).toString() +': ';
             if (mp)
                 for (let j = 0; j < mp[node.id].length; j++) {
                     output += mp[node.id][j][0] + ',' + mp[node.id][j][1] + ' ';
@@ -53,7 +55,7 @@ app.post('/write-file', (req, res) => {
             output += '\n'
         }
         console.log(output);
-        fs.writeFileSync('./input.txt', output);
+        fs.writeFileSync('./file io/input.txt', output);
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Failed to save data to file' });
@@ -62,9 +64,29 @@ app.post('/write-file', (req, res) => {
 
 
 app.post('/perform-dijktra', (req, res) => {
+    // Specify the path to your C++ executable
+    const dijkstraExecutable = './Dijkstra/Dijkstra.exe';  // Adjust the path as needed
 
-    console.log("hello i am here")
+    // Execute the C++ program
+    execFile(dijkstraExecutable, (error, stdout, stderr) => {
+        if (error) {
+            console.error('Error:', error);
+            res.status(500).send('An error occurred during execution.');
+            return;
+        }
 
+        if (stderr) {
+            console.error('Error:', stderr);
+            res.status(500).send('An error occurred during execution.');
+            return;
+        }
+
+        // Process the output if needed
+        console.log('C++ program output:', stdout);
+
+        // Send a response to the client
+        res.send('C++ program executed successfully.');
+    });
 });
 
 // app.post('/process-data', (req, res) => {
@@ -113,6 +135,6 @@ app.listen(port, () => {
 // });
 
 app.get('/read-file', (req, res) => {
-    const data = fs.readFileSync('./Output.txt', 'utf-8');
+    const data = fs.readFileSync('./output.txt', 'utf-8');
     res.send(data);
 });
