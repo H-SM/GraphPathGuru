@@ -400,7 +400,7 @@ const AddNodeOnEdgeDrop = () => {
         <section class="grid grid-cols-1 gap-x-8 gap-y-6 pb-20 xl:grid-cols-4"><h2 class="text-3xl font-bold tracking-tight text-slate-900">Start Looking into it!</h2><div class="col-span-3"><div class="max-w-[54rem] text-lg leading-8 text-slate-600"><p>Welcome to our playground! You could look into your graph learning from visualizing them below using the variable features there is to offer.</p><p class="mt-6">We provide a platform for researchers to experiment, validate, and gain insights into the performance of various shortest path algorithms, fostering algorithmic innovation.</p></div></div></section>
         </div>
         <div className='flex justify-center items-center'>
-            <div className="wrapper w-[80%] h-[90vh]" 
+            <div className="wrapper w-[80%] h-[90vh] ring-2 ring-zinc-200 ring-offset-2" 
             // style={{ 
             //     width: "80%", 
             //     height: "100vh", 
@@ -423,12 +423,8 @@ const AddNodeOnEdgeDrop = () => {
                     <Background />
                     <Controls />
                 </ReactFlow>
-            </div>
-        </div>
-            <div 
-            // className='absolute bottom-80 top-40 left-[1150px]'
-            >
-                <button onClick={startProcess} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            
+                <button onClick={startProcess} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 my-1 rounded">
                     Visualise
                 </button>
 
@@ -477,7 +473,7 @@ const AddNodeOnEdgeDrop = () => {
 
 
                 </div>
-
+                </div>
             </div>
 
 
