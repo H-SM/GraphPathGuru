@@ -207,7 +207,7 @@ int main() {
     
     auto g = make_graph();
     int V = g.first, S = 0;
-    int t = 2;
+    int t = 0;
     auto adj = g.second;
     std::string output; 
 
