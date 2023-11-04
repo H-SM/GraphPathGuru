@@ -57,9 +57,11 @@ app.post('/write-file', (req, res) => {
 });
 
 
-// app.get('/', (req, res) => {
-//   res.sendFile(__dirname + '/views/index.html');
-// });
+app.post('/perform-dijktra', (req, res) => {
+
+    console.log("hello i am here")
+
+});
 
 // app.post('/process-data', (req, res) => {
 //     const{ text_line }= req.body;

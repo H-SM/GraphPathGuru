@@ -8,6 +8,7 @@ import ReactFlow, {
     getIncomers,
     getOutgoers,
     getConnectedEdges,
+    MarkerType,
 } from 'reactflow';
 
 import 'reactflow/dist/style.css';
@@ -190,12 +191,18 @@ const AddNodeOnEdgeDrop = () => {
 
 
     const onConnect = useCallback(
-        (params) => {  
+        (params) => {
             const redEdge = {
                 ...params,
                 id: `${connectingNodeId.current}_${params.target}`,
                 style: { stroke: 'red', strokeWidth: 1 },
                 type: "straight",
+                markerEnd: {
+                    type: MarkerType.ArrowClosed,
+                    width: 30,
+                    height: 30,
+                    color: 'red',
+                },
             };
             setEdges((els) => addEdge(redEdge, els));
             console.log(edges);
@@ -224,7 +231,16 @@ const AddNodeOnEdgeDrop = () => {
                 };
 
                 setNodes((nds) => nds.concat(newNode));
-                setEdges((eds) => eds.concat({ id: `${connectingNodeId.current}_${id}`, source: connectingNodeId.current, type: "straight", target: id, style: { stroke: "red", strokeWidth: 1 } }));
+                setEdges((eds) => eds.concat({
+                    id: `${connectingNodeId.current}_${id}`, source: connectingNodeId.current, type: "straight", target: id,
+                    style: { stroke: "red", strokeWidth: 1 },
+                    markerEnd: {
+                        type: MarkerType.ArrowClosed,
+                        width: 30,
+                        height: 30,
+                        color: 'red',
+                    },
+                }));
                 console.log(edges);
             }
         },
@@ -315,6 +331,50 @@ const AddNodeOnEdgeDrop = () => {
         })
     }
 
+    const performDijktra = () => {
+
+        fetch('http://localhost:8000/perform-dijktra', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+    }
+
+    const flipNode = (node1) => {
+        const updatedNodes = [];
+        console.log("i am here")
+        nodes.forEach(node => {
+            if (node.id === selectedNode.id) {
+                updatedNodes.push({
+                    ...node,
+                    targetPosition: 'right',
+                    sourcePosition: 'right',
+
+                });
+            }
+            else {
+                updatedNodes.push({
+                    ...node,
+                });
+            }
+        });
+
+        setNodes(updatedNodes);
+
+    }
+
+    // for flipping 
+    const [selectedNode, setSelectedNode] = useState(null);
+
+    const handleSelectionChange = (elements) => {
+        if (elements.length === 1 && elements[0].type === 'input') {
+            setSelectedNode(elements[0]);
+        } else {
+            setSelectedNode(null);
+        }
+    };
+
     return (
         <>
             <div className="wrapper " style={{ width: "100%", height: "100vh", borderColor: "black", borderWidth: "3px" }} ref={reactFlowWrapper}>
@@ -329,6 +389,7 @@ const AddNodeOnEdgeDrop = () => {
                     onConnectEnd={onConnectEnd}
                     fitView
                     fitViewOptions={fitViewOptions}
+                    onSelectionChange = {handleSelectionChange}
                 />
             </div>
 
@@ -371,6 +432,15 @@ const AddNodeOnEdgeDrop = () => {
                     <button onClick={() => writeFile()} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
                         Save
                     </button>
+
+                    <button onClick={() => flipNode(node1)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Flip node
+                    </button>
+
+                    <button onClick={performDijktra} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                        Perform Dijktra
+                    </button>
+
 
                 </div>
 
