@@ -103,7 +103,7 @@ app.post('/perform-dijktra', (req, res) => {
 const port = 8000;
 
 app.listen(port, () => {
-  console.log(`Server listening on port ${port}`);
+    console.log(`Server listening on port ${port}`);
 });
 
 
@@ -135,6 +135,51 @@ app.listen(port, () => {
 // });
 
 app.get('/read-file', (req, res) => {
-    const data = fs.readFileSync('./output.txt', 'utf-8');
-    res.send(data);
+
+    const fileContent = fs.readFileSync('./Dijkstra/output1.txt', 'utf-8');
+
+    const regex = /<adj>([\s\S]*?)<\/adj>/g;
+
+    const adjDataArray = [];
+
+    let match;
+    while ((match = regex.exec(fileContent)) !== null) {
+        const adjData = match[1].trim();
+        adjDataArray.push(adjData);
+    }
+
+    console.log(adjDataArray);
+
+    const result = [];
+    const checkNode = []; // New array to store third values
+
+    adjDataArray.forEach(row => {
+        const lines = row.split('\n');
+        const values = [];
+        const thirdValues = [];
+
+        for (let i = 1; i < lines.length; i++) {
+            const parts = lines[i].split('\t')[1];
+            if (parts) {
+                const firstNumericValue = parseInt(parts.split(',')[0], 10);
+                const thirdNumericValue = parseInt(parts.split(',')[2], 10);
+
+                values.push(firstNumericValue);
+                thirdValues.push(thirdNumericValue);
+            }
+        }
+        checkNode.push(values);
+        result.push(thirdValues);
+    });
+
+    console.log(result);
+    console.log(checkNode);
+
+
+    const responseData = {
+        result,
+        checkNode,
+    };
+
+    res.json(responseData);
 });
