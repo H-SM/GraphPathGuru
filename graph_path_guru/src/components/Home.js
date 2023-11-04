@@ -9,11 +9,15 @@ import ReactFlow, {
     getOutgoers,
     getConnectedEdges,
     MarkerType,
-    useOnSelectionChange
+    useOnSelectionChange,
+    Background,
+    Controls
 } from 'reactflow';
 
 import 'reactflow/dist/style.css';
 
+import Navbar from './Navbar';
+import HeroSection from './HeroSection';
 
 const initialNodes = [
     {
@@ -391,7 +395,14 @@ const AddNodeOnEdgeDrop = () => {
 
     return (
         <>
-            <div className="wrapper " style={{ width: "100%", height: "100vh", borderColor: "black", borderWidth: "3px" }} ref={reactFlowWrapper}>
+            <div className="wrapper " 
+            style={{ 
+                width: "80%", 
+                height: "80vh", 
+                // borderColor: "black", 
+                // borderWidth: "3px" 
+            }} 
+            ref={reactFlowWrapper}>
                 <ReactFlow
                     nodes={nodes}
                     edges={edges}
@@ -403,7 +414,10 @@ const AddNodeOnEdgeDrop = () => {
                     onConnectEnd={onConnectEnd}
                     fitView
                     fitViewOptions={fitViewOptions}
-                />
+                >
+                    <Background />
+                    <Controls />
+                </ReactFlow>
             </div>
 
             <div className='absolute bottom-80 top-40 left-[1150px]'>
@@ -466,7 +480,12 @@ const AddNodeOnEdgeDrop = () => {
 };
 
 export default () => (
+    <>
+    <Navbar/>
+    <HeroSection/>
     <ReactFlowProvider>
         <AddNodeOnEdgeDrop />
     </ReactFlowProvider>
+
+    </>
 );
