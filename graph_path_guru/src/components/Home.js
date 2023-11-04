@@ -399,7 +399,7 @@ const AddNodeOnEdgeDrop = () => {
         <div className='flex justify-center items-center'>
         <section class="grid grid-cols-1 gap-x-8 gap-y-6 pb-20 xl:grid-cols-4"><h2 class="text-3xl font-bold tracking-tight text-slate-900">Start Looking into it!</h2><div class="col-span-3"><div class="max-w-[54rem] text-lg leading-8 text-slate-600"><p>Welcome to our playground! You could look into your graph learning from visualizing them below using the variable features there is to offer.</p><p class="mt-6">We provide a platform for researchers to experiment, validate, and gain insights into the performance of various shortest path algorithms, fostering algorithmic innovation.</p></div></div></section>
         </div>
-        <div className='flex flex-row justify-center items-center gap-2'>
+        <div className='flex flex-row justify-center items-center gap-3'>
             <div className="wrapper w-[70%] h-[80vh] ring-2 ring-zinc-200 ring-offset-2 rounded-sm" 
             // style={{ 
             //     width: "80%", 
@@ -424,7 +424,7 @@ const AddNodeOnEdgeDrop = () => {
                     <Controls />
                 </ReactFlow>
             </div>
-            <div className='w-[20%] h-[80vh] flex flex-col justify-start gap-4'>
+            <div className='w-[20%] h-[80vh] flex flex-col justify-start gap-4 mt-[35px]'>
                     <button onClick={startProcess} class="relative px-5 py-3 overflow-hidden font-medium text-gray-600 bg-gray-100 border border-gray-100 rounded-lg shadow-inner group">
                         <span class="absolute top-0 left-0 w-0 h-0 transition-all duration-200 border-t-2 border-gray-600 group-hover:w-full ease"></span>
                         <span class="absolute bottom-0 right-0 w-0 h-0 transition-all duration-200 border-b-2 border-gray-600 group-hover:w-full ease"></span>
