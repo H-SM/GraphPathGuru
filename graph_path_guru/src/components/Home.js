@@ -36,6 +36,7 @@ const initialNodes = [
 
 let id = 1;
 const getId = () => `${id++}`;
+const setId = () => `${id--}`;
 
 const fitViewOptions = {
     padding: 3,
@@ -58,6 +59,8 @@ const AddNodeOnEdgeDrop = () => {
 
     var checkNode = [];
     var result = [];
+    var distance = [];
+    var distance_curr = [];
 
     const [isProcessing, setIsProcessing] = useState(false);
 
@@ -91,6 +94,8 @@ const AddNodeOnEdgeDrop = () => {
                 console.log('Received data:', data.result);
                 result = data.result;
                 checkNode = data.checkNode;
+                distance = data.distance;
+                distance_curr = data.distance_curr;
             })
             .catch((error) => {
                 console.error('Error:', error);
@@ -143,13 +148,12 @@ const AddNodeOnEdgeDrop = () => {
 
                 const weight = edge.label;
                 // console.log(edge.id, " ", currentNode.toString() + '_' + checkNode[currentNode][index].toString());
-
-                if (checkNode[currentNode][index] && edge.id === currentNode.toString() + '_' + checkNode[currentNode][index].toString()) {
+                if (checkNode[currentNode][index] != undefined && edge.id === currentNode.toString() + '_' + checkNode[currentNode][index].toString()) {
 
                     updatedEdges.push({
                         ...edge,
                         animated: true,
-                        label: "dist[red] + weight[node] < dist[blue]"
+                        label: distance_curr[currentNode].toString() + " + " + weight + " < " + distance[currentNode][index].toString()
                     });
                 }
                 else {
@@ -275,6 +279,7 @@ const AddNodeOnEdgeDrop = () => {
 
     const onNodesDelete = useCallback(
         (deleted) => {
+            const id = setId();
             setEdges(
                 deleted.reduce((acc, node) => {
                     const incomers = getIncomers(node, nodes, edges);
@@ -370,12 +375,22 @@ const AddNodeOnEdgeDrop = () => {
 
         nodes.forEach(node => {
             if (node.id === selectedNode[0]) {
-                updatedNodes.push({
-                    ...node,
-                    targetPosition: 'right',
-                    sourcePosition: 'right',
+                if (node.targetPosition === 'right') {
+                    updatedNodes.push({
+                        ...node,
+                        targetPosition: 'left',
+                        sourcePosition: 'left',
 
-                });
+                    });
+                }
+                else {
+                    updatedNodes.push({
+                        ...node,
+                        targetPosition: 'right',
+                        sourcePosition: 'right',
+
+                    });
+                }
             }
             else {
                 updatedNodes.push({
@@ -403,31 +418,31 @@ const AddNodeOnEdgeDrop = () => {
         <section class="grid grid-cols-1 gap-x-8 gap-y-6 pb-20 xl:grid-cols-4"><h2 class="text-3xl font-bold tracking-tight text-slate-900">Start Looking into it!</h2><div class="col-span-3"><div class="max-w-[54rem] text-lg leading-8 text-slate-600"><p>Welcome to our playground! You could look into your graph learning from visualizing them below using the variable features there is to offer.</p><p class="mt-6">We provide a platform for researchers to experiment, validate, and gain insights into the performance of various shortest path algorithms, fostering algorithmic innovation.</p></div></div></section>
         </div>
         <div className='flex flex-row justify-center items-center gap-3'>
-            <div className="wrapper w-[70%] h-[80vh] ring-2 ring-zinc-200 ring-offset-2 rounded-sm" 
-            // style={{ 
-            //     width: "80%", 
-            //     height: "100vh", 
-            //     // borderColor: "black", 
-            //     // borderWidth: "3px" 
-            // }} 
-            ref={reactFlowWrapper}>
-                <ReactFlow
-                    nodes={nodes}
-                    edges={edges}
-                    onNodesChange={onNodesChange}
-                    onEdgesChange={onEdgesChange}
-                    onConnect={onConnect}
-                    onNodesDelete={onNodesDelete}
-                    onConnectStart={onConnectStart}
-                    onConnectEnd={onConnectEnd}
-                    fitView
-                    fitViewOptions={fitViewOptions}
-                >
-                    <Background />
-                    <Controls />
-                </ReactFlow>
-            </div>
-            <div className='w-[20%] h-[80vh] flex flex-col justify-start gap-4 mt-[35px]'>
+                <div className="wrapper w-[70%] h-[80vh] ring-2 ring-zinc-200 ring-offset-2 rounded-sm"
+                    // style={{ 
+                    //     width: "80%", 
+                    //     height: "100vh", 
+                    //     // borderColor: "black", 
+                    //     // borderWidth: "3px" 
+                    // }} 
+                    ref={reactFlowWrapper}>
+                    <ReactFlow
+                        nodes={nodes}
+                        edges={edges}
+                        onNodesChange={onNodesChange}
+                        onEdgesChange={onEdgesChange}
+                        onConnect={onConnect}
+                        onNodesDelete={onNodesDelete}
+                        onConnectStart={onConnectStart}
+                        onConnectEnd={onConnectEnd}
+                        fitView
+                        fitViewOptions={fitViewOptions}
+                    >
+                        <Background />
+                        <Controls />
+                    </ReactFlow>
+                </div>
+                <div className='w-[20%] h-[80vh] flex flex-col justify-start gap-4 mt-[35px]'>
                     <button onClick={startProcess} class="relative px-5 py-3 overflow-hidden font-medium text-gray-600 bg-gray-100 border border-gray-100 rounded-lg shadow-inner group">
                         <span class="absolute top-0 left-0 w-0 h-0 transition-all duration-200 border-t-2 border-gray-600 group-hover:w-full ease"></span>
                         <span class="absolute bottom-0 right-0 w-0 h-0 transition-all duration-200 border-b-2 border-gray-600 group-hover:w-full ease"></span>
