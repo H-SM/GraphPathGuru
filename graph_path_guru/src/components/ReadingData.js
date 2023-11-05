@@ -16,25 +16,40 @@ console.log(adjDataArray);
 
 const result = [];
 const checkNode = []; // New array to store third values
+const nodesBeforeColon = [];
 
 adjDataArray.forEach(row => {
     const lines = row.split('\n');
     const values = [];
     const thirdValues = [];
 
-    for (let i = 1; i < lines.length; i++) {
-        const parts = lines[i].split('\t')[1];
-        if (parts) {
-            const firstNumericValue = parseInt(parts.split(',')[0], 10);
-            const thirdNumericValue = parseInt(parts.split(',')[2], 10); // Get the third value
+    const numbersBeforeColon = [];
 
-            values.push(firstNumericValue);
-            thirdValues.push(thirdNumericValue);
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        const parts = line.split(':');
+        if (parts.length === 2) {
+            const beforeColon = parseInt(parts[0].trim(), 10);
+            numbersBeforeColon.push(beforeColon);
+        }
+
+        if (i > 0) {
+            const parts = line.split('\t')[1];
+            if (parts) {
+                const firstNumericValue = parseInt(parts.split(',')[0], 10);
+                const thirdNumericValue = parseInt(parts.split(',')[2], 10); // Get the third value
+
+                values.push(firstNumericValue);
+                thirdValues.push(thirdNumericValue);
+            }
         }
     }
+
+    nodesBeforeColon.push(numbersBeforeColon);
     checkNode.push(values);
     result.push(thirdValues); // Store third values in the new array
 });
 
 console.log(result);
 console.log(checkNode);
+console.log(nodesBeforeColon);
