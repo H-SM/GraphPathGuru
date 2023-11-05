@@ -22,6 +22,7 @@ import HeroSection from './HeroSection';
 import AboutUs from './aboutUs';
 import Footer from './Footer';
 import TechStack from './techStack';
+import { useLocation } from 'react-router-dom';
 
 const initialNodes = [
     {
@@ -411,13 +412,30 @@ const AddNodeOnEdgeDrop = () => {
             setSelectedNode(nodes.map((node) => node.id));
         },
     });
+    const location = useLocation();
 
+    useEffect(() => {
+      const queryParams = new URLSearchParams(location.search);
+      const sectionToScroll = queryParams.get("section");
+      console.log(sectionToScroll);
+  
+      if (sectionToScroll) {
+        const targetSection = document.getElementById(sectionToScroll);
+  
+        if (targetSection) {
+          targetSection.scrollIntoView({ behavior: "smooth" });
+          // Remove the section query parameter from the URL
+        queryParams.delete("section");
+        }
+      }
+    }, [location.search]);
+  
     return (
         <>
         <div className='flex justify-center items-center'>
         <section class="grid grid-cols-1 gap-x-8 gap-y-6 pb-20 xl:grid-cols-4"><h2 class="text-3xl font-bold tracking-tight text-slate-900">Start Looking into it!</h2><div class="col-span-3"><div class="max-w-[54rem] text-lg leading-8 text-slate-600"><p>Welcome to our playground! You could look into your graph learning from visualizing them below using the variable features there is to offer.</p><p class="mt-6">We provide a platform for researchers to experiment, validate, and gain insights into the performance of various shortest path algorithms, fostering algorithmic innovation.</p></div></div></section>
         </div>
-        <div className='flex flex-row justify-center items-center gap-3'>
+        <div id="graph" className='flex flex-row justify-center items-center gap-3'>
                 <div className="wrapper w-[70%] h-[80vh] ring-2 ring-zinc-200 ring-offset-2 rounded-sm"
                     // style={{ 
                     //     width: "80%", 

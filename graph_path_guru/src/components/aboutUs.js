@@ -1,10 +1,28 @@
-import React from 'react'
+import React, { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 
-const aboutUs = () => {
+const AboutUs = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const queryParams = new URLSearchParams(location.search);
+    const sectionToScroll = queryParams.get("section");
+    console.log(sectionToScroll);
+
+    if (sectionToScroll) {
+      const targetSection = document.getElementById(sectionToScroll);
+
+      if (targetSection) {
+        targetSection.scrollIntoView({ behavior: "smooth" });
+
+        // Remove the section query parameter from the URL
+        queryParams.delete("section");
+      }
+    }
+  }, [location.search]);
   return (
-  
         <> 
-          <div class="relative z-20 mx-auto max-w-container px-4 pt-14 sm:px-6 sm:pt-20 lg:px-8"><div class="mx-auto max-w-[45rem] text-center"><h1 class="text-base font-semibold leading-7 text-sky-500">We the creators.</h1><p class="mt-4 text-5xl font-extrabold leading-[3.5rem] tracking-tight text-slate-900">Meet the team.</p><p class="mt-4 text-lg text-slate-700"> Discover the exceptional individuals behind our college project. Our team is composed of passionate and driven developers, each contributing their unique talents and expertise to make this project a reality.</p></div></div>
+          <div id="team" class="relative z-20 mx-auto max-w-container px-4 pt-14 sm:px-6 sm:pt-20 lg:px-8"><div class="mx-auto max-w-[45rem] text-center"><h1 class="text-base font-semibold leading-7 text-sky-500">We the creators.</h1><p class="mt-4 text-5xl font-extrabold leading-[3.5rem] tracking-tight text-slate-900">Meet the team.</p><p class="mt-4 text-lg text-slate-700"> Discover the exceptional individuals behind our college project. Our team is composed of passionate and driven developers, each contributing their unique talents and expertise to make this project a reality.</p></div></div>
     
           <div className='flex justify-center items-center mt-[10vh]'>      
           <div class="grid gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 max-w-[80%]">
@@ -115,4 +133,4 @@ const aboutUs = () => {
   )
 }
 
-export default aboutUs
+export default AboutUs;
