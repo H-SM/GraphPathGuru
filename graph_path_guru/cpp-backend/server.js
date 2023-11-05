@@ -4,6 +4,7 @@ const app = express();
 const path = require('path');
 const fs = require('fs');
 const cors = require('cors');
+const os = require('os');
 
 app.use(express.json());
 
@@ -47,7 +48,7 @@ app.post('/write-file', (req, res) => {
             node = nodes[i];
             output += node.id;
 
-            output += ' ' + Math.floor(node.position.x).toString() + ' ' + Math.floor(node.position.y).toString() +': ';
+            output += ' ' + Math.floor(node.position.x).toString() + ' ' + Math.floor(node.position.y).toString() + ': ';
             if (mp)
                 for (let j = 0; j < mp[node.id].length; j++) {
                     output += mp[node.id][j][0] + ',' + mp[node.id][j][1] + ' ';
@@ -65,7 +66,14 @@ app.post('/write-file', (req, res) => {
 
 app.post('/perform-dijktra', (req, res) => {
     // Specify the path to your C++ executable
-    const dijkstraExecutable = './Dijkstra/Dijkstra.exe';  // Adjust the path as needed
+    let dijkstraExecutable;
+
+    if (os.platform() === 'win32') {
+        dijkstraExecutable = './Dijkstra/Dijkstra.exe';
+    } 
+    else if (os.platform() === 'linux') {
+        dijkstraExecutable = './Dijkstra_linux/Dijkstra'; 
+    }
 
     // Execute the C++ program
     execFile(dijkstraExecutable, (error, stdout, stderr) => {
@@ -136,7 +144,7 @@ app.listen(port, () => {
 
 app.get('/read-file', (req, res) => {
 
-    const fileContent = fs.readFileSync('./Dijkstra/output1.txt', 'utf-8');
+    const fileContent = fs.readFileSync('./file io/output.txt', 'utf-8');
 
     const regex = /<adj>([\s\S]*?)<\/adj>/g;
 
@@ -152,33 +160,59 @@ app.get('/read-file', (req, res) => {
 
     const result = [];
     const checkNode = []; // New array to store third values
+    const distance = [];
+    const distance_curr = [];
 
     adjDataArray.forEach(row => {
         const lines = row.split('\n');
         const values = [];
         const thirdValues = [];
+        const secondValues = [];
 
-        for (let i = 1; i < lines.length; i++) {
-            const parts = lines[i].split('\t')[1];
-            if (parts) {
-                const firstNumericValue = parseInt(parts.split(',')[0], 10);
-                const thirdNumericValue = parseInt(parts.split(',')[2], 10);
+        const numbersBeforeColon = [];
 
-                values.push(firstNumericValue);
-                thirdValues.push(thirdNumericValue);
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            const parts = line.split(':');
+            if (parts.length === 2) {
+                const beforeColon = parseInt(parts[0].trim(), 10);
+                numbersBeforeColon.push(beforeColon);
+            }
+
+            if (i > 0) {
+                const parts = lines[i].split('\t')[1];
+                if (parts) {
+                    const firstNumericValue = parseInt(parts.split(',')[0], 10);
+                    const secondNumericValue = parseInt(parts.split(',')[1], 10);
+                    const thirdNumericValue = parseInt(parts.split(',')[2], 10);
+
+                    values.push(firstNumericValue);
+                    secondValues.push(secondNumericValue);
+                    thirdValues.push(thirdNumericValue);
+
+                }
             }
         }
+
         checkNode.push(values);
         result.push(thirdValues);
+        distance.push(secondValues);
+        distance_curr.push(numbersBeforeColon);
     });
 
-    console.log(result);
-    console.log(checkNode);
 
+    console.log(checkNode);
+    console.log(distance);
+    console.log(result);
+    console.log(distance_curr);
+
+    checkNode.push([]);
 
     const responseData = {
         result,
         checkNode,
+        distance,
+        distance_curr,
     };
 
     res.json(responseData);
