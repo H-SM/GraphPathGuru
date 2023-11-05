@@ -1,21 +1,28 @@
 import Home from "./components/Home"
-// import Details from "./components/Details"
+import {
+  BrowserRouter as Router,
+  Route,
+  Routes
+} from "react-router-dom";
+import Docpage from "./components/Docpage";
+import Settings from "./components/Settings";
+import Login from "./components/Login";
+import Signup from "./components/Signup";
 
 function App() {
   return (
     <>
-      
-      <div className="flex">
-        <div className="w-[100%]">
-          <Home />
-        </div>
+      <Router>
+          <Routes>
+            <Route exact path="/" element={<Home/>} />
+            <Route exact path="/docs" element={<Docpage />} />
 
-        {/* <div className="w-[20%]">
-          <Details />
-        </div> */}
-        
+            <Route exact path="/settings" element={<Settings />} />
 
-      </div>
+            <Route exact path="/login" element={<Login />} />
+            <Route exact path="/signup" element={<Signup/>} />
+          </Routes>
+      </Router>
 
     </>
   );
