@@ -1,6 +1,6 @@
 import React from 'react'
 
-const Details = () => {
+const Settings = () => {
   return (
     <div className='flex justify-center'>
       Details
@@ -8,4 +8,4 @@ const Details = () => {
   )
 }
 
-export default Details
+export default Settings
