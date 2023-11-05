@@ -1,5 +1,6 @@
 import React from 'react'
 import imager from '../assests/beams-pricing.png'
+import { Link } from 'react-router-dom'
 const HeroSection = () => {
   return (
     <>
@@ -32,15 +33,15 @@ const HeroSection = () => {
             We aim to make learning complex algorithms, specifically shortest path algorithms, more engaging and accessible for students and educators.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6 lg:justify-start">
-              <a
-                href="#"
+              <Link
+                to="/?section=graph"
                 className="rounded-md bg-white px-3.5 py-2.5 text-sm font-semibold text-gray-900 shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
               >
                 Get started
-              </a>
-              <a href="#" className="text-sm font-semibold leading-6 text-white">
+              </Link>
+              <Link to="/docs" className="text-sm font-semibold leading-6 text-white">
                 Learn more <span aria-hidden="true">→</span>
-              </a>
+              </Link>
             </div>
           </div>
           <div className="relative mt-16 h-80 lg:mt-8">
