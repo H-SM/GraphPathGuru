@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const fileContent = fs.readFileSync('cpp-backend/Dijkstra/output1.txt', 'utf-8');
+const fileContent = fs.readFileSync('cpp-backend/file io/output.txt', 'utf-8');
 
 const regex = /<adj>([\s\S]*?)<\/adj>/g;
 
@@ -50,6 +50,29 @@ adjDataArray.forEach(row => {
     result.push(thirdValues); // Store third values in the new array
 });
 
-console.log(result);
-console.log(checkNode);
-console.log(nodesBeforeColon);
+
+distance = [];
+
+const dsMatches = fileContent.match(/<ds>[\s\S]*?<\/ds>/g);
+
+if (dsMatches) {
+    const dsArray = dsMatches.map(ds => {
+        const dsContent = ds.match(/<ds>([\s\S]*?)<\/ds>/)[1].trim();
+        const dsLines = dsContent.split('\n');
+        return dsLines
+            .map(line => line.trim().split(/\s+/).map(val => (val === 'INF' ? 'Infinity' : parseInt(val, 10))));
+    });
+
+
+    for(let i=0; i<dsArray.length; i++)
+    {
+        distance.push(dsArray[i][1]);
+    }
+
+} 
+
+console.log(distance);
+
+
+// console.log(checkNode);
+// console.log(nodesBeforeColon);

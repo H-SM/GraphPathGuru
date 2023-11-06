@@ -121,7 +121,7 @@ pair<int,vector<vector<pair<int, int>>>> make_graph() {
     
     std::ifstream inputFile;
     std::string path = std::string(__FILE__);
-    inputFile.open("input.txt");
+    inputFile.open("../file io/input.txt");
     vector<std::string> lines;
     if (inputFile.is_open()) {
         std::string line;
@@ -191,7 +191,7 @@ pair<int,vector<vector<pair<int, int>>>> make_graph() {
 void storeOutput(string output) {
 
     std::string path = std::string(__FILE__);
-    std::ofstream outputFile("output.txt");
+    std::ofstream outputFile("../file io/output.txt");
 
     if (outputFile.is_open()) {
         outputFile << output << std::endl << std::endl; 
