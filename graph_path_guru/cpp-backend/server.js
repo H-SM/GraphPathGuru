@@ -70,9 +70,9 @@ app.post('/perform-dijktra', (req, res) => {
 
     if (os.platform() === 'win32') {
         dijkstraExecutable = './Dijkstra/Dijkstra.exe';
-    } 
+    }
     else if (os.platform() === 'linux') {
-        dijkstraExecutable = './Dijkstra_linux/Dijkstra'; 
+        dijkstraExecutable = './Dijkstra_linux/Dijkstra';
     }
 
     // Execute the C++ program
@@ -160,14 +160,12 @@ app.get('/read-file', (req, res) => {
 
     const result = [];
     const checkNode = []; // New array to store third values
-    const distance = [];
     const distance_curr = [];
 
     adjDataArray.forEach(row => {
         const lines = row.split('\n');
         const values = [];
         const thirdValues = [];
-        const secondValues = [];
 
         const numbersBeforeColon = [];
 
@@ -183,11 +181,9 @@ app.get('/read-file', (req, res) => {
                 const parts = lines[i].split('\t')[1];
                 if (parts) {
                     const firstNumericValue = parseInt(parts.split(',')[0], 10);
-                    const secondNumericValue = parseInt(parts.split(',')[1], 10);
                     const thirdNumericValue = parseInt(parts.split(',')[2], 10);
 
                     values.push(firstNumericValue);
-                    secondValues.push(secondNumericValue);
                     thirdValues.push(thirdNumericValue);
 
                 }
@@ -196,11 +192,29 @@ app.get('/read-file', (req, res) => {
 
         checkNode.push(values);
         result.push(thirdValues);
-        distance.push(secondValues);
         distance_curr.push(numbersBeforeColon);
     });
 
+    const distance = [];
 
+    const dsMatches = fileContent.match(/<ds>[\s\S]*?<\/ds>/g);
+
+    if (dsMatches) {
+        const dsArray = dsMatches.map(ds => {
+            const dsContent = ds.match(/<ds>([\s\S]*?)<\/ds>/)[1].trim();
+            const dsLines = dsContent.split('\n');
+            return dsLines
+                .map(line => line.trim().split(/\s+/).map(val => (val === 'INF' ? 'INF' : parseInt(val, 10))));
+        });
+
+
+        for (let i = 0; i < dsArray.length; i++) {
+            distance.push(dsArray[i][1]);
+        }
+
+    }
+
+    console.log(distance);
     console.log(checkNode);
     console.log(distance);
     console.log(result);
