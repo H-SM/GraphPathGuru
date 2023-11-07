@@ -1,4 +1,0 @@
-// A case example
-Will be specific to every algo.
-
-Read me specific to every algo is also present in each folder/source code.
