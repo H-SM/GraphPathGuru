@@ -161,6 +161,15 @@ app.get('/read-file', (req, res) => {
     const result = [];
     const checkNode = []; // New array to store third values
     const distance_curr = [];
+    const curr_node = [];
+
+    for (const line of adjDataArray) {
+        const match = line.match(/^(\d+)/); // Regular expression to match the first number
+        if (match) {
+            const firstNumber = parseInt(match[1], 10);
+            curr_node.push(firstNumber);
+        }
+    }
 
     adjDataArray.forEach(row => {
         const lines = row.split('\n');
@@ -171,10 +180,10 @@ app.get('/read-file', (req, res) => {
 
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
-            const parts = line.split(':');
-            if (parts.length === 2) {
-                const beforeColon = parseInt(parts[0].trim(), 10);
-                numbersBeforeColon.push(beforeColon);
+            const match = line.match(/(\d+):/); // Regular expression to match the number before ':'
+            if (match) {
+                const number = parseInt(match[1], 10); // Extract and convert to an integer
+                numbersBeforeColon.push(number);
             }
 
             if (i > 0) {
@@ -182,7 +191,6 @@ app.get('/read-file', (req, res) => {
                 if (parts) {
                     const firstNumericValue = parseInt(parts.split(',')[0], 10);
                     const thirdNumericValue = parseInt(parts.split(',')[2], 10);
-
                     values.push(firstNumericValue);
                     thirdValues.push(thirdNumericValue);
 
@@ -216,9 +224,9 @@ app.get('/read-file', (req, res) => {
 
     console.log(distance);
     console.log(checkNode);
-    console.log(distance);
     console.log(result);
-    console.log(distance_curr);
+
+    console.log(curr_node);
 
     checkNode.push([]);
 
@@ -227,6 +235,7 @@ app.get('/read-file', (req, res) => {
         checkNode,
         distance,
         distance_curr,
+        curr_node,
     };
 
     res.json(responseData);
