@@ -24,6 +24,9 @@ import Footer from './Footer';
 import TechStack from './techStack';
 import { useLocation } from 'react-router-dom';
 
+// TODO: can't ping up the .env file here 
+const host = process.env.BACKEND_HOST;
+console.log("host :",host);
 const initialNodes = [
     {
         id: '0',
@@ -85,7 +88,10 @@ const AddNodeOnEdgeDrop = () => {
 
     const visualise = () => {
 
-        fetch('http://localhost:8000/read-file') 
+        fetch(`${host}/read-file`) 
+            .then(() => {
+                console.log(`${host}/read-file`, "pinged");
+            }) 
             .then((response) => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
@@ -357,22 +363,28 @@ const AddNodeOnEdgeDrop = () => {
             edges: edges,
         };
 
-        fetch('http://localhost:8000/write-file', {
+        fetch(`${host}/write-file`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(data),
         })
+        .then(() => {
+            console.log(`${host}/write-file`, "pinged");
+        })
     }
 
     const performDijktra = () => {
 
-        fetch('http://localhost:8000/perform-dijktra', {
+        fetch(`${host}/perform-dijktra`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
+        })
+        .then(() => {
+            console.log(`${host}/perform-dijktra`, "pinged");
         })
     }
 
