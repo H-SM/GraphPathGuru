@@ -5,8 +5,13 @@ input.txt
 output.txt
 
 
+# env files ignored
+.env
+.env.local
+
 # dependencies
 /node_modules
+node_modules
 /.pnp
 .pnp.js
 
