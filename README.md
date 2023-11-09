@@ -22,3 +22,9 @@ GraphPathGuru/
 |-- ...
 
 ```
+
+# .env structure
+
+```bash 
+REACT_APP_BACKEND_LOCALHOST=http://localhost:5000
+```
