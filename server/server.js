@@ -1,34 +1,35 @@
 const { execFile } = require('child_process');
-const express = require("express");
-const app = express();
 const path = require('path');
 const fs = require('fs');
-const cors = require('cors');
 const os = require('os');
+const express = require('express');
+var cors= require('cors');
+// const connectToMongo = require('./db');
 
-app.use(express.json());
-
-
-var bodyParser = require('body-parser');
-const { response } = require("express");
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+// var bodyParser = require('body-parser');
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: true }));
 // app.use(express.static(__dirname + '/views'));
 
+// connectToMongo();
+const app = express();
+const port = 5000;
+
+app.use(cors());
+app.use(express.json());
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
 // let processedData = "";
 
-app.set('views', path.join(__dirname, 'views'))
-app.set('view engine', 'html');
-app.engine('html', require('ejs').renderFile);
+// app.set('views', path.join(__dirname, 'views'))
+// app.set('view engine', 'html');
+// app.engine('html', require('ejs').renderFile);
 
-app.use('/static', express.static('static'))
-app.use(express.urlencoded())
+// app.use('/static', express.static('static'))
+// app.use(express.urlencoded())
 
-app.use(cors());
 
 
 app.post('/write-file', (req, res) => {
@@ -41,17 +42,17 @@ app.post('/write-file', (req, res) => {
         const mp = {};
         let w = 0;
         for (var i = 0; i < nodes.length; i++) {
-            node = nodes[i];
+            let node = nodes[i];
             mp[node.id] = [];
         }
         for (var i = 0; i < edges.length; i++) {
-            edge = edges[i];
+            let edge = edges[i];
             w = edge.label == undefined ? -1 : edge.label;
             mp[edge.source].push([edge.target, w]);
         }
         console.log(mp);
         for (var i = 0; i < nodes.length; i++) {
-            node = nodes[i];
+            let node = nodes[i];
             output += node.id;
 
             output += ' ' + Math.floor(node.position.x).toString() + ' ' + Math.floor(node.position.y).toString() + ': ';
@@ -247,8 +248,6 @@ app.get('/read-file', (req, res) => {
     res.json(responseData);
 });
 
-
-const port = 5000;
 
 app.listen(port, () => {
     console.log(`Server listening on port ${port}`);
