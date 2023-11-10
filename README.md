@@ -6,21 +6,24 @@ This project offers an interactive React Native app with a C++ backend for visua
 
 ```bash 
 GraphPathGuru/
-|-- android/
-|-- ios/
+|-- client/
+|   |-- public/
+|   |-- src/
+|-- .gitignore/
 |-- node_modules/
-|-- src/
-|-- cpp-backend/
-|   |-- C++ source files
+|-- package.json
+|-- package-lock.json
+|-- tailwind.config.js
 |-- server/
+|   |-- C++ source files
 |   |-- server.js
 |   |-- routes/
 |   |   |-- api.js
 |   |-- database/
 |   |   |-- db.js
 |-- package.json
+|-- package-lock.json
 |-- ...
-
 ```
 
 # .env structure
