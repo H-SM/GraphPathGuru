@@ -140,7 +140,7 @@ const AddNodeOnEdgeDrop = () => {
                 return response.json();
             })
             .then((data) => {
-                console.log('Received data:', data.distance_curr);
+                // console.log('Received data:', data.distance_curr);
                 result = data.result;
                 checkNode = data.checkNode;
                 distance = data.distance;
@@ -152,8 +152,9 @@ const AddNodeOnEdgeDrop = () => {
                 console.error('Error:', error);
             });
 
+        console.log(currentNode, index);
 
-        if (checkNode.length > 0 && checkNode[currentNode].length === 0) {
+        if (checkNode.length > 0 && checkNode[currentNode].length === 0 && currentNode >= checkNode.length - 1) {
 
             // setting all things to default at the end
             setNodes(colorNode(nodes, curr_node[currentNode], 'white'));
@@ -170,7 +171,6 @@ const AddNodeOnEdgeDrop = () => {
             setIsProcessing(false);
             return;
         }
-
 
         setTimeout(() => {
 
@@ -191,6 +191,19 @@ const AddNodeOnEdgeDrop = () => {
                     )
                 );
             }
+            else {
+                // to set it to default
+                setEdges(
+                    colorEdge(
+                        edges,
+                        '-1',
+                        '-1',
+                        distance_curr,
+                        distance,
+                        true,
+                    )
+                );
+            }
 
             setTimeout(() => {
 
@@ -204,7 +217,7 @@ const AddNodeOnEdgeDrop = () => {
                     setNodes(colorNode(updatedNodes, checkNode[currentNode][index], 'black'));
                 }
 
-                if (index == checkNode[currentNode].length - 1) {
+                if (checkNode[currentNode].length == 0 || index == checkNode[currentNode].length - 1) {
                     index = 0;
                     currentNode++;
                 } else {
