@@ -5,6 +5,9 @@
 #include <fstream>
 #include <queue>
 #include <algorithm>
+#include <Windows.h>
+
+std::string epath;
 
 using std::pair;
 using std::greater;
@@ -119,7 +122,7 @@ std::string goBackDir(std::string path, int levels) {
 pair<int,vector<vector<pair<int, int>>>> make_graph() {
     
     std::ifstream inputFile;
-    std::string path = std::string(__FILE__);
+    std::string path = std::string(epath);
     inputFile.open(goBackDir(path, 1)+"\\file io\\input.txt");
     vector<std::string> lines;
     if (inputFile.is_open()) {
@@ -189,7 +192,7 @@ pair<int,vector<vector<pair<int, int>>>> make_graph() {
 
 void storeOutput(string output) {
 
-    std::string path = std::string(__FILE__);
+    std::string path = std::string(epath);
     std::ofstream outputFile(goBackDir(path, 1)+"\\file io\\output.txt");
 
     if (outputFile.is_open()) {
@@ -203,8 +206,17 @@ void storeOutput(string output) {
 }
 
 
+std::string getExecutablePath() {
+    char buffer[MAX_PATH];
+    // @ts-ignore
+    GetModuleFileName(NULL, buffer, MAX_PATH);  // ignore this error it doesn't matter
+    return std::string(buffer);
+}
+
+
 int main() {
-    
+    epath = getExecutablePath();
+    std::cout << "Current File: " << epath << std::endl;
     auto g = make_graph();
     int V = g.first, S = 0;
     int t = 0;
