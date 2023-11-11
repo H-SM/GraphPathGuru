@@ -4,9 +4,14 @@ const fs = require('fs');
 const os = require('os');
 const express = require('express');
 var cors= require('cors');
-const connectToMongo = require('./db');
+// const connectToMongo = require('./db');
 
-connectToMongo();
+// var bodyParser = require('body-parser');
+// app.use(bodyParser.json());
+// app.use(bodyParser.urlencoded({ extended: true }));
+// app.use(express.static(__dirname + '/views'));
+
+// connectToMongo();
 const app = express();
 const port = 5000;
 
@@ -16,9 +21,17 @@ app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/graph', require('./routes/graph'));
+// let processedData = "";
 
+// app.set('views', path.join(__dirname, 'views'))
+// app.set('view engine', 'html');
+// app.engine('html', require('ejs').renderFile);
+
+// app.use('/static', express.static('static'))
+// app.use(express.urlencoded())
+
+
+// write the data we get as request to the input file
 app.post('/write-file', (req, res) => {
     try {
         const { nodes, edges } = req.body;
@@ -59,6 +72,7 @@ app.post('/write-file', (req, res) => {
 
 
 app.post('/perform-dijktra', (req, res) => {
+
     // Specify the path to your C++ executable
     let dijkstraExecutable;
 
@@ -83,59 +97,18 @@ app.post('/perform-dijktra', (req, res) => {
             return;
         }
 
-        // Process the output if needed
         console.log('C++ program output:', stdout);
 
-        // Send a response to the client
         res.send('C++ program executed successfully.');
     });
 });
 
-// app.post('/process-data', (req, res) => {
-//     const{ text_line }= req.body;
-//     // process inputText here and generate response
-//     const response = `${text_line}`;
-//     // console.log(response);
-//     text = response;
-//     // console.log("text" + text);
-//     res.send({ response });
-
-// });
-
-
-
-
-// add ons 
-
-// to run the blockchain code 
-
-// const { spawn } = require('child_process');
-// let output = "";
-
-// app.post('/execute', (req, res) => {
-//   const text = req.body.text;
-//   const process = spawn('node', ['node_skellington.js',text]);
-
-//   process.stdout.on('data', (data) => {
-//     output = data;
-//     console.log(`stdout: ${data}`);
-//   });
-
-//   process.stderr.on('data', (data) => {
-//     console.error(`stderr: ${data}`);
-//   });
-
-//   process.on('close', (code) => {
-//     res.send(output);
-//     console.log(`child process exited with code ${code}`);
-//   });
-// });
 
 app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
-
+// to read the output file and send the data in the form of arrays
 app.get('/read-file', (req, res) => {
 
     const fileContent = fs.readFileSync('./file io/output.txt', 'utf-8');
@@ -153,12 +126,12 @@ app.get('/read-file', (req, res) => {
     console.log(adjDataArray);
 
     const result = [];
-    const checkNode = []; // New array to store third values
+    const checkNode = []; 
     const distance_curr = [];
     const curr_node = [];
 
     for (const line of adjDataArray) {
-        const match = line.match(/^(\d+)/); // Regular expression to match the first number
+        const match = line.match(/^(\d+)/);
         if (match) {
             const firstNumber = parseInt(match[1], 10);
             curr_node.push(firstNumber);
@@ -169,14 +142,13 @@ app.get('/read-file', (req, res) => {
         const lines = row.split('\n');
         const values = [];
         const thirdValues = [];
-
         const numbersBeforeColon = [];
 
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
-            const match = line.match(/(\d+):/); // Regular expression to match the number before ':'
+            const match = line.match(/(\d+):/); 
             if (match) {
-                const number = parseInt(match[1], 10); // Extract and convert to an integer
+                const number = parseInt(match[1], 10); 
                 numbersBeforeColon.push(number);
             }
 
@@ -197,8 +169,8 @@ app.get('/read-file', (req, res) => {
         distance_curr.push(numbersBeforeColon);
     });
 
+    // find the distance of the node to be checked from source node
     const distance = [];
-
     const dsMatches = fileContent.match(/<ds>[\s\S]*?<\/ds>/g);
 
     if (dsMatches) {
@@ -216,13 +188,14 @@ app.get('/read-file', (req, res) => {
 
     }
 
+    // to remove the undefined (0) error due to timeout function
+    checkNode.push([]);
+    result.push([]);
+
     console.log(distance);
     console.log(checkNode);
     console.log(result);
-
     console.log(curr_node);
-
-    checkNode.push([]);
 
     const responseData = {
         result,
