@@ -4,14 +4,9 @@ const fs = require('fs');
 const os = require('os');
 const express = require('express');
 var cors= require('cors');
-// const connectToMongo = require('./db');
+const connectToMongo = require('./db');
 
-// var bodyParser = require('body-parser');
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: true }));
-// app.use(express.static(__dirname + '/views'));
-
-// connectToMongo();
+connectToMongo();
 const app = express();
 const port = 5000;
 
@@ -21,16 +16,8 @@ app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
-// let processedData = "";
-
-// app.set('views', path.join(__dirname, 'views'))
-// app.set('view engine', 'html');
-// app.engine('html', require('ejs').renderFile);
-
-// app.use('/static', express.static('static'))
-// app.use(express.urlencoded())
-
-
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/graph', require('./routes/graph'));
 
 app.post('/write-file', (req, res) => {
     try {
