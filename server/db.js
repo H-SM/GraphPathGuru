@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
 let cluster = process.env.API_CLUSTERING;
-console.log(cluster);
 const connectToMongo = () => {
     mongoose.connect(cluster,{ 
         //TODO: look over these parameters in the db connection
