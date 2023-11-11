@@ -3,11 +3,12 @@ TODO:
 - Have vinay refactor this entire file; do arrangements of code 
 - make a functinoal API b/w our js script and react flow:
  example: we need functions like this: 
- color_node(nodes, edges, node_id, color_hex)
- change_edge(nodes, edges, edge_id, edge_to_change, new_label)
+ color_node(nodes, edges, node_id, color_hex, time)
+ change_edge(nodes, edges, edge_id, edge_to_change, new_label, time)
  and so on
  this will make our animations far more modular and will allow us to make the animations for all the algos much more easily
  also the code will look pretty :)
+
 */
 
 import React, { useCallback, useRef, useEffect, useState } from 'react';
@@ -37,8 +38,8 @@ import TechStack from './techStack';
 import { useLocation } from 'react-router-dom';
 
 // TODO: can't ping up the .env file here 
-// const host = "http://localhost:5000";
-const host = process.env.REACT_APP_BACKEND_LOCALHOST;
+const host = "http://localhost:5000";
+// const host = process.env.REACT_APP_BACKEND_LOCALHOST;
 console.log("host:", host);
 const initialNodes = [
     {
