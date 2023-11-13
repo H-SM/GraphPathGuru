@@ -6,14 +6,18 @@ import {
   Route,
   Routes
 } from "react-router-dom";
+import GraphState from "./context/Graph/graphState";
+import UserState from "./context/User/userState";
 import Docpage from "./components/Docpage";
 import Settings from "./components/Settings";
 import Login from "./components/Login";
 import Signup from "./components/Signup";
-   
+
 function App() {
 
   return (
+    <UserState>
+    <GraphState>
     <div className="App">
       <Router>
           <Routes>
@@ -27,6 +31,8 @@ function App() {
           </Routes>
       </Router>
     </div>
+    </GraphState>
+    </UserState>
   );
 }
 

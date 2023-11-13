@@ -1,9 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import { useNavigate } from "react-router-dom";
 
 const Settings = () => {
+  let navigate = useNavigate();
+  useEffect(()=>{
+      if(localStorage.getItem('token')){
+        
+      }else{
+        navigate('/login');
+      }
+      // eslint-disable-next-line
+    },[]);
   return (
     <>
       <Navbar />

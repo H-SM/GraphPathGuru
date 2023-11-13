@@ -1,9 +1,11 @@
 import React from 'react'
 import logo from '../assets/logo.png';
 import imager from '../assets/beams-pricing.png';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const Navbar = () => {
+  let navigate = useNavigate();
+
   return (
     <>
     <header class="relative z-50 w-full flex-none text-sm font-semibold leading-6 text-slate-900">
@@ -30,7 +32,10 @@ const Navbar = () => {
     <button type="button" class="-my-1 -mr-1 ml-6 flex h-8 w-8 items-center justify-center lg:hidden">
       <span class="sr-only">Open navigation</span><svg viewBox="0 0 24 24" class="h-6 w-6 stroke-slate-900"><path d="M3.75 12h16.5M3.75 6.75h16.5M3.75 17.25h16.5" fill="none" stroke-width="1.5" stroke-linecap="round"></path></svg></button>
     <div class="hidden lg:ml-8 lg:flex lg:items-center lg:border-l lg:border-slate-900/15 lg:pl-8">
-      <Link to="/login">Sign in</Link>
+      <button onClick={() =>{
+        localStorage.removeItem('token');
+        navigate("/login");
+        }}>Sign out</button>
       <Link class="inline-flex justify-center rounded-lg text-sm font-semibold py-2.5 px-4 bg-slate-900 text-white hover:bg-slate-700 -my-2.5 ml-8" to="/docs?section=start"><span>How to start <span aria-hidden="true">→</span></span></Link></div></div></nav></header>
     </>
    
