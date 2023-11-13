@@ -34,7 +34,7 @@ import HeroSection from './HeroSection';
 import AboutUs from './aboutUs';
 import Footer from './Footer';
 import TechStack from './techStack';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 // TODO: can't ping up the .env file here 
 // const host = "http://localhost:5000";
@@ -50,7 +50,6 @@ const initialNodes = [
         sourcePosition: 'right',
     },
 ];
-
 let id = 1;
 const getId = () => `${id++}`;
 const setId = () => `${id--}`;
@@ -375,7 +374,7 @@ const AddNodeOnEdgeDrop = () => {
             nodes: nodes,
             edges: edges,
         };
-
+        console.log("this is data\n", data);
         fetch(`${host}/write-file`, {
             method: 'POST',
             headers: {
@@ -567,7 +566,17 @@ const AddNodeOnEdgeDrop = () => {
     );
 };
 
-export default () => (
+const Home = () => {
+    let navigate = useNavigate();
+    useEffect(()=>{
+        if(localStorage.getItem('token')){
+          
+        }else{
+          navigate('/login');
+        }
+        // eslint-disable-next-line
+      },[]);
+  return (
     <>
     <div>
     <img src={imager} alt="" class="absolute left-0 top-0 z-[-1] w-full max-w-none opacity-[90%]"/>
@@ -587,4 +596,7 @@ export default () => (
     <TechStack/>
     <Footer/>  
     </>
-);
+  )
+}
+
+export default Home;
