@@ -567,15 +567,15 @@ const AddNodeOnEdgeDrop = () => {
 };
 
 const Home = () => {
-    // let navigate = useNavigate();
-    // useEffect(()=>{
-    //     if(localStorage.getItem('token')){
+    let navigate = useNavigate();
+    useEffect(()=>{
+        if(localStorage.getItem('token')){
           
-    //     }else{
-    //       navigate('/login');
-    //     }
-    //     // eslint-disable-next-line
-    //   },[]);
+        }else{
+          navigate('/login');
+        }
+        // eslint-disable-next-line
+      },[]);
   return (
     <>
         <div>
