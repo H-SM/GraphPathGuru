@@ -6,6 +6,7 @@
 #include <queue>
 #include <algorithm>
 #include <Windows.h>
+#include <climits>
 
 std::string epath;
 
