@@ -1,24 +1,127 @@
-import React, { useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
+import contextValue from "../context/User/userContext.js";
 import { useNavigate } from "react-router-dom";
+import CloudinaryUploadWidget from "./cloudinaryUpload.js";
 
 const Settings = () => {
+  const [details, setDetails] = useState({
+    oldpassword: "",
+    newpassword: "",
+    checkpassword: "",
+    name: "",
+  });
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+
   let navigate = useNavigate();
-  useEffect(()=>{
-      if(localStorage.getItem('token')){
-        
-      }else{
-        navigate('/login');
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+    } else {
+      navigate("/login");
+    }
+    // eslint-disable-next-line
+  }, []);
+  const context = useContext(contextValue);
+  const { userData, setUserData, getuserinfo, changename, changepassword } =
+    context;
+  useEffect(() => {
+    getuserinfo();
+  }, []);
+  //looks over the changes in the info
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    let flag = false;
+    if (details.name.trim() !== "" || details.name.trim() !== userData.name) {
+      try {
+        const updatedUser = await changename({ name: details.name });
+        if (!updatedUser.success) {
+          alert(updatedUser.error);
+        } else {
+          setUserData((prevUserData) => ({
+            ...prevUserData,
+            name: details.name,
+          }));
+          flag = true;
+        }
+      } catch (error) {
+        console.error("Error updating name:", error);
       }
-      // eslint-disable-next-line
-    },[]);
+    }
+    if (
+      details.oldpassword.trim() !== "" ||
+      details.newpassword.trim() !== "" ||
+      details.checkpassword.trim() !== ""
+    ) {
+      if (details.newpassword !== details.checkpassword) {
+        alert("Recheck your new password!");
+        return;
+      } else {
+        try {
+          const updatedUser = await changepassword({
+            oldpassword: details.oldpassword,
+            newpassword: details.newpassword,
+          });
+
+          if (!updatedUser.success) {
+            alert(updatedUser.error);
+          } else {
+            flag = true;
+          }
+        } catch (error) {
+          console.error("Error updating password:", error);
+        }
+      }
+    }
+    if (flag) {
+      alert("details updated");
+    } else {
+      alert("Recheck your credentails!");
+    }
+  };
+  //looks over closing of the window
+  const handleclick = (e) => {
+    setUserData({});
+    navigate("/");
+  };
+
+  const onChange = (e) => {
+    setDetails({ ...details, [e.target.name]: e.target.value });
+  };
+
+  const handleCancel = (e) => {
+    setDetails({
+      oldpassword: "",
+      newpassword: "",
+      checkpassword: "",
+      name: "",
+    });
+    navigate("/");
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        navigate("/");
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [navigate]);
+
   return (
+    // right-[3vh] top-[11vh]
     <>
       <Navbar />
 
-      <div class="isolate bg-white px-6 py-24 sm:py-32 lg:px-8">
+      <div class="isolate  px-6 py-24 sm:py-32 lg:px-8">
         <div
           className="absolute inset-x-0 top-[-10rem] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[-20rem]"
           aria-hidden="true"
@@ -33,6 +136,32 @@ const Settings = () => {
         </div>
 
         <div class="mx-auto max-w-2xl text-center">
+          <div
+            className="absolute 
+        right-[17%] top-[25%]
+my-3 mx-3 z-50"
+          >
+            <button
+              type="button"
+              className="text-black/70 hover:scale-125 rounded-full bg-cyan-600/40 transition ease-in-out transition-500 w-8 h-8"
+              onClick={handleclick}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+                stroke="currentColor"
+                className="w-8 h-8 p-1"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
           <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Settings
           </h2>
@@ -43,58 +172,38 @@ const Settings = () => {
         </div>
 
         <div className="flex justify-center items-center mt-8">
-          <form>
+          <form onSubmit={handleSubmit} action="#">
             <div className="space-y-12 ">
-              <div className="border-b border-gray-900/10 pb-12">
+              <div className="border-b w-[100vh] border-gray-900/10 pb-12">
                 <h2 className="text-base font-semibold leading-7 text-gray-900">
                   Profile
                 </h2>
                 <p className="mt-1 text-sm leading-6 text-gray-600"></p>
 
                 <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                  <div className="sm:col-span-4">
+                  <div className="col-span-full">
                     <label
-                      htmlFor="username"
+                      htmlFor="name"
                       className="block text-sm font-medium leading-6 text-gray-900"
                     >
                       Username
                     </label>
-                    <div className="mt-2">
-                      <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
+                    <div className="mt-2 flex justify-center">
+                      <div className="flex w-full rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                         <span className="flex select-none items-center pl-3 text-gray-500 sm:text-sm">
                           graphpathguru.com/
                         </span>
                         <input
                           type="text"
-                          name="username"
-                          id="username"
-                          autoComplete="username"
+                          name="name"
+                          id="name"
+                          autoComplete="name"
                           className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
-                          placeholder="H-SM"
+                          placeholder={userData.name}
+                          onChange={onChange}
                         />
                       </div>
                     </div>
-                  </div>
-
-                  <div className="col-span-full">
-                    <label
-                      htmlFor="about"
-                      className="block text-sm font-medium leading-6 text-gray-900"
-                    >
-                      About
-                    </label>
-                    <div className="mt-2">
-                      <textarea
-                        id="about"
-                        name="about"
-                        rows={3}
-                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                        defaultValue={""}
-                      />
-                    </div>
-                    <p className="mt-3 text-sm leading-6 text-gray-600">
-                      Write a few sentences about yourself.
-                    </p>
                   </div>
 
                   <div className="col-span-full">
@@ -104,226 +213,187 @@ const Settings = () => {
                     >
                       Photo
                     </label>
-                    <div className="mt-2 flex items-center gap-x-3">
-                      <UserCircleIcon
-                        className="h-12 w-12 text-gray-300"
-                        aria-hidden="true"
-                      />
-                      <button
-                        type="button"
-                        className="rounded-md bg-white px-2.5 py-1.5 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
-                      >
-                        Change
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="col-span-full">
-                    <label
-                      htmlFor="cover-photo"
-                      className="block text-sm font-medium leading-6 text-gray-900"
-                    >
-                      Cover photo
-                    </label>
-                    <div className="mt-2 flex justify-center rounded-lg border border-dashed border-gray-900/25 px-6 py-10">
-                      <div className="text-center">
-                        <PhotoIcon
-                          className="mx-auto h-12 w-12 text-gray-300"
+                    <div className="mt-2 flex items-center justify-center gap-x-2">
+                      {userData.image ? (
+                        <img
+                          src={userData.image}
+                          className="h-[15vh] w-[15vh]"
+                          alt="pfp"
+                        />
+                      ) : (
+                        <UserCircleIcon
+                          className="h-[15vh] w-[15vh] text-cyan-600"
                           aria-hidden="true"
                         />
-                        <div className="mt-4 flex text-sm leading-6 text-gray-600">
-                          <label
-                            htmlFor="file-upload"
-                            className="relative cursor-pointer rounded-md bg-white font-semibold text-indigo-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-indigo-600 focus-within:ring-offset-2 hover:text-indigo-500"
-                          >
-                            <span>Upload a file</span>
-                            <input
-                              id="file-upload"
-                              name="file-upload"
-                              type="file"
-                              className="sr-only"
-                            />
-                          </label>
-                          <p className="pl-1">or drag and drop</p>
-                        </div>
-                        <p className="text-xs leading-5 text-gray-600">
-                          PNG, JPG, GIF up to 10MB
-                        </p>
-                      </div>
+                      )}
+                      <CloudinaryUploadWidget />
                     </div>
                   </div>
                 </div>
-              </div>
-
-              <div className="border-b border-gray-900/10 pb-12">
-                <h2 className="text-base font-semibold leading-7 text-gray-900">
-                  Personal Information
-                </h2>
-                <p className="mt-1 text-sm leading-6 text-gray-600">
-                  Use a permanent address where you can receive mail.
-                </p>
-
-                <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                  <div className="sm:col-span-3">
-                    <label
-                      htmlFor="first-name"
-                      className="block text-sm font-medium leading-6 text-gray-900"
-                    >
-                      First name
-                    </label>
-                    <div className="mt-2">
+                <div className="col-span-full mt-2">
+                  <label
+                    htmlFor="oldpassword"
+                    className="block text-sm font-medium leading-6 text-gray-900"
+                  >
+                    Password
+                  </label>
+                  <div className="mt-2 flex flex-col items-center justify-center gap-y-2">
+                    <div className="relative flex w-full rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                       <input
-                        type="text"
-                        name="first-name"
-                        id="first-name"
-                        autoComplete="given-name"
-                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        type={showOldPassword ? "text" : "password"}
+                        name="oldpassword"
+                        id="oldpassword"
+                        autoComplete="oldpassword"
+                        className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 mx-2"
+                        placeholder={showOldPassword ? "password" : "••••••••"}
+                        onChange={onChange}
                       />
-                    </div>
-                  </div>
-
-                  <div className="sm:col-span-3">
-                    <label
-                      htmlFor="last-name"
-                      className="block text-sm font-medium leading-6 text-gray-900"
-                    >
-                      Last name
-                    </label>
-                    <div className="mt-2">
-                      <input
-                        type="text"
-                        name="last-name"
-                        id="last-name"
-                        autoComplete="family-name"
-                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="sm:col-span-4">
-                    <label
-                      htmlFor="email"
-                      className="block text-sm font-medium leading-6 text-gray-900"
-                    >
-                      Email address
-                    </label>
-                    <div className="mt-2">
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        autoComplete="email"
-                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="sm:col-span-3">
-                    <label
-                      htmlFor="country"
-                      className="block text-sm font-medium leading-6 text-gray-900"
-                    >
-                      Country
-                    </label>
-                    <div className="mt-2">
-                      <select
-                        id="country"
-                        name="country"
-                        autoComplete="country-name"
-                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
+                      <button
+                        type="button"
+                        className="absolute right-3 top-[20%] text-[#fff] focus:outline-none"
+                        onClick={() => setShowOldPassword(!showOldPassword)}
                       >
-                        <option>United States</option>
-                        <option>Canada</option>
-                        <option>Mexico</option>
-                      </select>
+                        {showOldPassword ? (
+                          <svg
+                            class="w-6 h-6 text-gray-800"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 20 18"
+                          >
+                            <path
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M1.933 10.909A4.357 4.357 0 0 1 1 9c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 19 9c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M2 17 18 1m-5 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                            />
+                          </svg>
+                        ) : (
+                          <svg
+                            class="w-6 h-6 text-gray-800"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 20 14"
+                          >
+                            <g
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                            >
+                              <path d="M10 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                              <path d="M10 13c4.97 0 9-2.686 9-6s-4.03-6-9-6-9 2.686-9 6 4.03 6 9 6Z" />
+                            </g>
+                          </svg>
+                        )}
+                      </button>
                     </div>
-                  </div>
-
-                  <div className="col-span-full">
-                    <label
-                      htmlFor="street-address"
-                      className="block text-sm font-medium leading-6 text-gray-900"
+                    <a
+                      href="#"
+                      class="text-sm text-end font-medium text-primary-600 hover:underline"
                     >
-                      Street address
-                    </label>
-                    <div className="mt-2">
+                      Forgot password?
+                    </a>
+                  </div>
+                </div>
+                <div className="col-span-full mt-4">
+                  <label
+                    htmlFor="newpassword"
+                    className="block text-sm font-medium leading-6 text-gray-900"
+                  >
+                    New Password
+                  </label>
+                  <div className="mt-2 flex justify-center">
+                    <div className="relative flex w-full rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                       <input
-                        type="text"
-                        name="street-address"
-                        id="street-address"
-                        autoComplete="street-address"
-                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        type={showNewPassword ? "text" : "password"}
+                        name="newpassword"
+                        id="newpassword"
+                        autoComplete="newpassword"
+                        className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 mx-2"
+                        placeholder={showNewPassword ? "password" : "••••••••"}
+                        onChange={onChange}
                       />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-[20%] text-[#fff] focus:outline-none"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                      >
+                        {showNewPassword ? (
+                          <svg
+                            class="w-6 h-6 text-gray-800"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 20 18"
+                          >
+                            <path
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M1.933 10.909A4.357 4.357 0 0 1 1 9c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 19 9c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M2 17 18 1m-5 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                            />
+                          </svg>
+                        ) : (
+                          <svg
+                            class="w-6 h-6 text-gray-800"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 20 14"
+                          >
+                            <g
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                            >
+                              <path d="M10 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                              <path d="M10 13c4.97 0 9-2.686 9-6s-4.03-6-9-6-9 2.686-9 6 4.03 6 9 6Z" />
+                            </g>
+                          </svg>
+                        )}
+                      </button>
                     </div>
                   </div>
-
-                  <div className="sm:col-span-2 sm:col-start-1">
-                    <label
-                      htmlFor="city"
-                      className="block text-sm font-medium leading-6 text-gray-900"
-                    >
-                      City
-                    </label>
-                    <div className="mt-2">
+                </div>
+                <div className="col-span-full mt-4">
+                  <label
+                    htmlFor="checkpassword"
+                    className="block text-sm font-medium leading-6 text-gray-900"
+                  >
+                    Refill new Password
+                  </label>
+                  <div className="mt-2 flex justify-center">
+                    <div className="relative flex w-full rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                       <input
-                        type="text"
-                        name="city"
-                        id="city"
-                        autoComplete="address-level2"
-                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <label
-                      htmlFor="region"
-                      className="block text-sm font-medium leading-6 text-gray-900"
-                    >
-                      State / Province
-                    </label>
-                    <div className="mt-2">
-                      <input
-                        type="text"
-                        name="region"
-                        id="region"
-                        autoComplete="address-level1"
-                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <label
-                      htmlFor="postal-code"
-                      className="block text-sm font-medium leading-6 text-gray-900"
-                    >
-                      ZIP / Postal code
-                    </label>
-                    <div className="mt-2">
-                      <input
-                        type="text"
-                        name="postal-code"
-                        id="postal-code"
-                        autoComplete="postal-code"
-                        className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                        type="password"
+                        name="checkpassword"
+                        id="checkpassword"
+                        autoComplete="checkpassword"
+                        className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 mx-2"
+                        placeholder="••••••••"
+                        onChange={onChange}
                       />
                     </div>
                   </div>
                 </div>
               </div>
             </div>
-
-            <div className="mt-6 flex items-center justify-end gap-x-6">
+            <div className="mt-6 flex items-center justify-end gap-x-6 w-full">
               <button
                 type="button"
                 className="text-sm font-semibold leading-6 text-gray-900"
+                onClick={handleCancel}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className="rounded-md bg-cyan-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-cyan-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600"
               >
                 Save
               </button>
