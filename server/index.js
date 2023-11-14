@@ -174,7 +174,11 @@ app.get('/read-file', (req, res) => {
         }
 
     }
-
+    
+    // to remove the undefined (0) error due to timeout function
+    checkNode.push([]);
+    result.push([]);
+    
     console.log(distance);
     console.log(checkNode);
     console.log(result);
