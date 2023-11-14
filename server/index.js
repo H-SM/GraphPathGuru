@@ -4,14 +4,9 @@ const fs = require('fs');
 const os = require('os');
 const express = require('express');
 var cors= require('cors');
-// const connectToMongo = require('./db');
+const connectToMongo = require('./db');
 
-// var bodyParser = require('body-parser');
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: true }));
-// app.use(express.static(__dirname + '/views'));
-
-// connectToMongo();
+connectToMongo();
 const app = express();
 const port = 5000;
 
@@ -21,17 +16,9 @@ app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
-// let processedData = "";
+app.use('/api/auth', require('./routes/auth'));
+app.use('/api/graph', require('./routes/graph'));
 
-// app.set('views', path.join(__dirname, 'views'))
-// app.set('view engine', 'html');
-// app.engine('html', require('ejs').renderFile);
-
-// app.use('/static', express.static('static'))
-// app.use(express.urlencoded())
-
-
-// write the data we get as request to the input file
 app.post('/write-file', (req, res) => {
     try {
         const { nodes, edges } = req.body;
@@ -105,7 +92,6 @@ app.post('/write-file', (req, res) => {
 
 // run bellman-ford
 app.post('/perform-dijktra', (req, res) => {
-
     // Specify the path to your C++ executable
     let bellmanExecutable;
 
@@ -130,8 +116,10 @@ app.post('/perform-dijktra', (req, res) => {
             return;
         }
 
+        // Process the output if needed
         console.log('C++ program output:', stdout);
 
+        // Send a response to the client
         res.send('C++ program executed successfully.');
     });
 });
@@ -140,7 +128,6 @@ app.get('/', (req, res) => {
     res.send('Hello World!');
 });
 
-// to read the output file and send the data in the form of arrays
 app.get('/read-file', (req, res) => {
 
     const fileContent = fs.readFileSync('./file io/output.txt', 'utf-8');
@@ -158,12 +145,12 @@ app.get('/read-file', (req, res) => {
     console.log(adjDataArray);
 
     const result = [];
-    const checkNode = []; 
+    const checkNode = []; // New array to store third values
     const distance_curr = [];
     const curr_node = [];
 
     for (const line of adjDataArray) {
-        const match = line.match(/^(\d+)/);
+        const match = line.match(/^(\d+)/); // Regular expression to match the first number
         if (match) {
             const firstNumber = parseInt(match[1], 10);
             curr_node.push(firstNumber);
@@ -174,13 +161,14 @@ app.get('/read-file', (req, res) => {
         const lines = row.split('\n');
         const values = [];
         const thirdValues = [];
+
         const numbersBeforeColon = [];
 
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i];
-            const match = line.match(/(\d+):/); 
+            const match = line.match(/(\d+):/); // Regular expression to match the number before ':'
             if (match) {
-                const number = parseInt(match[1], 10); 
+                const number = parseInt(match[1], 10); // Extract and convert to an integer
                 numbersBeforeColon.push(number);
             }
 
@@ -201,8 +189,8 @@ app.get('/read-file', (req, res) => {
         distance_curr.push(numbersBeforeColon);
     });
 
-    // find the distance of the node to be checked from source node
     const distance = [];
+
     const dsMatches = fileContent.match(/<ds>[\s\S]*?<\/ds>/g);
 
     if (dsMatches) {
@@ -219,14 +207,15 @@ app.get('/read-file', (req, res) => {
         }
 
     }
-
+    
     // to remove the undefined (0) error due to timeout function
     checkNode.push([]);
     result.push([]);
-
+    
     console.log(distance);
     console.log(checkNode);
     console.log(result);
+
     console.log(curr_node);
 
     const responseData = {
