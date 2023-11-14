@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <Windows.h>
 #include <climits>
+#include <array> 
 
 std::string epath;
 
@@ -17,7 +18,7 @@ using std::pair;
 using std::string;
 using std::vector;
 
-pair<vector<int>, vector<int>> bellmanFord(int V, vector<vector<int>> &edges, int S, std::string &output) 
+pair<vector<int>, vector<int>> bellmanFord(int V, std::vector<std::array<int, 3>> &edges, int S, std::string &output) 
 {
     vector<int> distTo(V, INT_MAX);
     vector<int> pred(V, -1);
@@ -25,11 +26,14 @@ pair<vector<int>, vector<int>> bellmanFord(int V, vector<vector<int>> &edges, in
     // tranverse of nodes-1 on edge list
     for (int i = 0; i < V - 1; i++)
     {
+        // source : from youtube -> code babbar
+
+        // iterating over the edges 
         for (int j = 0; j < edges.size(); j++)
         {
-            int u = edges[j][0];
-            int v = edges[j][1];
-            int w = edges[j][2];
+            int u = edges[j][0];  // source node
+            int v = edges[j][1];  // destination node
+            int w = edges[j][2];  // weight betwee the nodes
 
             output += "<ds>\n\t"; // begin <ds>
             output += std::to_string(u) + "," + std::to_string(distTo[u]) + " ";
@@ -53,6 +57,8 @@ pair<vector<int>, vector<int>> bellmanFord(int V, vector<vector<int>> &edges, in
             output += std::to_string(u) + ", " + std::to_string(distTo[u]) + ":";
             output += "\n\t" + std::to_string(v) + ", " + std::to_string(w) + ", ";
 
+            // element whether the prev dist is larger than current or not.
+            // If current distance is smaller, push it into the queue.
             bool f = 0;
             if (distTo[u] != INT_MAX && distTo[u] + w < distTo[v])
             {
@@ -125,7 +131,7 @@ std::string goBackDir(std::string path, int levels)
     return res;
 }
 
-pair<int, vector<vector<int>>> make_graph()
+pair<int, vector<std::array<int,3>>> make_graph()
 {
     std::ifstream inputFile;
     std::string path = std::string(epath);
@@ -144,9 +150,9 @@ pair<int, vector<vector<int>>> make_graph()
 
     // cout << "done";
 
-    pair<int, vector<vector<int>>> res;
+    pair<int, vector<std::array<int,3>>> res;
     int V = lines.size();
-    vector<vector<int>> edges;
+    vector<std::array<int,3>> edges;
     for (auto line : lines)
     {
         int pointer = 0;
