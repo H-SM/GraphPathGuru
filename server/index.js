@@ -58,19 +58,52 @@ app.post('/write-file', (req, res) => {
 });
 
 
+// app.post('/perform-dijktra', (req, res) => {
+
+//     // Specify the path to your C++ executable
+//     let dijkstraExecutable;
+
+//     if (os.platform() === 'win32') {
+//         dijkstraExecutable = './Dijkstra/Dijkstra.exe';
+//     }
+//     else if (os.platform() === 'linux') {
+//         dijkstraExecutable = './Dijkstra_linux/Dijkstra';
+//     }
+
+//     // Execute the C++ program
+//     execFile(dijkstraExecutable, (error, stdout, stderr) => {
+//         if (error) {
+//             console.error('Error:', error);
+//             res.status(500).send('An error occurred during execution.');
+//             return;
+//         }
+
+//         if (stderr) {
+//             console.error('Error:', stderr);
+//             res.status(500).send('An error occurred during execution.');
+//             return;
+//         }
+
+//         console.log('C++ program output:', stdout);
+
+//         res.send('C++ program executed successfully.');
+//     });
+// });
+
+// run bellman-ford
 app.post('/perform-dijktra', (req, res) => {
     // Specify the path to your C++ executable
-    let dijkstraExecutable;
+    let bellmanExecutable;
 
     if (os.platform() === 'win32') {
-        dijkstraExecutable = './Dijkstra/Dijkstra.exe';
+        bellmanExecutable = './Bellman_Ford/Bellman.exe';
     }
     else if (os.platform() === 'linux') {
-        dijkstraExecutable = './Dijkstra_linux/Dijkstra';
+        bellmanExecutable = './Bellman_Ford/Bellman';
     }
 
     // Execute the C++ program
-    execFile(dijkstraExecutable, (error, stdout, stderr) => {
+    execFile(bellmanExecutable, (error, stdout, stderr) => {
         if (error) {
             console.error('Error:', error);
             res.status(500).send('An error occurred during execution.');
@@ -78,7 +111,7 @@ app.post('/perform-dijktra', (req, res) => {
         }
 
         if (stderr) {
-            console.error('Error:', stderr);
+            console.error('StdError:', stderr);
             res.status(500).send('An error occurred during execution.');
             return;
         }
