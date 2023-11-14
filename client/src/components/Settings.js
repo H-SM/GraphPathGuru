@@ -7,63 +7,118 @@ import { useNavigate } from "react-router-dom";
 import CloudinaryUploadWidget from "./cloudinaryUpload.js";
 
 const Settings = () => {
-  const [details, setDetails]= useState({ oldpassword:"", newpassword:"", checkpassword:"", name:""});
+  const [details, setDetails] = useState({
+    oldpassword: "",
+    newpassword: "",
+    checkpassword: "",
+    name: "",
+  });
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
 
-
   let navigate = useNavigate();
-  useEffect(()=>{
-      if(localStorage.getItem('token')){
-        
-      }else{
-        navigate('/login');
-      }
-      // eslint-disable-next-line
-    },[]);
-    const context = useContext(contextValue);
-    const { userData, setUserData, getuserinfo } = context;
-    useEffect(() => {
-      getuserinfo();
-    },[]);
-    //looks over the changes in the info
-    const handleSubmit = (e) => {
-      e.preventDefault();
-      console.log("SUBSUB");
+  useEffect(() => {
+    if (localStorage.getItem("token")) {
+    } else {
+      navigate("/login");
     }
-    //looks over clsong of the window
-    const handleclick= (e) => {
-      setUserData({});
-      navigate("/");
-    }
-    
-    const onChange = (e) =>{
-      setDetails({...details,[e.target.name] : e.target.value});
-    }
-
-    const handleCancel = (e) => {
-      setDetails({ oldpassword:"", newpassword:"", checkpassword:"", name:""});
-      navigate("/");
-    }
-
-    useEffect(() => {
-      const handleKeyDown = (event) => {
-        if ( event.key === 'Escape') {
-          event.preventDefault();
-          navigate("/");
+    // eslint-disable-next-line
+  }, []);
+  const context = useContext(contextValue);
+  const { userData, setUserData, getuserinfo, changename, changepassword } =
+    context;
+  useEffect(() => {
+    getuserinfo();
+  }, []);
+  //looks over the changes in the info
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    let flag = false;
+    if (details.name.trim() !== "" || details.name.trim() !== userData.name) {
+      try {
+        const updatedUser = await changename({ name: details.name });
+        if (!updatedUser.success) {
+          alert(updatedUser.error);
+        } else {
+          setUserData((prevUserData) => ({
+            ...prevUserData,
+            name: details.name,
+          }));
+          flag = true;
         }
-      };
-  
-      document.addEventListener('keydown', handleKeyDown);
-  
-      return () => {
-        document.removeEventListener('keydown', handleKeyDown);
-      };
-    }, [navigate]);
+      } catch (error) {
+        console.error("Error updating name:", error);
+      }
+    }
+    if (
+      details.oldpassword.trim() !== "" ||
+      details.newpassword.trim() !== "" ||
+      details.checkpassword.trim() !== ""
+    ) {
+      if (details.newpassword !== details.checkpassword) {
+        alert("Recheck your new password!");
+        return;
+      } else {
+        try {
+          const updatedUser = await changepassword({
+            oldpassword: details.oldpassword,
+            newpassword: details.newpassword,
+          });
+
+          if (!updatedUser.success) {
+            alert(updatedUser.error);
+          } else {
+            flag = true;
+          }
+        } catch (error) {
+          console.error("Error updating password:", error);
+        }
+      }
+    }
+    if (flag) {
+      alert("details updated");
+    } else {
+      alert("Recheck your credentails!");
+    }
+  };
+  //looks over closing of the window
+  const handleclick = (e) => {
+    setUserData({});
+    navigate("/");
+  };
+
+  const onChange = (e) => {
+    setDetails({ ...details, [e.target.name]: e.target.value });
+  };
+
+  const handleCancel = (e) => {
+    setDetails({
+      oldpassword: "",
+      newpassword: "",
+      checkpassword: "",
+      name: "",
+    });
+    navigate("/");
+  };
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        navigate("/");
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [navigate]);
 
   return (
-// right-[3vh] top-[11vh] 
-<>
+    // right-[3vh] top-[11vh]
+    <>
       <Navbar />
 
       <div class="isolate  px-6 py-24 sm:py-32 lg:px-8">
@@ -81,15 +136,32 @@ const Settings = () => {
         </div>
 
         <div class="mx-auto max-w-2xl text-center">
-        <div className='absolute 
+          <div
+            className="absolute 
         right-[17%] top-[25%]
-my-3 mx-3 z-50'>
-            <button type="button" className='text-black/70 hover:scale-125 rounded-full bg-cyan-600/40 transition ease-in-out transition-500 w-8 h-8' onClick={handleclick}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-8 h-8 p-1">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+my-3 mx-3 z-50"
+          >
+            <button
+              type="button"
+              className="text-black/70 hover:scale-125 rounded-full bg-cyan-600/40 transition ease-in-out transition-500 w-8 h-8"
+              onClick={handleclick}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="2"
+                stroke="currentColor"
+                className="w-8 h-8 p-1"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
             </button>
-  </div>
+          </div>
           <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Settings
           </h2>
@@ -109,7 +181,7 @@ my-3 mx-3 z-50'>
                 <p className="mt-1 text-sm leading-6 text-gray-600"></p>
 
                 <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
-                <div className="col-span-full">
+                  <div className="col-span-full">
                     <label
                       htmlFor="name"
                       className="block text-sm font-medium leading-6 text-gray-900"
@@ -142,122 +214,174 @@ my-3 mx-3 z-50'>
                       Photo
                     </label>
                     <div className="mt-2 flex items-center justify-center gap-x-2">
-                      {userData.image ? 
-                      <img src={userData.image} className="h-[15vh] w-[15vh]" alt="pfp"/>
-                      :
-                      <UserCircleIcon
-                        className="h-[15vh] w-[15vh] text-cyan-600"
-                        aria-hidden="true"
-                      />
-                      }
-                      <CloudinaryUploadWidget/>
+                      {userData.image ? (
+                        <img
+                          src={userData.image}
+                          className="h-[15vh] w-[15vh]"
+                          alt="pfp"
+                        />
+                      ) : (
+                        <UserCircleIcon
+                          className="h-[15vh] w-[15vh] text-cyan-600"
+                          aria-hidden="true"
+                        />
+                      )}
+                      <CloudinaryUploadWidget />
                     </div>
                   </div>
                 </div>
                 <div className="col-span-full mt-2">
-                    <label
-                      htmlFor="oldpassword"
-                      className="block text-sm font-medium leading-6 text-gray-900"
+                  <label
+                    htmlFor="oldpassword"
+                    className="block text-sm font-medium leading-6 text-gray-900"
+                  >
+                    Password
+                  </label>
+                  <div className="mt-2 flex flex-col items-center justify-center gap-y-2">
+                    <div className="relative flex w-full rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
+                      <input
+                        type={showOldPassword ? "text" : "password"}
+                        name="oldpassword"
+                        id="oldpassword"
+                        autoComplete="oldpassword"
+                        className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 mx-2"
+                        placeholder={showOldPassword ? "password" : "••••••••"}
+                        onChange={onChange}
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-[20%] text-[#fff] focus:outline-none"
+                        onClick={() => setShowOldPassword(!showOldPassword)}
+                      >
+                        {showOldPassword ? (
+                          <svg
+                            class="w-6 h-6 text-gray-800"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 20 18"
+                          >
+                            <path
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M1.933 10.909A4.357 4.357 0 0 1 1 9c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 19 9c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M2 17 18 1m-5 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                            />
+                          </svg>
+                        ) : (
+                          <svg
+                            class="w-6 h-6 text-gray-800"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 20 14"
+                          >
+                            <g
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                            >
+                              <path d="M10 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                              <path d="M10 13c4.97 0 9-2.686 9-6s-4.03-6-9-6-9 2.686-9 6 4.03 6 9 6Z" />
+                            </g>
+                          </svg>
+                        )}
+                      </button>
+                    </div>
+                    <a
+                      href="#"
+                      class="text-sm text-end font-medium text-primary-600 hover:underline"
                     >
-                      Password
-                    </label>
-                    <div className="mt-2 flex flex-col items-center justify-center gap-y-2">
-                      <div className="relative flex w-full rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                        <input
-                          type={showOldPassword ? 'text' : 'password'}
-                          name="oldpassword"
-                          id="oldpassword"
-                          autoComplete="oldpassword"
-                          className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 mx-2"
-                          placeholder={showOldPassword ? 'password' : "••••••••"}
-                          onChange={onChange}
-                        />
-                        <button
-              type="button"
-              className="absolute right-3 top-[20%] text-[#fff] focus:outline-none"
-              onClick={() => setShowOldPassword(!showOldPassword)}
-            >
-              {showOldPassword ? (
-                <svg class="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 18">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1.933 10.909A4.357 4.357 0 0 1 1 9c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 19 9c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M2 17 18 1m-5 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-              </svg>         
-              ) : (
-                <svg class="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 14">
-                <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-                  <path d="M10 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-                  <path d="M10 13c4.97 0 9-2.686 9-6s-4.03-6-9-6-9 2.686-9 6 4.03 6 9 6Z"/>
-                </g>
-              </svg> 
-              )}
-            </button>
-                      </div>
-                      <a href="#" class="text-sm text-end font-medium text-primary-600 hover:underline">Forgot password?</a> 
+                      Forgot password?
+                    </a>
+                  </div>
+                </div>
+                <div className="col-span-full mt-4">
+                  <label
+                    htmlFor="newpassword"
+                    className="block text-sm font-medium leading-6 text-gray-900"
+                  >
+                    New Password
+                  </label>
+                  <div className="mt-2 flex justify-center">
+                    <div className="relative flex w-full rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
+                      <input
+                        type={showNewPassword ? "text" : "password"}
+                        name="newpassword"
+                        id="newpassword"
+                        autoComplete="newpassword"
+                        className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 mx-2"
+                        placeholder={showNewPassword ? "password" : "••••••••"}
+                        onChange={onChange}
+                      />
+                      <button
+                        type="button"
+                        className="absolute right-3 top-[20%] text-[#fff] focus:outline-none"
+                        onClick={() => setShowNewPassword(!showNewPassword)}
+                      >
+                        {showNewPassword ? (
+                          <svg
+                            class="w-6 h-6 text-gray-800"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 20 18"
+                          >
+                            <path
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                              d="M1.933 10.909A4.357 4.357 0 0 1 1 9c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 19 9c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M2 17 18 1m-5 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                            />
+                          </svg>
+                        ) : (
+                          <svg
+                            class="w-6 h-6 text-gray-800"
+                            aria-hidden="true"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 20 14"
+                          >
+                            <g
+                              stroke="currentColor"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              stroke-width="2"
+                            >
+                              <path d="M10 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                              <path d="M10 13c4.97 0 9-2.686 9-6s-4.03-6-9-6-9 2.686-9 6 4.03 6 9 6Z" />
+                            </g>
+                          </svg>
+                        )}
+                      </button>
                     </div>
                   </div>
-                  <div className="col-span-full mt-4">
-                    <label
-                      htmlFor="newpassword"
-                      className="block text-sm font-medium leading-6 text-gray-900"
-                    >
-                      New Password
-                    </label>
-                    <div className="mt-2 flex justify-center">
-                      <div className="relative flex w-full rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                        <input
-                          type={showNewPassword ? 'text' : 'password'}
-                          name="newpassword"
-                          id="newpassword"
-                          autoComplete="newpassword"
-                          className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 mx-2"
-                          placeholder={showNewPassword ? 'password' : "••••••••"}
-                          onChange={onChange}
-                        />
-                        <button
-              type="button"
-              className="absolute right-3 top-[20%] text-[#fff] focus:outline-none"
-              onClick={() => setShowNewPassword(!showNewPassword)}
-            >
-              {showNewPassword ? (
-                <svg class="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 18">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1.933 10.909A4.357 4.357 0 0 1 1 9c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 19 9c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M2 17 18 1m-5 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
-              </svg>         
-              ) : (
-                <svg class="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 14">
-                <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
-                  <path d="M10 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
-                  <path d="M10 13c4.97 0 9-2.686 9-6s-4.03-6-9-6-9 2.686-9 6 4.03 6 9 6Z"/>
-                </g>
-              </svg> 
-              )}
-            </button>
-            
-                      </div>
+                </div>
+                <div className="col-span-full mt-4">
+                  <label
+                    htmlFor="checkpassword"
+                    className="block text-sm font-medium leading-6 text-gray-900"
+                  >
+                    Refill new Password
+                  </label>
+                  <div className="mt-2 flex justify-center">
+                    <div className="relative flex w-full rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
+                      <input
+                        type="password"
+                        name="checkpassword"
+                        id="checkpassword"
+                        autoComplete="checkpassword"
+                        className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 mx-2"
+                        placeholder="••••••••"
+                        onChange={onChange}
+                      />
                     </div>
                   </div>
-                  <div className="col-span-full mt-4">
-                    <label
-                      htmlFor="checkpassword"
-                      className="block text-sm font-medium leading-6 text-gray-900"
-                    >
-                      Refill new Password
-                    </label>
-                    <div className="mt-2 flex justify-center">
-                      <div className="relative flex w-full rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
-                        <input
-                          type='password'
-                          name="checkpassword"
-                          id="checkpassword"
-                          autoComplete="checkpassword"
-                          className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 mx-2"
-                          placeholder="••••••••"
-                          onChange={onChange}
-                        />
-                      
-                      </div>
-                    </div>
-                  </div>
+                </div>
               </div>
-              
             </div>
             <div className="mt-6 flex items-center justify-end gap-x-6 w-full">
               <button
