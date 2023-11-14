@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
@@ -7,6 +7,11 @@ import { useNavigate } from "react-router-dom";
 import CloudinaryUploadWidget from "./cloudinaryUpload.js";
 
 const Settings = () => {
+  const [details, setDetails]= useState({ oldpassword:"", newpassword:"", checkpassword:"", name:""});
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+
+
   let navigate = useNavigate();
   useEffect(()=>{
       if(localStorage.getItem('token')){
@@ -21,11 +26,47 @@ const Settings = () => {
     useEffect(() => {
       getuserinfo();
     },[]);
+    //looks over the changes in the info
+    const handleSubmit = (e) => {
+      e.preventDefault();
+      console.log("SUBSUB");
+    }
+    //looks over clsong of the window
+    const handleclick= (e) => {
+      setUserData({});
+      navigate("/");
+    }
+    
+    const onChange = (e) =>{
+      setDetails({...details,[e.target.name] : e.target.value});
+    }
+
+    const handleCancel = (e) => {
+      setDetails({ oldpassword:"", newpassword:"", checkpassword:"", name:""});
+      navigate("/");
+    }
+
+    useEffect(() => {
+      const handleKeyDown = (event) => {
+        if ( event.key === 'Escape') {
+          event.preventDefault();
+          navigate("/");
+        }
+      };
+  
+      document.addEventListener('keydown', handleKeyDown);
+  
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }, [navigate]);
+
   return (
-    <>
+// right-[3vh] top-[11vh] 
+<>
       <Navbar />
 
-      <div class="isolate bg-white px-6 py-24 sm:py-32 lg:px-8">
+      <div class="isolate  px-6 py-24 sm:py-32 lg:px-8">
         <div
           className="absolute inset-x-0 top-[-10rem] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[-20rem]"
           aria-hidden="true"
@@ -40,6 +81,15 @@ const Settings = () => {
         </div>
 
         <div class="mx-auto max-w-2xl text-center">
+        <div className='absolute 
+        right-[17%] top-[25%]
+my-3 mx-3 z-50'>
+            <button type="button" className='text-black/70 hover:scale-125 rounded-full bg-cyan-600/40 transition ease-in-out transition-500 w-8 h-8' onClick={handleclick}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-8 h-8 p-1">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            </button>
+  </div>
           <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Settings
           </h2>
@@ -50,7 +100,7 @@ const Settings = () => {
         </div>
 
         <div className="flex justify-center items-center mt-8">
-          <form>
+          <form onSubmit={handleSubmit} action="#">
             <div className="space-y-12 ">
               <div className="border-b w-[100vh] border-gray-900/10 pb-12">
                 <h2 className="text-base font-semibold leading-7 text-gray-900">
@@ -61,7 +111,7 @@ const Settings = () => {
                 <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-8 sm:grid-cols-6">
                 <div className="col-span-full">
                     <label
-                      htmlFor="photo"
+                      htmlFor="name"
                       className="block text-sm font-medium leading-6 text-gray-900"
                     >
                       Username
@@ -73,11 +123,12 @@ const Settings = () => {
                         </span>
                         <input
                           type="text"
-                          name="username"
-                          id="username"
-                          autoComplete="username"
+                          name="name"
+                          id="name"
+                          autoComplete="name"
                           className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                           placeholder={userData.name}
+                          onChange={onChange}
                         />
                       </div>
                     </div>
@@ -105,47 +156,106 @@ const Settings = () => {
                 </div>
                 <div className="col-span-full mt-2">
                     <label
-                      htmlFor="password"
+                      htmlFor="oldpassword"
                       className="block text-sm font-medium leading-6 text-gray-900"
                     >
                       Password
                     </label>
                     <div className="mt-2 flex flex-col items-center justify-center gap-y-2">
-                      <div className="flex w-full rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
+                      <div className="relative flex w-full rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                         <input
-                          type="password"
+                          type={showOldPassword ? 'text' : 'password'}
                           name="oldpassword"
                           id="oldpassword"
                           autoComplete="oldpassword"
                           className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 mx-2"
-                          placeholder="••••••••"
+                          placeholder={showOldPassword ? 'password' : "••••••••"}
+                          onChange={onChange}
                         />
+                        <button
+              type="button"
+              className="absolute right-3 top-[20%] text-[#fff] focus:outline-none"
+              onClick={() => setShowOldPassword(!showOldPassword)}
+            >
+              {showOldPassword ? (
+                <svg class="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 18">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1.933 10.909A4.357 4.357 0 0 1 1 9c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 19 9c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M2 17 18 1m-5 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+              </svg>         
+              ) : (
+                <svg class="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 14">
+                <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                  <path d="M10 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+                  <path d="M10 13c4.97 0 9-2.686 9-6s-4.03-6-9-6-9 2.686-9 6 4.03 6 9 6Z"/>
+                </g>
+              </svg> 
+              )}
+            </button>
                       </div>
                       <a href="#" class="text-sm text-end font-medium text-primary-600 hover:underline">Forgot password?</a> 
                     </div>
                   </div>
                   <div className="col-span-full mt-4">
                     <label
-                      htmlFor="password"
+                      htmlFor="newpassword"
                       className="block text-sm font-medium leading-6 text-gray-900"
                     >
                       New Password
                     </label>
                     <div className="mt-2 flex justify-center">
-                      <div className="flex w-full rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
+                      <div className="relative flex w-full rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
                         <input
-                          type="password"
+                          type={showNewPassword ? 'text' : 'password'}
                           name="newpassword"
                           id="newpassword"
                           autoComplete="newpassword"
                           className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 mx-2"
-                          placeholder="••••••••"
+                          placeholder={showNewPassword ? 'password' : "••••••••"}
+                          onChange={onChange}
                         />
-                        
+                        <button
+              type="button"
+              className="absolute right-3 top-[20%] text-[#fff] focus:outline-none"
+              onClick={() => setShowNewPassword(!showNewPassword)}
+            >
+              {showNewPassword ? (
+                <svg class="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 18">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1.933 10.909A4.357 4.357 0 0 1 1 9c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 19 9c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M2 17 18 1m-5 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+              </svg>         
+              ) : (
+                <svg class="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 14">
+                <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                  <path d="M10 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
+                  <path d="M10 13c4.97 0 9-2.686 9-6s-4.03-6-9-6-9 2.686-9 6 4.03 6 9 6Z"/>
+                </g>
+              </svg> 
+              )}
+            </button>
+            
                       </div>
                     </div>
                   </div>
-
+                  <div className="col-span-full mt-4">
+                    <label
+                      htmlFor="checkpassword"
+                      className="block text-sm font-medium leading-6 text-gray-900"
+                    >
+                      Refill new Password
+                    </label>
+                    <div className="mt-2 flex justify-center">
+                      <div className="relative flex w-full rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
+                        <input
+                          type='password'
+                          name="checkpassword"
+                          id="checkpassword"
+                          autoComplete="checkpassword"
+                          className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6 mx-2"
+                          placeholder="••••••••"
+                          onChange={onChange}
+                        />
+                      
+                      </div>
+                    </div>
+                  </div>
               </div>
               
             </div>
@@ -153,6 +263,7 @@ const Settings = () => {
               <button
                 type="button"
                 className="text-sm font-semibold leading-6 text-gray-900"
+                onClick={handleCancel}
               >
                 Cancel
               </button>
