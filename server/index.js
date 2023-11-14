@@ -185,8 +185,6 @@ app.get('/read-file', (req, res) => {
 
     console.log(curr_node);
 
-    checkNode.push([]);
-
     const responseData = {
         result,
         checkNode,
