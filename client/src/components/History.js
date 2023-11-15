@@ -117,13 +117,13 @@ const History = () => {
                           scope="col"
                           class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6"
                         >
-                          Node
+                          Number of Nodes
                         </th>
                         <th
                           scope="col"
                           class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6"
                         >
-                          Edges
+                          Number of Edges
                         </th>
                         <th
                           scope="col"
