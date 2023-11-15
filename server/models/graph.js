@@ -17,6 +17,14 @@ const GraphSchema = new Schema({
     graph: { 
         type: String,
         required: true
+    },
+    name : {
+        type: String,
+        required: true
+    },
+    favourite: {
+        type: Boolean,
+        required: true
     }
 });
 

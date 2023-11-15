@@ -34,6 +34,7 @@ import HeroSection from './HeroSection';
 import AboutUs from './aboutUs';
 import Footer from './Footer';
 import TechStack from './techStack';
+import History from './History';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 // TODO: can't ping up the .env file here 
@@ -592,6 +593,7 @@ const Home = () => {
         </ReactFlowProvider>
 
         <div className='w-full h-[20vh]'></div>
+        <History/>
         <AboutUs />
         <TechStack />
         <Footer />

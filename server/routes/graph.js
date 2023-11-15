@@ -19,18 +19,26 @@ router.get("/fetchallgraphs", fetchuser, async (req, res) => {
 router.post("/addgraph", fetchuser,[
     body("result", "Enter a valid result").isLength({ min: 1 }),
     body("graph", "Enter a valid graph").isLength({ min: 1 }),
+    body("name", "Enter a valid unique name").isLength({ min: 1 }),
+    body("favourite", "Enter a valid favourite detail").isBoolean(),
   ],
   async (req, res) => {
     try {
-    const { result, graph } = req.body;
+    const { result, graph, name, favourite } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
     }
-    
+    //look over unique naming
+    const existingGraph = await Graph.findOne({ name, user: req.user.id });
+    if (existingGraph) {
+      return res.status(400).json({ status: "validation error", errors: "Name must be unique for the user" });
+    }
     let graphFields = {
       result,
       graph,
+      name, 
+      favourite,
       user: req.user.id,
     };
 
