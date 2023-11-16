@@ -96,7 +96,7 @@ app.post('/perform-dijktra', (req, res) => {
     let bellmanExecutable;
 
     if (os.platform() === 'win32') {
-        bellmanExecutable = './Bellman_Ford/Bellman.exe';
+        bellmanExecutable = './Floyd-Warshall/Floyd_Warshall.exe';
     }
     else if (os.platform() === 'linux') {
         bellmanExecutable = './Bellman_Ford/Bellman';
