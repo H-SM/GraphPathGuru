@@ -36,15 +36,6 @@ const GraphState = (props) =>{
     
     //update favourite feild for the graph
     const editfavgraph = async (id, favourite) =>{
-      //API call
-      await fetch(`${host}/api/graph/updatefavgraph/${id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          "auth-token" : localStorage.getItem("token")
-        },
-        body: JSON.stringify({ favourite }) 
-      });
       let newGraphs = JSON.parse(JSON.stringify(graphs));
 
       for (let index = 0; index < newGraphs.length; index++) {
@@ -55,6 +46,15 @@ const GraphState = (props) =>{
         }
       }
       setGraphs(newGraphs);
+      //API call
+      await fetch(`${host}/api/graph/updatefavgraph/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "auth-token" : localStorage.getItem("token")
+        },
+        body: JSON.stringify({ favourite }) 
+      });
   }
     return (
     <graphContext.Provider value={{graphs,setGraphs,getallgraph,addgraph,editfavgraph}}>

@@ -9,7 +9,7 @@ const History = () => {
   const [active, setActive] = useState(1);
   const [searchedGraph, setSearchedGraph] = useState("");
   const [sorterGraph, setSorterGraph] = useState("Time (new-to-old)");
-  const itemsPerPage = 8;
+  const itemsPerPage = 10;
 
   useEffect(() => {
     console.log(sorterGraph);
@@ -46,13 +46,14 @@ const History = () => {
   let TotalSearched = sortAndFilterGraphs(graphs).filter((graph) =>
     graph.name.toLowerCase().includes(searchedGraph.toLowerCase())
   ).length;
-  let totalPages = Math.ceil(sortAndFilterGraphs(graphs).length / itemsPerPage);
+  let totalPages = Math.max(Math.ceil(sortAndFilterGraphs(graphs).length / itemsPerPage),1);
   if (searchedGraph !== "") {
     totalPages = Math.ceil(TotalSearched / itemsPerPage);
   }
   //prevent overflow on shifting page sorting searches
-  if(active > totalPages) active = totalPages;
-
+  setTimeout(() => {
+    if(active > totalPages) setActive(totalPages);
+  },1000)
   const next = () => {
     if (active === totalPages) return;
 
@@ -65,7 +66,7 @@ const History = () => {
     setActive(active - 1);
   };
 
-  const startIndex = (active - 1) * itemsPerPage;
+  const startIndex = (active-1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   return (
     <>
@@ -96,6 +97,7 @@ const History = () => {
         </p>
       ) : (
         <>
+        <div className="lg:h-[37rem]">
           <div class="flex flex-col mt-8">
             <div class="overflow-x-auto sm:-mx-6 lg:-mx-8 flex-row justify-center items-center gap-y-3">
               <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
@@ -225,6 +227,8 @@ const History = () => {
               </div>
             </div>
           </div>
+          </div>
+          <div>
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-8 w-full mt-3">
               <IconButton
@@ -232,7 +236,7 @@ const History = () => {
                 variant="outlined"
                 onClick={prev}
                 disabled={active === 1}
-                className="bg-white hover:bg-sky-300/20 transition ease-in-out"
+                className="bg-white hover:bg-sky-300/20 transition ease-in-out disabled:opacity-0"
               >
                 <ArrowLeftIcon strokeWidth={2} className="h-4 w-4" />
               </IconButton>
@@ -245,12 +249,13 @@ const History = () => {
                 variant="outlined"
                 onClick={next}
                 disabled={active === totalPages}
-                className="bg-white hover:bg-sky-300/20 transition ease-in-out"
+                className="bg-white hover:bg-sky-300/20 transition ease-in-out disabled:opacity-0"
               >
                 <ArrowRightIcon strokeWidth={2} className="h-4 w-4" />
               </IconButton>
             </div>
           )}
+          </div>
         </>
       )}
     </>
