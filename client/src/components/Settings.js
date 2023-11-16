@@ -217,7 +217,7 @@ my-3 mx-3 z-50"
                       {userData.image ? (
                         <img
                           src={userData.image}
-                          className="h-[15vh] w-[15vh]"
+                          className="w-[15vh]"
                           alt="pfp"
                         />
                       ) : (

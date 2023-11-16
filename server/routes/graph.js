@@ -50,5 +50,28 @@ router.post("/addgraph", fetchuser,[
       res.status(500).send("INTERNAL SERVER ERROR : Some error occured");
     }
 });
+router.put('/updatefavgraph/:id', fetchuser,
+  async (req, res) => {
+    try {
+    const { favourite } = req.body;
+    const newGraph = {};
+    newGraph.favourite = favourite;
+    
+    console.log(newGraph);
 
+    let graph =await Graph.findById(req.params.id);
+    if(!graph) res.status(404).send("NOT FOUND!");
+
+    if(graph.user.toString() !== req.user.id){
+        return res.status(401).send("NOT ALLOWED");
+    }
+
+    const graph_upd = await Graph.findByIdAndUpdate(req.params.id, {$set : newGraph},{new : true});
+    res.json(graph_upd);
+    } catch (err) {
+    console.error(err);
+    res.status(500).send("INTERNAL SERVER ERROR : Some error occured");
+  }
+  }
+);
 module.exports = router;
