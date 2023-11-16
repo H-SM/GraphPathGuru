@@ -1,12 +1,17 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import graphContext from "../context/Graph/graphContext.js";
 import { useNavigate } from "react-router-dom";
 import { IconButton, Typography } from "@material-tailwind/react";
 import { ArrowRightIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
+import HistoryItem from "./HistoryItem.js";
 
 const History = () => {
-  const [active, setActive] = React.useState(1);
-
+  const [active, setActive] = useState(1);
+  const [searchedGraph, setSearchedGraph] = useState("");
+  const [sorterGraph, setSorterGraph] = useState("Time (new-to-old)");
+  useEffect(() => {
+    console.log(sorterGraph);
+  }, [sorterGraph]);
   const next = () => {
     if (active === 10) return;
 
@@ -21,7 +26,7 @@ const History = () => {
   let context = useContext(graphContext);
   let navigate = useNavigate();
 
-  const { graphs, getallgraph, searchedGraph } = context;
+  const { graphs, getallgraph } = context;
   useEffect(() => {
     if (localStorage.getItem("token")) {
       getallgraph();
@@ -30,41 +35,21 @@ const History = () => {
     }
     // eslint-disable-next-line
   }, []);
+  const sortAndFilterGraphs = (graphs) => {
+    switch (sorterGraph) {
+      case "Time (new-to-old)":
+        return graphs.sort((a, b) => new Date(b.date) - new Date(a.date));
+      case "Time (old-to-new)":
+        return graphs.sort((a, b) => new Date(a.date) - new Date(b.date));
+      case "Favourites":
+        return graphs
+          .filter((graph) => graph.favourite === true)
+          .sort((a, b) => new Date(b.date) - new Date(a.date));
+      default:
+        return graphs;
+    }
+  };
   console.log(graphs);
-
-  const formatTime = (isoTime) => {
-    const date = new Date(isoTime);
-    const options = {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true,
-    };
-
-    return date.toLocaleString("en-US", options);
-  };
-  //get no. of nodes and edges
-  const extractEdgesAndNodes = (graphData) => {
-    const lines = graphData.split("\n");
-
-    let numEdges = 0;
-    let numNodes = 0;
-
-    lines.forEach((line) => {
-      const parts = line.split(" ");
-
-      if (parts.length >= 1) {
-        numNodes++;
-
-        // TODO: show's wrong answer
-        numEdges += parts.length - 1;
-      }
-    });
-
-    return { numEdges, numNodes };
-  };
   return (
     <>
       <div
@@ -98,6 +83,39 @@ const History = () => {
             <div class="overflow-x-auto sm:-mx-6 lg:-mx-8 flex-row justify-center items-center gap-y-3">
               <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
                 <div class="mx-[10%] overflow-hidden">
+                  <div class="flex flex-row justify-end my-1 sm:mb-0">
+                    <div class="relative">
+                      <select
+                        class="appearance-none h-full rounded-md border-t sm:rounded-r-none sm:border-r-0 border-r border-b block w-full bg-white border-sky-700 text-gray-700 py-2 px-4 pr-8 leading-tight focus:outline-none focus:border-l focus:border-r focus:bg-white focus:border-gray-500 focus:ring-0 focus:ring-offset-0"
+                        value={sorterGraph}
+                        onChange={(e) => setSorterGraph(e.target.value)}
+                      >
+                        <option defaultChecked>Time (new-to-old) </option>
+                        <option>Favourites</option>
+                        <option>Time (old-to-new)</option>
+                      </select>
+                    </div>
+
+                    <div class="block relative">
+                      <span class="h-full absolute inset-y-0 left-0 flex items-center pl-2">
+                        <svg
+                          viewBox="0 0 24 24"
+                          class="h-4 w-4 fill-current text-gray-500"
+                        >
+                          <path d="M10 4a6 6 0 100 12 6 6 0 000-12zm-8 6a8 8 0 1114.32 4.906l5.387 5.387a1 1 0 01-1.414 1.414l-5.387-5.387A8 8 0 012 10z"></path>
+                        </svg>
+                      </span>
+                      <input
+                        placeholder="Search (Name)"
+                        class="appearance-none rounded-r rounded-l sm:rounded-l-none border border-sky-700 border-b block pl-8 pr-6 py-2 w-full bg-white text-sm placeholder-gray-400 text-gray-700 focus:bg-white focus:placeholder-gray-600 focus:text-gray-700 focus:outline-none focus:ring-0 focus:ring-offset-0"
+                        onChange={(e) => {
+                          e.preventDefault();
+                          setSearchedGraph(e.target.value);
+                          console.log(searchedGraph);
+                        }}
+                      />
+                    </div>
+                  </div>
                   <table class="min-w-full text-left text-sm font-light">
                     <thead class="border-b font-medium dark:border-sky-500">
                       <tr>
@@ -153,95 +171,37 @@ const History = () => {
                     </thead>
                     <tbody>
                       {searchedGraph === "" ? (
-                        graphs
-                        .sort((a, b) => new Date(b.date) - new Date(a.date))
-                        .map((graph, index) => {
-                          const { numNodes, numEdges } = extractEdgesAndNodes(
-                            graph.graph
-                          );
-                          // Extract TC and SC from the result string
-                          const resultArray = graph.result
-                            .split("\n")
-                            .filter((item) => item.trim() !== "");
-                          const tc = resultArray[1]?.trim() || "N/A";
-                          const sc = resultArray[2]?.trim() || "N/A";
-
-                          return (
-                            <tr class="border-b dark:border-sky-200/80">
-                              <td class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6">
-                                {graph.name}
-                              </td>
-                              <td class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-light font-mono text-opacity-100 text-gray-400 px-6">
-                                {formatTime(graph.date)}
-                              </td>
-                              <td class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-semibold font-mono text-opacity-100 text-gray-700 px-6">
-                                {numNodes}
-                              </td>
-                              <td class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-semibold font-mono  text-opacity-100 text-gray-700 px-6">
-                                {numEdges}
-                              </td>
-                              <td class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-semibold font-mono  text-opacity-100 text-gray-700 px-6">
-                                {tc}
-                              </td>
-                              <td class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-semibold font-mono  text-opacity-100 text-gray-700 px-6">
-                                {sc}
-                              </td>
-                              <td
-                                class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-semibold font-mono text-opacity-100 text-gray-700 px-6 hover:cursor-pointer"
-                                onClick={() => {}}
-                              >
-                                {graph.favourite ? (
-                                  <svg
-                                    className="text-[#f3da35]"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    fill="currentColor"
-                                    class="bi bi-star-fill"
-                                    viewBox="0 0 16 16"
-                                  >
-                                    {" "}
-                                    <path
-                                      d="M3.612 15.443c-.386.198-.824-.149-.746-.592l.83-4.73L.173 6.765c-.329-.314-.158-.888.283-.95l4.898-.696L7.538.792c.197-.39.73-.39.927 0l2.184 4.327 4.898.696c.441.062.612.636.282.95l-3.522 3.356.83 4.73c.078.443-.36.79-.746.592L8 13.187l-4.389 2.256z"
-                                      fill="#f3da35"
-                                    />{" "}
-                                  </svg>
-                                ) : (
-                                  <svg
-                                    className="text-[#f3da35]"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    width="20"
-                                    height="20"
-                                    fill="currentColor"
-                                    class="bi bi-star"
-                                    viewBox="0 0 16 16"
-                                  >
-                                    {" "}
-                                    <path
-                                      d="M2.866 14.85c-.078.444.36.791.746.593l4.39-2.256 4.389 2.256c.386.198.824-.149.746-.592l-.83-4.73 3.522-3.356c.33-.314.16-.888-.282-.95l-4.898-.696L8.465.792a.513.513 0 0 0-.927 0L5.354 5.12l-4.898.696c-.441.062-.612.636-.283.95l3.523 3.356-.83 4.73zm4.905-2.767-3.686 1.894.694-3.957a.565.565 0 0 0-.163-.505L1.71 6.745l4.052-.576a.525.525 0 0 0 .393-.288L8 2.223l1.847 3.658a.525.525 0 0 0 .393.288l4.052.575-2.906 2.77a.565.565 0 0 0-.163.506l.694 3.957-3.686-1.894a.503.503 0 0 0-.461 0z"
-                                      fill="#f3da35"
-                                    ></path>{" "}
-                                  </svg>
-                                )}
-                              </td>
-                              <td
-                                class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold font-mono  text-opacity-100 text-cyan-700 px-6 scale-95 hover:scale-100 transition duration-150 ease-in-out
-"
-                              >
-                                <a href="#">
-                                  View
-                                  <span aria-hidden="true" className="ml-1">
-                                    →
-                                  </span>
-                                </a>
-                              </td>
-                            </tr>
-                          );
+                        sortAndFilterGraphs(graphs).map((graph, index) => {
+                          return <HistoryItem graph={graph} key={index} />;
                         })
+                      ) : sortAndFilterGraphs(graphs).filter((graph) =>
+                          graph.name
+                            .toLowerCase()
+                            .includes(searchedGraph.toLowerCase())
+                        ).length > 0 ? (
+                        sortAndFilterGraphs(graphs)
+                          .filter((graph) =>
+                            graph.name
+                              .toLowerCase()
+                              .includes(searchedGraph.toLowerCase())
+                          )
+                          .sort((a, b) => new Date(b.date) - new Date(a.date))
+                          .map((graph, index) => (
+                            <HistoryItem graph={graph} key={index} />
+                          ))
                       ) : (
-                        <>
-                            {/* will have the search logic here */}
-                        </>
+                        <tr>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td>
+                            <div className="w-[200px] text-black flex flex-col justify-center items-center">
+                              <p className="w-full flex justify-center items-center font-bold text-gray-600 text-[15px] mt-[15vh] mb-[15vh]">
+                                No such Graph exist.
+                              </p>
+                            </div>
+                          </td>
+                        </tr>
                       )}
                     </tbody>
                   </table>

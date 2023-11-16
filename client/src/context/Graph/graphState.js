@@ -3,7 +3,6 @@ import graphContext from "./graphContext";
 const GraphState = (props) =>{
     const host = process.env.REACT_APP_BACKEND_LOCALHOST;
     const [graphs , setGraphs] = useState([]); 
-    const [searchedGraph,setSearchedGraph]=useState("");
 
     const getallgraph = async () =>{
     
@@ -35,9 +34,30 @@ const GraphState = (props) =>{
     }
 
     
+    //update favourite feild for the graph
+    const editfavgraph = async (id, favourite) =>{
+      //API call
+      await fetch(`${host}/api/graph/updatefavgraph/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "auth-token" : localStorage.getItem("token")
+        },
+        body: JSON.stringify({ favourite }) 
+      });
+      let newGraphs = JSON.parse(JSON.stringify(graphs));
 
+      for (let index = 0; index < newGraphs.length; index++) {
+        const element = newGraphs[index];
+        if(element._id === id){
+          newGraphs[index].favourite = favourite;
+          break;
+        }
+      }
+      setGraphs(newGraphs);
+  }
     return (
-    <graphContext.Provider value={{graphs,setGraphs,searchedGraph,setSearchedGraph,getallgraph,addgraph }}>
+    <graphContext.Provider value={{graphs,setGraphs,getallgraph,addgraph,editfavgraph}}>
         {props.children}
     </graphContext.Provider>
     );
