@@ -9,24 +9,17 @@ const History = () => {
   const [active, setActive] = useState(1);
   const [searchedGraph, setSearchedGraph] = useState("");
   const [sorterGraph, setSorterGraph] = useState("Time (new-to-old)");
+  const itemsPerPage = 8;
+
   useEffect(() => {
     console.log(sorterGraph);
   }, [sorterGraph]);
-  const next = () => {
-    if (active === 10) return;
 
-    setActive(active + 1);
-  };
-
-  const prev = () => {
-    if (active === 1) return;
-
-    setActive(active - 1);
-  };
   let context = useContext(graphContext);
   let navigate = useNavigate();
 
   const { graphs, getallgraph } = context;
+
   useEffect(() => {
     if (localStorage.getItem("token")) {
       getallgraph();
@@ -35,6 +28,7 @@ const History = () => {
     }
     // eslint-disable-next-line
   }, []);
+
   const sortAndFilterGraphs = (graphs) => {
     switch (sorterGraph) {
       case "Time (new-to-old)":
@@ -49,7 +43,30 @@ const History = () => {
         return graphs;
     }
   };
-  console.log(graphs);
+  let TotalSearched = sortAndFilterGraphs(graphs).filter((graph) =>
+    graph.name.toLowerCase().includes(searchedGraph.toLowerCase())
+  ).length;
+  let totalPages = Math.ceil(sortAndFilterGraphs(graphs).length / itemsPerPage);
+  if (searchedGraph !== "") {
+    totalPages = Math.ceil(TotalSearched / itemsPerPage);
+  }
+  //prevent overflow on shifting page sorting searches
+  if(active > totalPages) active = totalPages;
+
+  const next = () => {
+    if (active === totalPages) return;
+
+    setActive(active + 1);
+  };
+
+  const prev = () => {
+    if (active === 1) return;
+
+    setActive(active - 1);
+  };
+
+  const startIndex = (active - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
   return (
     <>
       <div
@@ -171,14 +188,12 @@ const History = () => {
                     </thead>
                     <tbody>
                       {searchedGraph === "" ? (
-                        sortAndFilterGraphs(graphs).map((graph, index) => {
-                          return <HistoryItem graph={graph} key={index} />;
-                        })
-                      ) : sortAndFilterGraphs(graphs).filter((graph) =>
-                          graph.name
-                            .toLowerCase()
-                            .includes(searchedGraph.toLowerCase())
-                        ).length > 0 ? (
+                        sortAndFilterGraphs(graphs)
+                          .map((graph, index) => {
+                            return <HistoryItem graph={graph} key={index} />;
+                          })
+                          .slice(startIndex, endIndex)
+                      ) : TotalSearched > 0 ? (
                         sortAndFilterGraphs(graphs)
                           .filter((graph) =>
                             graph.name
@@ -189,6 +204,7 @@ const History = () => {
                           .map((graph, index) => (
                             <HistoryItem graph={graph} key={index} />
                           ))
+                          .slice(startIndex, endIndex)
                       ) : (
                         <tr>
                           <td></td>
@@ -209,30 +225,32 @@ const History = () => {
               </div>
             </div>
           </div>
-          <div className="flex items-center justify-center gap-8 w-full mt-3">
-            <IconButton
-              size="sm"
-              variant="outlined"
-              onClick={prev}
-              disabled={active === 1}
-              className="bg-white hover:bg-sky-300/20 transition ease-in-out"
-            >
-              <ArrowLeftIcon strokeWidth={2} className="h-4 w-4" />
-            </IconButton>
-            <Typography color="gray" className="font-normal">
-              Page <strong className="text-gray-900">{active}</strong> of{" "}
-              <strong className="text-gray-900">10</strong>
-            </Typography>
-            <IconButton
-              size="sm"
-              variant="outlined"
-              onClick={next}
-              disabled={active === 10}
-              className="bg-white hover:bg-sky-300/20 transition ease-in-out"
-            >
-              <ArrowRightIcon strokeWidth={2} className="h-4 w-4" />
-            </IconButton>
-          </div>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-center gap-8 w-full mt-3">
+              <IconButton
+                size="sm"
+                variant="outlined"
+                onClick={prev}
+                disabled={active === 1}
+                className="bg-white hover:bg-sky-300/20 transition ease-in-out"
+              >
+                <ArrowLeftIcon strokeWidth={2} className="h-4 w-4" />
+              </IconButton>
+              <Typography color="gray" className="font-normal">
+                Page <strong className="text-gray-900">{active}</strong> of{" "}
+                <strong className="text-gray-900">{totalPages}</strong>
+              </Typography>
+              <IconButton
+                size="sm"
+                variant="outlined"
+                onClick={next}
+                disabled={active === totalPages}
+                className="bg-white hover:bg-sky-300/20 transition ease-in-out"
+              >
+                <ArrowRightIcon strokeWidth={2} className="h-4 w-4" />
+              </IconButton>
+            </div>
+          )}
         </>
       )}
     </>
