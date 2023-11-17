@@ -1,10 +1,11 @@
 import React, { useContext } from "react";
 import graphContext from "../context/Graph/graphContext.js";
+import { useNavigate } from "react-router-dom";
 
 
 const HistoryItem = (props) => {
     let context = useContext(graphContext);
-  
+    const navigate = useNavigate();
     const { editfavgraph } = context;
 
     const formatTime = (isoTime) => {
@@ -54,6 +55,7 @@ const HistoryItem = (props) => {
     <tr class="border-b dark:border-sky-200/80">
       <td class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6">
         {graph.name}
+        //TODO: have an update name path in the API
       </td>
       <td class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-light font-mono text-opacity-100 text-gray-400 px-6">
         {formatTime(graph.date)}
@@ -112,12 +114,12 @@ const HistoryItem = (props) => {
         class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold font-mono  text-opacity-100 text-cyan-700 px-6 scale-95 hover:scale-100 transition duration-150 ease-in-out
 "
       >
-        <a href="#">
+        <button onClick={() => navigate(`/graph/${graph._id}`)}>
           View
           <span aria-hidden="true" className="ml-1">
             →
           </span>
-        </a>
+        </button>
       </td>
     </tr>
   );

@@ -11,10 +11,6 @@ const History = () => {
   const [sorterGraph, setSorterGraph] = useState("Time (new-to-old)");
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    console.log(sorterGraph);
-  }, [sorterGraph]);
-
   let context = useContext(graphContext);
   let navigate = useNavigate();
 
@@ -130,7 +126,6 @@ const History = () => {
                         onChange={(e) => {
                           e.preventDefault();
                           setSearchedGraph(e.target.value);
-                          console.log(searchedGraph);
                         }}
                       />
                     </div>

@@ -74,4 +74,20 @@ router.put('/updatefavgraph/:id', fetchuser,
   }
   }
 );
+
+router.get('/getgraph/:id',
+  async (req, res) => {
+    try {
+    //find the graph to be given
+    let graph =await Graph.findById(req.params.id);
+    if(!graph) res.status(404).send("NOT FOUND!");
+
+    res.json({"success" : "graph given", "graph" : graph});
+    } catch (err) {
+    console.error(err);
+    res.status(500).send("INTERNAL SERVER ERROR : Some error occured");
+  }
+  }
+);
+
 module.exports = router;
