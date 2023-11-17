@@ -74,6 +74,8 @@ const AddNodeOnEdgeDrop = () => {
     const [edges, setEdges, onEdgesChange] = useEdgesState([]);
     const { project } = useReactFlow();
 
+    const [algoID, setAlgoID] = useState('');
+
 
     var checkNode = [];    // the nodes to check 
     var result = [];      // result whether 1 or 0
@@ -383,22 +385,45 @@ const AddNodeOnEdgeDrop = () => {
             .then(() => {
                 console.log(`${host}/write-file`, "pinged");
             })
+            performAlgo();
     }
+    
+    // Object to map the correct algo ID for back end
+    const algoMap = {
+        'Dijkstra': 0,
+        'Bellman Ford': 1,
+        'SPFA': 2,
+        'Floyd Warshall': 3,
+        "Johnson's Algorithm": 4,
+        "Yen's K shortest Paths": 5
+        };
 
-    // for performing dijkstra
-    const performDijktra = () => {
+    // Drop down menu logic
+    const selectAlgo = (event) => {
+        const selectedValue = event.target.value;
+        setAlgoID(selectedValue);
+        console.log("This is val:", selectedValue, algoMap[algoID]);
+    };
 
-        fetch(`${host}/perform-dijktra`, {
+    // Algo POST call. Uses algoID use state variable to call the correct algorithm in backend
+    const performAlgo = () => {
+        console.log(algoID);
+        if (algoID === '') {
+            return;
+        }
+        console.log(algoMap[algoID]);
+        fetch(`${host}/perform-algo`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
+            body: JSON.stringify({ algoID: algoMap[algoID] }),
         })
             .then(() => {
                 console.log(`${host}/perform-dijktra`, "pinged");
             })
     }
-
+    
     // for flipping the node
     const flipNode = () => {
         const updatedNodes = [];
@@ -515,14 +540,25 @@ const AddNodeOnEdgeDrop = () => {
                         <span class="absolute inset-0 w-full h-full duration-300 delay-300 bg-gray-900 opacity-0 group-hover:opacity-100"></span>
                         <span class="relative transition-colors duration-300 delay-200 group-hover:text-white ease font-bold">Flip Node</span>
                     </button>
-                    <button onClick={performDijktra} class="relative px-5 py-3 overflow-hidden font-medium text-gray-600 bg-gray-100 border border-gray-100 rounded-lg shadow-inner group">
+                    {/* <button onClick={performDijktra} class="relative px-5 py-3 overflow-hidden font-medium text-gray-600 bg-gray-100 border border-gray-100 rounded-lg shadow-inner group">
                         <span class="absolute top-0 left-0 w-0 h-0 transition-all duration-200 border-t-2 border-gray-600 group-hover:w-full ease"></span>
                         <span class="absolute bottom-0 right-0 w-0 h-0 transition-all duration-200 border-b-2 border-gray-600 group-hover:w-full ease"></span>
                         <span class="absolute top-0 left-0 w-full h-0 transition-all duration-300 delay-200 bg-gray-600 group-hover:h-full ease"></span>
                         <span class="absolute bottom-0 left-0 w-full h-0 transition-all duration-300 delay-200 bg-gray-600 group-hover:h-full ease"></span>
                         <span class="absolute inset-0 w-full h-full duration-300 delay-300 bg-gray-900 opacity-0 group-hover:opacity-100"></span>
                         <span class="relative transition-colors duration-300 delay-200 group-hover:text-white ease font-bold">Perform Dijktra</span>
-                    </button>
+                    </button> */}
+                    <label htmlFor="dropdown">Select an Algorithm:</label>
+                    <select id="dropdown" onChange={selectAlgo} value={algoID || ''}>
+                        <option value="" disabled>Select an option</option>
+                        <option value="Dijkstra">Dijkstra</option>
+                        <option value="Bellman Ford">Bellman Ford</option>
+                        <option value="SPFA">SPFA</option>
+                        <option value="Floyd Warshall">Floyd Warshall</option>
+                        <option value="Johnson's Algorithm">Johnson's Algorithm</option>
+                        <option value="Yen's K shortest Paths">Yen's K shortest Paths</option>
+                    </select>
+
 
                     <div className='gap-3 flex w-full justify-evenly'>
                         <div>

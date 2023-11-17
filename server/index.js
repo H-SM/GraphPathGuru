@@ -91,19 +91,16 @@ app.post('/write-file', (req, res) => {
 // });
 
 // run bellman-ford
-app.post('/perform-dijktra', (req, res) => {
+app.post('/perform-algo', (req, res) => {
     // Specify the path to your C++ executable
-    let bellmanExecutable;
-
-    if (os.platform() === 'win32') {
-        bellmanExecutable = './Dijkstra/Dijkstra.exe';
-    }
-    else if (os.platform() === 'linux') {
-        bellmanExecutable = './Bellman_Ford/Bellman';
-    }
-
+    console.log("I made the perform-algo POST call!")
+    const id = req.body.algoID;
+    console.log("The algo ID is ", id)
+    const algo_execs = ["./Dijkstra/Dijkstra.exe","./Bellman_Ford/Bellman.exe","./SPFA/SPFA.exe","./Floyd_Warshall/Floyd_Warshall.exe","./Johnsons/Johnson.exe","./Yen/Yen.exe"];
+    let algoExecutable = algo_execs[id];
+    console.log("Executing the algo:", algoExecutable);
     // Execute the C++ program
-    execFile(bellmanExecutable, (error, stdout, stderr) => {
+    execFile(algoExecutable, (error, stdout, stderr) => {
         if (error) {
             console.error('Error:', error);
             res.status(500).send('An error occurred during execution.');
