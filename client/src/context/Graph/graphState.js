@@ -65,7 +65,6 @@ const GraphState = (props) =>{
           "Content-Type": "application/json",
         }
     });
-    console.log(`${host}/api/graph/getgraph/${id}`)
     const response = await req.json();
 
     if (response.success === 'graph given' && response.graph) {

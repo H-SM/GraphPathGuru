@@ -5,7 +5,6 @@ const UserState = (props) =>{
     const host = process.env.REACT_APP_BACKEND_LOCALHOST;
     const [userData, setUserData] = useState([]);
     const [showUser, setShowUser] = useState([]);
-
     const getuserinfo = async () => {
       try{
         const response = await fetch(`${host}/api/auth/getuser`, {

@@ -57,8 +57,6 @@ router.put('/updatefavgraph/:id', fetchuser,
     const newGraph = {};
     newGraph.favourite = favourite;
     
-    console.log(newGraph);
-
     let graph =await Graph.findById(req.params.id);
     if(!graph) res.status(404).send("NOT FOUND!");
 
