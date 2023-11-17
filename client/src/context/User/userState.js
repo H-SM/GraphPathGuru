@@ -4,7 +4,7 @@ import userContext from "./userContext";
 const UserState = (props) =>{
     const host = process.env.REACT_APP_BACKEND_LOCALHOST;
     const [userData, setUserData] = useState([]);
-
+    const [showUser, setShowUser] = useState([]);
     const getuserinfo = async () => {
       try{
         const response = await fetch(`${host}/api/auth/getuser`, {
@@ -94,8 +94,24 @@ const UserState = (props) =>{
         const response = await req.json();
         return response;
     }
+
+    const usershower = async (id) => {
+      try{
+        const response = await fetch(`${host}/api/auth/showuser/${id}`, {
+          method: 'GET',
+          headers: {
+            "Content-Type": "application/json",
+          }
+          });
+          const json = await response.json();
+          setShowUser(json);
+      }catch(error){
+        console.error('Error fetching user data:', error);
+      }
+    }
+
     return (
-        <userContext.Provider value={{userData,setUserData,getuserinfo,changename, login, signin, changepassword, changeimage }}>
+        <userContext.Provider value={{userData,setUserData,getuserinfo,changename, login, signin, changepassword, changeimage, usershower, showUser, setShowUser }}>
             {props.children}
         </userContext.Provider>
         );

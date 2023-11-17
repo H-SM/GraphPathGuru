@@ -185,4 +185,21 @@ router.put('/settings/pw',[
     }
 });
 
+//ROUTE 6:GET user details : GET "/api/auth/showuser".no login required 
+router.get('/showuser/:id',
+ async (req,res)=>{
+    try {    
+        const user = await User.findById(req.params.id).select({ password: 0, _id: 0, email: 0 });
+        if (!user) {
+          return res.status(404).send("NOT FOUND!");
+        }
+    
+        res.send(user);
+      } catch (err_hsm) {
+        console.error(err_hsm);
+        res.status(500).send("INTERNAL SERVER ERROR: Some error occurred");
+      }
+});
+
+
 module.exports = router;

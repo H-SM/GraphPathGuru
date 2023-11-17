@@ -3,6 +3,7 @@ import graphContext from "./graphContext";
 const GraphState = (props) =>{
     const host = process.env.REACT_APP_BACKEND_LOCALHOST;
     const [graphs , setGraphs] = useState([]); 
+    const [viewGraph , setViewGraph] = useState([]); 
 
     const getallgraph = async () =>{
     
@@ -56,8 +57,24 @@ const GraphState = (props) =>{
         body: JSON.stringify({ favourite }) 
       });
   }
+
+  const getgraph = async (id) => {
+    const req = await fetch(`${host}/api/graph/getgraph/${id}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        }
+    });
+    const response = await req.json();
+
+    if (response.success === 'graph given' && response.graph) {
+        setViewGraph(response.graph);
+    } else {
+        console.error("Error fetching graph data");
+    }
+};
     return (
-    <graphContext.Provider value={{graphs,setGraphs,getallgraph,addgraph,editfavgraph}}>
+    <graphContext.Provider value={{graphs,setGraphs,getallgraph,addgraph,editfavgraph, getgraph, viewGraph , setViewGraph}}>
         {props.children}
     </graphContext.Provider>
     );

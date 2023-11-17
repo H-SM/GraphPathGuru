@@ -10,6 +10,7 @@ import UserState from "./context/User/userState";
 import Docpage from "./components/Docpage";
 import Settings from "./components/Settings";
 import Login from "./components/Login";
+import Grapher from './components/Grapher';
 
 function App() {
 
@@ -25,6 +26,7 @@ function App() {
             <Route exact path="/settings" element={<Settings />} />
 
             <Route exact path="/login" element={<Login />} />
+            <Route exact path="/graph/:id" element={<Grapher />} />
           </Routes>
       </Router>
     </div>
