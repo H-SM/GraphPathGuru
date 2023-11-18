@@ -6,7 +6,8 @@ import userContext from "../context/User/userContext.js";
 import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
-import logo from '../assets/logo.png';
+import { UserCircleIcon } from "@heroicons/react/24/solid";
+import logo from "../assets/logo.png";
 
 import ReactFlow, {
   useNodesState,
@@ -32,7 +33,7 @@ const Grapher = () => {
   const contextuser = useContext(userContext);
 
   const { getgraph, viewGraph } = contextgraph;
-  const { usershower, showUser, setShowUser } = contextuser;
+  const { usershower, showUser } = contextuser;
 
   useEffect(() => {
     const fetchGraph = async () => {
@@ -76,18 +77,44 @@ const Grapher = () => {
   useEffect(() => {
     if (showUser.length !== 0) {
       extractEdgesAndNodes(viewGraph.graph);
-        // Extract TC and SC from the result string
+      // Extract TC and SC from the result string
       const resultArray = viewGraph.result
-      .split("\n")
-      .filter((item) => item.trim() !== "");
+        .split("\n")
+        .filter((item) => item.trim() !== "");
       setTc(resultArray[1]?.trim() || "N/A");
       setSc(resultArray[2]?.trim() || "N/A");
-      calculateThroughput(tc,sc)
+      calculateThroughput(tc, sc);
     }
   }, [showUser, viewGraph, tc, sc]);
- 
 
-    
+  function calculateTimeAgo(dateString) {
+    const showUserDate = new Date(dateString);
+    const currentDate = new Date();
+
+    const timeDifference = currentDate - showUserDate;
+
+    const seconds = Math.floor(timeDifference / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    const months = Math.floor(days / 30);
+    const years = Math.floor(days / 365);
+
+    if (years > 0) {
+      return `Joined ${years} ${years === 1 ? "year" : "years"} ago`;
+    } else if (months > 0) {
+      return `Joined ${months} ${months === 1 ? "month" : "months"} ago`;
+    } else if (days > 0) {
+      return `Joined ${days} ${days === 1 ? "day" : "days"} ago`;
+    } else if (hours > 0) {
+      return `Joined ${hours} ${hours === 1 ? "hour" : "hours"} ago`;
+    } else if (minutes > 0) {
+      return `Joined ${minutes} ${minutes === 1 ? "minute" : "minutes"} ago`;
+    } else {
+      return `Joined just now`;
+    }
+  }
+
   useEffect(() => {
     // Ensure viewGraph.user is available and not undefined
     if (viewGraph && viewGraph.user) {
@@ -112,7 +139,6 @@ const Grapher = () => {
   //     // Cleanup function
   //     return ;
   //   }, [id, viewGraph, getgraph]);
-
   const formatTime = (isoTime) => {
     const date = new Date(isoTime);
     const options = {
@@ -128,9 +154,11 @@ const Grapher = () => {
     // Calculate throughput in Mbps
     const timeInMilliseconds = parseFloat(tc, 10);
     const spaceInMegabytes = parseFloat(sc, 10);
-    const throughputMbps =Math.ceil( spaceInMegabytes / (timeInMilliseconds / 1000));
+    const throughputMbps = Math.ceil(
+      spaceInMegabytes / (timeInMilliseconds / 1000)
+    );
 
-    setThroughput(`${throughputMbps} mbps`)
+    setThroughput(`${throughputMbps} mbps`);
   }
   return (
     <>
@@ -149,27 +177,6 @@ const Grapher = () => {
             }}
           ></div> */}
           </div>
-
-
-<section class="relative h-[17vh]">
-  <div class="absolute left-1/2 top-[5%] mx-auto flex w-[90%] max-w-[960px] flex-col items-center rounded-xl -translate-x-1/2 bg-gradient-to-t from-white to-sky-400 p-4 sm:justify-between sm:px-8 md:flex-row md:py-6 lg:w-full">
-    <div class="flex flex-row items-center">
-      <img src={logo} alt="" class="inline-block item-center w-[25vh] rounded-full object-cover" />
-      <Link 
-    class="group -my-2 hidden items-center gap-2 rounded-full bg-white/95 px-3 py-2 text-xs text-slate-900 ring-1 ring-inset ring-black/[0.08] hover:bg-white/80 hover:ring-black/[0.13] ml-2 sm:flex md:hidden lg:flex xl:flex" to="/"><svg class="h-4 w-4 fill-sky-500" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M9 4.5a.75.75 0 01.721.544l.813 2.846a3.75 3.75 0 002.576 2.576l2.846.813a.75.75 0 010 1.442l-2.846.813a3.75 3.75 0 00-2.576 2.576l-.813 2.846a.75.75 0 01-1.442 0l-.813-2.846a3.75 3.75 0 00-2.576-2.576l-2.846-.813a.75.75 0 010-1.442l2.846-.813A3.75 3.75 0 007.466 7.89l.813-2.846A.75.75 0 019 4.5zM18 1.5a.75.75 0 01.728.568l.258 1.036c.236.94.97 1.674 1.91 1.91l1.036.258a.75.75 0 010 1.456l-1.036.258c-.94.236-1.674.97-1.91 1.91l-.258 1.036a.75.75 0 01-1.456 0l-.258-1.036a2.625 2.625 0 00-1.91-1.91l-1.036-.258a.75.75 0 010-1.456l1.036-.258a2.625 2.625 0 001.91-1.91l.258-1.036A.75.75 0 0118 1.5zM16.5 15a.75.75 0 01.712.513l.394 1.183c.15.447.5.799.948.948l1.183.395a.75.75 0 010 1.422l-1.183.395c-.447.15-.799.5-.948.948l-.395 1.183a.75.75 0 01-1.422 0l-.395-1.183a1.5 1.5 0 00-.948-.948l-1.183-.395a.75.75 0 010-1.422l1.183-.395c.447-.15.799-.5.948-.948l.395-1.183A.75.75 0 0116.5 15z" clip-rule="evenodd"></path></svg>
-        <span class="font-semibold">Make Your Graphs</span>
-        <svg width="2" height="2" aria-hidden="true" class="fill-slate-900"><circle cx="1" cy="1" r="1"></circle></svg>
-        <span class="font-medium"><span class="md:hidden">New Graphs</span><span class="hidden md:inline">Learn by visualizing your graphs</span></span>
-    <svg viewBox="0 0 5 8" class="h-2 w-[5px] fill-black/30 group-hover:fill-black/60" fill-rule="evenodd" clip-rule="evenodd" aria-hidden="true"><path d="M.2.24A.75.75 0 0 1 1.26.2l3.5 3.25a.75.75 0 0 1 0 1.1L1.26 7.8A.75.75 0 0 1 .24 6.7L3.148 4 .24 1.3A.75.75 0 0 1 .2.24Z"></path>
-    </svg>
-    </Link>
-    </div>
-    <div class="mt-4 flex flex-row items-center justify-center gap-4 md:mt-0">
-      <Link href="#" class="inline-block rounded-xl border border-black bg-white px-10 py-3 font-semibold text-sky-700 [box-shadow:rgb(3,_105,_161)_6px_6px] transition ease-in-out duration-200 delay-75 hover:[box-shadow:rgb(3,_105,_161)_0px_0px] hover:bg-white/80 hover:text-black" to="/login">Get Started</Link>
-      
-    </div>
-  </div>
-</section>
 
           <div
             id="graph"
@@ -194,68 +201,121 @@ const Grapher = () => {
                 <Background />
                 <Controls />
               </ReactFlow>
-              
             </div>
-            
+            <div className="w-[60vh] flex flex-col items-center">
+              <p class="mt-4 text-3xl font-bold leading-[3.5rem] tracking-tight text-slate-900">
+                Made By
+              </p>
+              <div className="w-[80vh] h-[15vh] bg-sky-700/10 my-2 rounded-xl ring-1 ring-sky-700 flex flex-row justify-center items-center gap-9 relative overflow-hidden">
+                {showUser?.image ? (
+                  <img
+                    alt="avatar"
+                    src={showUser?.image}
+                    className="w-[13vh]"
+                  />
+                ) : (
+                  <UserCircleIcon
+                    className="w-[13vh] text-cyan-600"
+                    aria-hidden="true"
+                  />
+                )}
+                <div className="flex items-center flex-col justify-center h-full w-fit">
+                  <p className="text-sky-900 font-mono font-bold text-[22px] xl:text-[25px]">
+                    {showUser.name}
+                  </p>
+                  <p className="text-sky-900/80 font-mono text-[15px]">
+                    {calculateTimeAgo(showUser.date)}
+                  </p>
+                </div>
+              </div>
+              <p class="font-medium text-[15px] mt-2 flex flex-row gap-1">
+                      Share this graph with others<span aria-hidden="true">→ </span>
+                      <a onClick={() => navigator.clipboard.writeText(`http://localhost:3000/graph/${id}`)} class="font-medium text-sky-700 hover:underline hover:cursor-pointer select-none flex flex-row items-center opacity-90 hover:opacity-100">
+                        click here <svg viewBox="0 0 25 25" fill="none" width="20" height="20" xmlns="http://www.w3.org/2000/svg" ><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12.5 6.25C12.9142 6.25 13.25 5.91421 13.25 5.5C13.25 5.08579 12.9142 4.75 12.5 4.75V6.25ZM20.25 12.5C20.25 12.0858 19.9142 11.75 19.5 11.75C19.0858 11.75 18.75 12.0858 18.75 12.5H20.25ZM19.5 6.25C19.9142 6.25 20.25 5.91421 20.25 5.5C20.25 5.08579 19.9142 4.75 19.5 4.75V6.25ZM15.412 4.75C14.9978 4.75 14.662 5.08579 14.662 5.5C14.662 5.91421 14.9978 6.25 15.412 6.25V4.75ZM20.25 5.5C20.25 5.08579 19.9142 4.75 19.5 4.75C19.0858 4.75 18.75 5.08579 18.75 5.5H20.25ZM18.75 9.641C18.75 10.0552 19.0858 10.391 19.5 10.391C19.9142 10.391 20.25 10.0552 20.25 9.641H18.75ZM20.0303 6.03033C20.3232 5.73744 20.3232 5.26256 20.0303 4.96967C19.7374 4.67678 19.2626 4.67678 18.9697 4.96967L20.0303 6.03033ZM11.9697 11.9697C11.6768 12.2626 11.6768 12.7374 11.9697 13.0303C12.2626 13.3232 12.7374 13.3232 13.0303 13.0303L11.9697 11.9697ZM12.5 4.75H9.5V6.25H12.5V4.75ZM9.5 4.75C6.87665 4.75 4.75 6.87665 4.75 9.5H6.25C6.25 7.70507 7.70507 6.25 9.5 6.25V4.75ZM4.75 9.5V15.5H6.25V9.5H4.75ZM4.75 15.5C4.75 18.1234 6.87665 20.25 9.5 20.25V18.75C7.70507 18.75 6.25 17.2949 6.25 15.5H4.75ZM9.5 20.25H15.5V18.75H9.5V20.25ZM15.5 20.25C18.1234 20.25 20.25 18.1234 20.25 15.5H18.75C18.75 17.2949 17.2949 18.75 15.5 18.75V20.25ZM20.25 15.5V12.5H18.75V15.5H20.25ZM19.5 4.75H15.412V6.25H19.5V4.75ZM18.75 5.5V9.641H20.25V5.5H18.75ZM18.9697 4.96967L11.9697 11.9697L13.0303 13.0303L20.0303 6.03033L18.9697 4.96967Z" fill="#000000"></path> </g></svg>
+                      </a>
+                  </p>
+            </div>
           </div>
           <div class="mx-auto max-w-2xl text-center">
-          <div class="relative z-20 mx-auto max-w-container px-4 pt-14 sm:px-6 sm:pt-20 lg:px-8"><div class="mx-auto max-w-[45rem] text-center"><h1 class="text-base font-semibold leading-7 text-sky-500">what did you make?</h1><p class="mt-4 text-5xl font-extrabold leading-[3.5rem] tracking-tight text-slate-900">Your Graph Stats.</p></div></div>
-         
-          <p class="mt-2 text-lg leading-8 text-gray-600">
-            Further details over the graph in order to have greater insights on item.
-          </p>
-          
-        </div>
-        <div className="order-first text-3xl font-bold  tracking-tight text-gray-900 sm:text-5xl mt-[10vh]">
-              {viewGraph.name}
-    </div>
-    <dt className="text-base leading-7 text-gray-600 mt-2">Name of the Graph</dt>
-    <div className="bg-white py-24 sm:py-32">
-      <div className="mx-auto max-w-7xl px-6 lg:px-8">
-        <dl className="grid grid-cols-1 gap-x-1 gap-y-16 text-center lg:grid-cols-3">
-            <div key="1" className="mx-auto flex max-w-xs flex-col gap-y-4">
-              <dt className="text-base leading-7 text-gray-600">Number of Nodes</dt>
-              <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-              {numNodes}
-              </dd>
+            <div class="relative z-20 mx-auto max-w-container px-4 pt-14 sm:px-6 sm:pt-20 lg:px-8">
+              <div class="mx-auto max-w-[45rem] text-center">
+                <h1 class="text-base font-semibold leading-7 text-sky-500">
+                  what did you make?
+                </h1>
+                <p class="mt-4 text-5xl font-extrabold leading-[3.5rem] tracking-tight text-slate-900">
+                  Your Graph Stats.
+                </p>
+              </div>
             </div>
-            
-              
-            <div key="2" className="mx-auto flex max-w-xs flex-col gap-y-4">
-              <dt className="text-base leading-7 text-gray-600">Overall Throughput</dt>
-              <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-              {throughput}
-              </dd>
-            </div>   
-            <div key="3" className="mx-auto flex max-w-xs flex-col gap-y-4">
-              <dt className="text-base leading-7 text-gray-600">Number of Edges</dt>
-              <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-              {numEdges}
-              </dd>
-            </div> 
-            <div key="4" className="mx-auto flex max-w-xs flex-col gap-y-4">
-              <dt className="text-base leading-7 text-gray-600">Time Taken</dt>
-              <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-              {tc}
-              </dd>
-            </div> 
-            <div key="5" className="mx-auto flex max-w-xs flex-col gap-y-4">
-              <dt className="text-base leading-7 text-gray-600">Date of Creation</dt>
-              <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-              {formatTime(viewGraph.date)}
-              </dd>
-            </div> 
-            <div key="6" className="mx-auto flex max-w-xs flex-col gap-y-4">
-              <dt className="text-base leading-7 text-gray-600">Space taken</dt>
-              <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-              {sc}
-              </dd>
-            </div> 
-        </dl>
-      </div>
-    </div>
 
-    <Footer/>
+            <p class="mt-2 text-lg leading-8 text-gray-600">
+              Further details over the graph in order to have greater insights
+              on item.
+            </p>
+          </div>
+          <div className="order-first text-3xl font-bold  tracking-tight text-gray-900 sm:text-5xl mt-[10vh]">
+            {viewGraph.name}
+          </div>
+          <dt className="text-base leading-7 text-gray-600 mt-2">
+            Name of the Graph
+          </dt>
+          <div className="bg-white py-24 sm:py-32">
+            <div className="mx-auto max-w-7xl px-6 lg:px-8">
+              <dl className="grid grid-cols-1 gap-x-1 gap-y-16 text-center lg:grid-cols-3">
+                <div key="1" className="mx-auto flex max-w-xs flex-col gap-y-4">
+                  <dt className="text-base leading-7 text-gray-600">
+                    Number of Nodes
+                  </dt>
+                  <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+                    {numNodes}
+                  </dd>
+                </div>
+
+                <div key="2" className="mx-auto flex max-w-xs flex-col gap-y-4">
+                  <dt className="text-base leading-7 text-gray-600">
+                    Overall Throughput
+                  </dt>
+                  <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+                    {throughput}
+                  </dd>
+                </div>
+                <div key="3" className="mx-auto flex max-w-xs flex-col gap-y-4">
+                  <dt className="text-base leading-7 text-gray-600">
+                    Number of Edges
+                  </dt>
+                  <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+                    {numEdges}
+                  </dd>
+                </div>
+                <div key="4" className="mx-auto flex max-w-xs flex-col gap-y-4">
+                  <dt className="text-base leading-7 text-gray-600">
+                    Time Taken
+                  </dt>
+                  <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+                    {tc}
+                  </dd>
+                </div>
+                <div key="5" className="mx-auto flex max-w-xs flex-col gap-y-4">
+                  <dt className="text-base leading-7 text-gray-600">
+                    Date of Creation
+                  </dt>
+                  <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+                    {formatTime(viewGraph.date)}
+                  </dd>
+                </div>
+                <div key="6" className="mx-auto flex max-w-xs flex-col gap-y-4">
+                  <dt className="text-base leading-7 text-gray-600">
+                    Space taken
+                  </dt>
+                  <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
+                    {sc}
+                  </dd>
+                </div>
+              </dl>
+            </div>
+          </div>
+
+          <Footer />
         </>
       ) : (
         <Box sx={{ width: "100%" }}>
