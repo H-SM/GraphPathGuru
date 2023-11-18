@@ -10,7 +10,7 @@ TODO:
  also the code will look pretty :)
 */
 
-import React, { useCallback, useRef, useEffect, useState } from 'react';
+import React, { useCallback, useRef, useEffect, useState, useContext } from 'react';
 import ReactFlow, {
     useNodesState,
     useEdgesState,
@@ -28,6 +28,7 @@ import ReactFlow, {
 
 import 'reactflow/dist/style.css';
 import imager from '../assets/beams-pricing.png';
+import userContext from "../context/User/userContext";
 
 import Navbar from './Navbar';
 import HeroSection from './HeroSection';
@@ -36,6 +37,7 @@ import Footer from './Footer';
 import TechStack from './techStack';
 import History from './History';
 import { useLocation, useNavigate } from 'react-router-dom';
+import UserSection from './UserSection';
 
 // TODO: can't ping up the .env file here 
 // const host = "http://localhost:5000";
@@ -577,6 +579,12 @@ const Home = () => {
         }
         // eslint-disable-next-line
       },[]);
+      const context = useContext(userContext);
+      const { getuserinfo } = context;
+
+      useEffect(() => {
+        getuserinfo();
+      }, []);
   return (
     <>
         <div>
@@ -587,7 +595,6 @@ const Home = () => {
                 <HeroSection />
             </div>
         </div>
-
         <ReactFlowProvider>
             <AddNodeOnEdgeDrop />
         </ReactFlowProvider>
@@ -597,6 +604,7 @@ const Home = () => {
         <AboutUs />
         <TechStack />
         <Footer />
+        <UserSection/>
     </>
   )
 }
