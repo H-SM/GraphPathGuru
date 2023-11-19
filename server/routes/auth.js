@@ -201,5 +201,29 @@ router.get('/showuser/:id',
       }
 });
 
+//ROUTE 6:PUT user details : GET "/api/auth/incGraphs".login required 
+router.put('/incGraphs',[
+    fetchuser,
+    body('graphs', 'Enter a valid graph').isLength({ min: 1 }),
+],async (req,res)=>{
+    try {
+        const userId = req.user.id;
+        let success = false;
+        const { graphs } = req.body;
+        const user = await User.findById(userId);
 
+        if (!user) {
+            return res.status(400).json({ success, error: "Check over your credentials again" });
+        }
+
+        const updInfo = {};
+        if(graphs){updInfo.graphs = graphs;}
+        success = true;
+        const user_upd = await User.findByIdAndUpdate(userId, {$set : updInfo},{new : true});
+        res.json({ success, user_upd });
+}catch(err){
+    console.error(err);
+    res.status(500).send("INTERNAL SERVER ERROR : Some error occured");
+}
+});
 module.exports = router;
