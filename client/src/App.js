@@ -12,6 +12,7 @@ import Settings from "./components/Settings";
 import Login from "./components/Login";
 import Grapher from './components/Grapher';
 import NotFound from './components/NotFound';
+import UserProfile from './components/UserProfile';
 
 function App() {
 
@@ -28,6 +29,7 @@ function App() {
 
             <Route exact path="/login" element={<Login />} />
             <Route exact path="/graph/:id" element={<Grapher />} />
+            <Route exact path="/user" element={<UserProfile />} />
 
             <Route path='*' element={<NotFound/>}/>
           </Routes>
