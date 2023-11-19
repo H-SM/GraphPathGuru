@@ -11,6 +11,7 @@ import Docpage from "./components/Docpage";
 import Settings from "./components/Settings";
 import Login from "./components/Login";
 import Grapher from './components/Grapher';
+import NotFound from './components/NotFound';
 
 function App() {
 
@@ -27,6 +28,8 @@ function App() {
 
             <Route exact path="/login" element={<Login />} />
             <Route exact path="/graph/:id" element={<Grapher />} />
+
+            <Route path='*' element={<NotFound/>}/>
           </Routes>
       </Router>
     </div>
