@@ -204,7 +204,7 @@ router.get('/showuser/:id',
 //ROUTE 6:PUT user details : GET "/api/auth/incGraphs".login required 
 router.put('/incGraphs',[
     fetchuser,
-    body('graphs', 'Enter a valid graph').isLength({ min: 1 }),
+    body('graphs', 'Enter a valid graph').exists(),
 ],async (req,res)=>{
     try {
         const userId = req.user.id;

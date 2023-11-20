@@ -110,8 +110,26 @@ const UserState = (props) =>{
       }
     }
 
+    const changegraph = async (graphs) => {
+      try{
+        const response = await fetch(`${host}/api/auth/incGraphs`, {
+          method: 'PUT',
+          headers: {
+            "Content-Type": "application/json",
+            "auth-token" : localStorage.getItem("token")
+          },
+          body: JSON.stringify({ graphs })
+          });
+          const json = await response.json();
+          setUserData(json.user_upd);
+          return json;
+      }catch(error){
+        console.error('Error fetching user data:', error);
+      }
+    }
+
     return (
-        <userContext.Provider value={{userData,setUserData,getuserinfo,changename, login, signin, changepassword, changeimage, usershower, showUser, setShowUser }}>
+        <userContext.Provider value={{userData,setUserData,getuserinfo,changename, login, signin, changepassword, changeimage, usershower, showUser, setShowUser, changegraph}}>
             {props.children}
         </userContext.Provider>
         );

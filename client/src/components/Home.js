@@ -29,7 +29,7 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import imager from '../assets/beams-pricing.png';
 import userContext from "../context/User/userContext";
-
+import graphContext from "../context/Graph/graphContext";
 import Navbar from './Navbar';
 import HeroSection from './HeroSection';
 import AboutUs from './aboutUs';
@@ -84,6 +84,13 @@ const AddNodeOnEdgeDrop = () => {
     var distance = [];    // distance of current node from source
     var distance_curr = [];  // distance of the current node
     var curr_node = [];   // current node from which the distance of all adjacent nodes is calculated
+
+    //context here 
+    const context = useContext(userContext);
+    const { userData, changegraph } = context;
+
+    const gContext = useContext(graphContext);
+    const { addgraph } = gContext;
 
     const [isProcessing, setIsProcessing] = useState(false);
     const startProcess = () => {
@@ -371,23 +378,35 @@ const AddNodeOnEdgeDrop = () => {
     }
 
     // writing data to file
-    const writeFile = () => {
+    const writeFile = async () => {
         const data = {
             nodes: nodes,
             edges: edges,
         };
         console.log("this is data\n", data);
-        fetch(`${host}/write-file`, {
+        const nexter = userData.graphs + 1;
+        const req = await fetch(`${host}/write-file`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(data),
-        })
-            .then(() => {
-                console.log(`${host}/write-file`, "pinged");
-            })
-            performAlgo();
+        });
+        const response = await req.json();
+        performAlgo();
+        //TODO: async 
+        // userData, changegraph
+        changegraph(nexter);
+        // console.log(algoID);
+        //TODO: WONT WORK AS UNIQUE NAME SYSTEM NEED TO BE MADE
+        const samp_data = { 
+            result : "<result> \n 12321ms \n 12.2MB \n 3,0 \n -1 2 0 \n 0 2 1 \n </result>",
+            graph: "0 -65 -3: 1,12 2,1 \n 1 118 -12: \n 2 182 134: 1,1",
+            name : ``,
+            favourite : false
+        }
+
+        addgraph(samp_data.result, samp_data.graph, samp_data.name, samp_data.favourite);
     }
     
     // Object to map the correct algo ID for back end
@@ -408,13 +427,13 @@ const AddNodeOnEdgeDrop = () => {
     };
 
     // Algo POST call. Uses algoID use state variable to call the correct algorithm in backend
-    const performAlgo = () => {
+    const performAlgo = async () => {
         console.log(algoID);
         if (algoID === '') {
             return;
         }
         console.log(algoMap[algoID]);
-        fetch(`${host}/perform-algo`, {
+        await fetch(`${host}/perform-algo`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -422,7 +441,7 @@ const AddNodeOnEdgeDrop = () => {
             body: JSON.stringify({ algoID: algoMap[algoID] }),
         })
             .then(() => {
-                console.log(`${host}/perform-dijktra`, "pinged");
+                console.log(`${host}/perform-algo`, "pinged");
             })
     }
     
@@ -474,7 +493,6 @@ const AddNodeOnEdgeDrop = () => {
     useEffect(() => {
         const queryParams = new URLSearchParams(location.search);
         const sectionToScroll = queryParams.get("section");
-        console.log(sectionToScroll);
 
         if (sectionToScroll) {
             const targetSection = document.getElementById(sectionToScroll);
@@ -486,7 +504,9 @@ const AddNodeOnEdgeDrop = () => {
             }
         }
     }, [location.search]);
-
+    useEffect(() => {
+        console.log(userData);
+    },[userData]);
     return (
         <>
             <div className='flex justify-center items-center'>

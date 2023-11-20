@@ -10,9 +10,8 @@ const UserProfile = () => {
     const { userData, getuserinfo } = context;
     useEffect(() => {
         getuserinfo();
-      }, []);
+      }, [getuserinfo]);
     let navigate = useNavigate();
-    console.log(userData);
 
     const calculateTimeAgo = (dateString) => {
         const showUserDate = new Date(dateString);
@@ -57,7 +56,10 @@ const UserProfile = () => {
         <div class="flex flex-wrap justify-center">
             <div class="w-full flex justify-center">
                 <div class="relative">
-                    <img src={userData.image} class="shadow-xl rounded-full align-middle border-none absolute -m-16 -ml-20 lg:-ml-16 max-w-[150px] bg-white"/>
+                  {userData?.image ?
+                    <img src={userData?.image} class="shadow-xl rounded-full align-middle border-none absolute -m-16 -ml-20 lg:-ml-16 max-w-[150px] bg-white"/>
+                    :
+                    <UserCircleIcon class="shadow-xl rounded-full align-middle border-none absolute -m-16 -ml-20 lg:-ml-16 max-w-[150px] bg-white"/>}
                 </div>
             </div>
             <div class="w-full text-center mt-20">

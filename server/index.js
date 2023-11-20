@@ -51,6 +51,7 @@ app.post('/write-file', (req, res) => {
         }
         console.log(output);
         fs.writeFileSync('./file io/input.txt', output);
+        res.status(200).json({ success : true, res : output});
     } catch (error) {
         console.error('Error:', error);
         res.status(500).json({ error: 'Failed to save data to file' });
