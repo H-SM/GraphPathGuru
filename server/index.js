@@ -1,10 +1,10 @@
-const { execFile } = require('child_process');
-const path = require('path');
-const fs = require('fs');
-const os = require('os');
-const express = require('express');
-var cors= require('cors');
-const connectToMongo = require('./db');
+const { execFile } = require("child_process");
+const path = require("path");
+const fs = require("fs");
+const os = require("os");
+const express = require("express");
+var cors = require("cors");
+const connectToMongo = require("./db");
 
 connectToMongo();
 const app = express();
@@ -12,52 +12,56 @@ const port = 5000;
 
 app.use(cors());
 app.use(express.json());
-app.get('/', (req, res) => {
-    res.send('Hello World!');
+app.get("/", (req, res) => {
+  res.send("Hello World!");
 });
 
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/graph', require('./routes/graph'));
+app.use("/api/auth", require("./routes/auth"));
+app.use("/api/graph", require("./routes/graph"));
 
-app.post('/write-file', (req, res) => {
-    try {
-        const { nodes, edges } = req.body;
+app.post("/write-file", (req, res) => {
+  try {
+    const { nodes, edges } = req.body;
 
-        console.log(nodes);
-        console.log(edges);
-        let output = "";
-        const mp = {};
-        let w = 0;
-        for (var i = 0; i < nodes.length; i++) {
-            let node = nodes[i];
-            mp[node.id] = [];
-        }
-        for (var i = 0; i < edges.length; i++) {
-            let edge = edges[i];
-            w = edge.label == undefined ? -1 : edge.label;
-            mp[edge.source].push([edge.target, w]);
-        }
-        console.log(mp);
-        for (var i = 0; i < nodes.length; i++) {
-            let node = nodes[i];
-            output += node.id;
-
-            output += ' ' + Math.floor(node.position.x).toString() + ' ' + Math.floor(node.position.y).toString() + ': ';
-            if (mp)
-                for (let j = 0; j < mp[node.id].length; j++) {
-                    output += mp[node.id][j][0] + ',' + mp[node.id][j][1] + ' ';
-                }
-            output += '\n'
-        }
-        console.log(output);
-        fs.writeFileSync('./file io/input.txt', output);
-        res.status(200).json({ success : true, res : output});
-    } catch (error) {
-        console.error('Error:', error);
-        res.status(500).json({ error: 'Failed to save data to file' });
+    console.log(nodes);
+    console.log(edges);
+    let output = "";
+    const mp = {};
+    let w = 0;
+    for (var i = 0; i < nodes.length; i++) {
+      let node = nodes[i];
+      mp[node.id] = [];
     }
-});
+    for (var i = 0; i < edges.length; i++) {
+      let edge = edges[i];
+      w = edge.label == undefined ? -1 : edge.label;
+      mp[edge.source].push([edge.target, w]);
+    }
+    console.log(mp);
+    for (var i = 0; i < nodes.length; i++) {
+      let node = nodes[i];
+      output += node.id;
 
+      output +=
+        " " +
+        Math.floor(node.position.x).toString() +
+        " " +
+        Math.floor(node.position.y).toString() +
+        ": ";
+      if (mp)
+        for (let j = 0; j < mp[node.id].length; j++) {
+          output += mp[node.id][j][0] + "," + mp[node.id][j][1] + " ";
+        }
+      output += "\n";
+    }
+    console.log(output);
+    fs.writeFileSync("./file io/input.txt", output);
+    res.status(200).json({ success: true, res: output });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Failed to save data to file" });
+  }
+});
 
 // app.post('/perform-dijktra', (req, res) => {
 
@@ -92,142 +96,255 @@ app.post('/write-file', (req, res) => {
 // });
 
 // run bellman-ford
-app.post('/perform-algo', (req, res) => {
-    // Specify the path to your C++ executable
-    console.log("I made the perform-algo POST call!")
-    const id = req.body.algoID;
-    console.log("The algo ID is ", id)
-    const algo_execs = ["./Dijkstra/Dijkstra.exe","./Bellman_Ford/Bellman.exe","./SPFA/SPFA.exe","./Floyd_Warshall/Floyd_Warshall.exe","./Johnsons/Johnson.exe","./Yen/Yen.exe"];
-    let algoExecutable = algo_execs[id];
-    console.log("Executing the algo:", algoExecutable);
-    // Execute the C++ program
-    execFile(algoExecutable, (error, stdout, stderr) => {
-        if (error) {
-            console.error('Error:', error);
-            res.status(500).send('An error occurred during execution.');
-            return;
+app.post("/perform-algo", (req, res) => {
+  // Specify the path to your C++ executable
+  console.log("I made the perform-algo POST call!");
+  const id = req.body.algoID;
+  console.log("The algo ID is ", id);
+  const algo_execs = [
+    "./Dijkstra/Dijkstra.exe",
+    "./Bellman_Ford/Bellman.exe",
+    "./SPFA/SPFA.exe",
+    "./Floyd_Warshall/Floyd_Warshall.exe",
+    "./Johnsons/Johnson.exe",
+    "./Yen/Yen.exe",
+  ];
+  let algoExecutable = algo_execs[id];
+  console.log("Executing the algo:", algoExecutable);
+  // Execute the C++ program
+  execFile(algoExecutable, (error, stdout, stderr) => {
+    if (error) {
+      console.error("Error:", error);
+      res.status(500).send("An error occurred during execution.");
+      return;
+    }
+
+    if (stderr) {
+      console.error("StdError:", stderr);
+      res.status(500).send("An error occurred during execution.");
+      return;
+    }
+
+    // Process the output if needed
+    console.log("C++ program output:", stdout);
+
+    // Send a response to the client
+    res.send("C++ program executed successfully.");
+  });
+});
+
+app.get("/", (req, res) => {
+  res.send("Hello World!");
+});
+
+app.get("/read-file", (req, res) => {
+  const fileContent = fs.readFileSync("./file io/output.txt", "utf-8");
+
+  const regex = /<adj>([\s\S]*?)<\/adj>/g;
+
+  const adjDataArray = [];
+
+  let match;
+  while ((match = regex.exec(fileContent)) !== null) {
+    const adjData = match[1].trim();
+    adjDataArray.push(adjData);
+  }
+
+  console.log(adjDataArray);
+
+  const result = [];
+  const checkNode = []; // New array to store third values
+  const distance_curr = [];
+  const curr_node = [];
+
+  for (const line of adjDataArray) {
+    const match = line.match(/^(\d+)/); // Regular expression to match the first number
+    if (match) {
+      const firstNumber = parseInt(match[1], 10);
+      curr_node.push(firstNumber);
+    }
+  }
+
+  adjDataArray.forEach((row) => {
+    const lines = row.split("\n");
+    const values = [];
+    const thirdValues = [];
+
+    const numbersBeforeColon = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const match = line.match(/(\d+):/); // Regular expression to match the number before ':'
+      if (match) {
+        const number = parseInt(match[1], 10); // Extract and convert to an integer
+        numbersBeforeColon.push(number);
+      }
+
+      if (i > 0) {
+        const parts = lines[i].split("\t")[1];
+        if (parts) {
+          const firstNumericValue = parseInt(parts.split(",")[0], 10);
+          const thirdNumericValue = parseInt(parts.split(",")[2], 10);
+          values.push(firstNumericValue);
+          thirdValues.push(thirdNumericValue);
         }
+      }
+    }
 
-        if (stderr) {
-            console.error('StdError:', stderr);
-            res.status(500).send('An error occurred during execution.');
-            return;
-        }
+    checkNode.push(values);
+    result.push(thirdValues);
+    distance_curr.push(numbersBeforeColon);
+  });
 
-        // Process the output if needed
-        console.log('C++ program output:', stdout);
+  const distance = [];
 
-        // Send a response to the client
-        res.send('C++ program executed successfully.');
+  const dsMatches = fileContent.match(/<ds>[\s\S]*?<\/ds>/g);
+
+  if (dsMatches) {
+    const dsArray = dsMatches.map((ds) => {
+      const dsContent = ds.match(/<ds>([\s\S]*?)<\/ds>/)[1].trim();
+      const dsLines = dsContent.split("\n");
+      return dsLines.map((line) =>
+        line
+          .trim()
+          .split(/\s+/)
+          .map((val) => (val === "INF" ? "INF" : parseInt(val, 10)))
+      );
     });
+
+    for (let i = 0; i < dsArray.length; i++) {
+      distance.push(dsArray[i][1]);
+    }
+  }
+
+  // to remove the undefined (0) error due to timeout function
+  checkNode.push([]);
+  result.push([]);
+
+  console.log(distance);
+  console.log(checkNode);
+  console.log(result);
+
+  console.log(curr_node);
+
+  const responseData = {
+    result,
+    checkNode,
+    distance,
+    distance_curr,
+    curr_node,
+  };
+
+  res.json(responseData);
 });
 
-app.get('/', (req, res) => {
-    res.send('Hello World!');
-});
+app.get("/read-file-YenK", (req, res) => {
+  const fileContent = fs.readFileSync("./file io/output.txt", "utf-8");
 
-app.get('/read-file', (req, res) => {
+  const regex = /<adj>([\s\S]*?)<\/adj>/g;
 
-    const fileContent = fs.readFileSync('./file io/output.txt', 'utf-8');
+  const adjDataArray = [];
 
-    const regex = /<adj>([\s\S]*?)<\/adj>/g;
+  let match;
+  while ((match = regex.exec(fileContent)) !== null) {
+    const adjData = match[1].trim();
+    adjDataArray.push(adjData);
+  }
 
-    const adjDataArray = [];
+  const result = [];
+  const checkNode = []; // New array to store third values
+  const distance_curr = [];
+  const curr_node = [];
 
-    let match;
-    while ((match = regex.exec(fileContent)) !== null) {
-        const adjData = match[1].trim();
-        adjDataArray.push(adjData);
+  for (const line of adjDataArray) {
+    const match = line.match(/^(\d+)/); // Regular expression to match the first number
+    if (match) {
+      const firstNumber = parseInt(match[1], 10);
+      curr_node.push(firstNumber);
+    }
+  }
+
+  adjDataArray.forEach((row) => {
+    const lines = row.split("\n");
+    const values = [];
+    const thirdValues = [];
+
+    const numbersBeforeColon = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const match = line.match(/(\d+):/); // Regular expression to match the number before ':'
+      if (match) {
+        const number = parseInt(match[1], 10); // Extract and convert to an integer
+        numbersBeforeColon.push(number);
+      }
+
+      if (i > 0) {
+        const parts = lines[i].split("\t")[1];
+        if (parts) {
+          const firstNumericValue = parseInt(parts.split(",")[0], 10);
+          const thirdNumericValue = parseInt(parts.split(",")[2], 10);
+          values.push(firstNumericValue);
+          thirdValues.push(thirdNumericValue);
+        }
+      }
     }
 
-    console.log(adjDataArray);
+    checkNode.push(values);
+    result.push(thirdValues);
+    distance_curr.push(numbersBeforeColon);
+  });
 
-    const result = [];
-    const checkNode = []; // New array to store third values
-    const distance_curr = [];
-    const curr_node = [];
+  const distance = [];
 
-    for (const line of adjDataArray) {
-        const match = line.match(/^(\d+)/); // Regular expression to match the first number
-        if (match) {
-            const firstNumber = parseInt(match[1], 10);
-            curr_node.push(firstNumber);
-        }
-    }
+  const dsMatches = fileContent.match(/<ds>[\s\S]*?<\/ds>/g);
 
-    adjDataArray.forEach(row => {
-        const lines = row.split('\n');
-        const values = [];
-        const thirdValues = [];
-
-        const numbersBeforeColon = [];
-
-        for (let i = 0; i < lines.length; i++) {
-            const line = lines[i];
-            const match = line.match(/(\d+):/); // Regular expression to match the number before ':'
-            if (match) {
-                const number = parseInt(match[1], 10); // Extract and convert to an integer
-                numbersBeforeColon.push(number);
-            }
-
-            if (i > 0) {
-                const parts = lines[i].split('\t')[1];
-                if (parts) {
-                    const firstNumericValue = parseInt(parts.split(',')[0], 10);
-                    const thirdNumericValue = parseInt(parts.split(',')[2], 10);
-                    values.push(firstNumericValue);
-                    thirdValues.push(thirdNumericValue);
-
-                }
-            }
-        }
-
-        checkNode.push(values);
-        result.push(thirdValues);
-        distance_curr.push(numbersBeforeColon);
+  if (dsMatches) {
+    const dsArray = dsMatches.map((ds) => {
+      const dsContent = ds.match(/<ds>([\s\S]*?)<\/ds>/)[1].trim();
+      const dsLines = dsContent.split("\n");
+      return dsLines.map((line) =>
+        line
+          .trim()
+          .split(/\s+/)
+          .map((val) => (val === "INF" ? "INF" : parseInt(val, 10)))
+      );
     });
 
-    const distance = [];
-
-    const dsMatches = fileContent.match(/<ds>[\s\S]*?<\/ds>/g);
-
-    if (dsMatches) {
-        const dsArray = dsMatches.map(ds => {
-            const dsContent = ds.match(/<ds>([\s\S]*?)<\/ds>/)[1].trim();
-            const dsLines = dsContent.split('\n');
-            return dsLines
-                .map(line => line.trim().split(/\s+/).map(val => (val === 'INF' ? 'INF' : parseInt(val, 10))));
-        });
-
-
-        for (let i = 0; i < dsArray.length; i++) {
-            distance.push(dsArray[i][1]);
-        }
-
+    for (let i = 0; i < dsArray.length; i++) {
+      distance.push(dsArray[i][1]);
     }
-    
-    // to remove the undefined (0) error due to timeout function
-    checkNode.push([]);
-    result.push([]);
-    
-    console.log(distance);
-    console.log(checkNode);
-    console.log(result);
+  }
 
-    console.log(curr_node);
+  const pathData = fileContent.match(/<result>[\s\S]*?<\/result>/g);
 
-    const responseData = {
-        result,
-        checkNode,
-        distance,
-        distance_curr,
-        curr_node,
-    };
+  const matches = pathData[0].match(/\t(.*?)\r/g);
 
-    res.json(responseData);
+  const path = matches.map((match) => match.trim().split(" ").map(Number));
+
+  // to remove the undefined (0) error due to timeout function
+  checkNode.push([]);
+  result.push([]);
+
+  console.log(distance);
+  console.log(checkNode);
+  console.log(result);
+
+  console.log(curr_node);
+  console.log(path);
+
+  const responseData = {
+    result,
+    checkNode,
+    distance,
+    distance_curr,
+    curr_node,
+    path,
+  };
+
+  res.json(responseData);
 });
-
 
 app.listen(port, () => {
-    console.log(`Server listening on port ${port}`);
+  console.log(`Server listening on port ${port}`);
 });
