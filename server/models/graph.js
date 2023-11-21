@@ -20,8 +20,8 @@ const GraphSchema = new Schema({
     },
     name : {
         type: String,
-        required: true,
-        unique: true
+        required: true
+        // unique: true
     },
     favourite: {
         type: Boolean,
