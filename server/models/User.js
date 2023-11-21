@@ -21,8 +21,12 @@ const UserSchema = new Schema({
     date: {
         type : Date, 
         default : Date.now
+    },
+    graphs:{
+        type: Number,
+        default: 1,
+        required: true
     }
-
 });
 
 // const user = mongoose.model('user', UserSchema);

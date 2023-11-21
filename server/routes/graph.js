@@ -51,6 +51,7 @@ router.post("/addgraph", fetchuser,[
     }
 });
 router.put('/updatefavgraph/:id', fetchuser,
+  body("favourite", "Enter a valid favourite detail").isBoolean(),
   async (req, res) => {
     try {
     const { favourite } = req.body;
@@ -69,6 +70,39 @@ router.put('/updatefavgraph/:id', fetchuser,
     } catch (err) {
     console.error(err);
     res.status(500).send("INTERNAL SERVER ERROR : Some error occured");
+  }
+  }
+);
+
+router.put('/updatenamegraph/:id', fetchuser,
+  body("name", "Enter a valid unique name").isLength({ min: 1, max : 25}),
+  async (req, res) => {
+    try {
+    const { name } = req.body;
+    if (name.length > 25) {
+      return res.status(400).json({ success: false, error: "New Name too big" });
+    }
+    const newGraph = {};
+    newGraph.name = name;
+    
+    let graph =await Graph.findById(req.params.id);
+    if(!graph) res.status(404).send("NOT FOUND!");
+
+    if(graph.user.toString() !== req.user.id){
+        return res.status(401).send("NOT ALLOWED");
+    }
+
+    const graph_upd = await Graph.findByIdAndUpdate(req.params.id, {$set : newGraph},{new : true});
+    res.json(graph_upd);
+    } catch (err) {
+      if(err.code=== 11000){
+        //Duplicate key error 
+        return res.status(400).json({success : false, error : "Name Already Exist"});
+    }
+    else{
+    console.error(err);
+    res.status(500).send("INTERNAL SERVER ERROR : Some error occured");
+    }
   }
   }
 );
