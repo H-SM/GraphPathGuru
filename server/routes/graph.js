@@ -24,6 +24,7 @@ router.post("/addgraph", fetchuser,[
   ],
   async (req, res) => {
     try {
+      console.log(req.body);
     const { result, graph, name, favourite } = req.body;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
