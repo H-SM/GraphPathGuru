@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import graphContext from "../context/Graph/graphContext.js";
 import { useNavigate } from "react-router-dom";
 
@@ -21,6 +21,18 @@ const HistoryItem = (props) => {
     
         return date.toLocaleString("en-US", options);
       };
+
+      const maxLengthCheck = (e) => {
+        if (e.target.value.length > e.target.maxLength) {
+         e.target.value = e.target.value.slice(0, e.target.maxLength)
+          }
+        }
+      const [namechanger,setNamechanger] = useState(false);
+
+      const handleNameChange = () => {
+        setNamechanger(!namechanger);
+      };
+
       //get no. of nodes and edges
       const extractEdgesAndNodes = (graphData) => {
         const lines = graphData.split("\n");
@@ -53,8 +65,22 @@ const HistoryItem = (props) => {
   const sc = resultArray[2]?.trim() || "N/A";
   return (
     <tr class="border-b dark:border-sky-200/80">
-      <td class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6">
-        {graph.name}
+      <td class="relative py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6 w-[18rem] hover:cursor-pointer" onClick={() => {
+        if(namechanger === false) handleNameChange();
+        }}>
+        {namechanger ? 
+        <div className="flex flex-row w-[20vh]">  
+          <div className="relative w-[18vh] h-[4vh]">
+          <input id="nameinp" type ="string" classname="" maxLength = "25" onInput={maxLengthCheck}/>
+          <label htmlFor="nameinp" className=" absolute bottom-0 right-0 text-gray-700 text-sm font-bold ">{25 }</label>
+          </div>
+          <button className="w-[2vh] h-[2vh]" onClick={handleNameChange}>
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="hover:scale-100 scale-95"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M5 5L19 19M5 19L19 5" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+          </button>
+        </div>
+        : 
+        graph.name
+        }
         {/* //TODO: have an update name path in the API */}
       </td>
       <td class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-light font-mono text-opacity-100 text-gray-400 px-6">
