@@ -6,11 +6,13 @@ import { useNavigate } from "react-router-dom";
 const UserSection = () => {
   const context = useContext(userContext);
   const { userData, getuserinfo } = context;
+  useEffect(() => {
+    getuserinfo();
+  }, []);
   let navigate = useNavigate();
   return (
     <>
-      {userData && (
-        <div className="bottom-5 right-7 fixed hover:cursor-pointer" onClick={() => navigate("/settings")}>
+        <div className="bottom-5 right-7 fixed hover:cursor-pointer" onClick={() => navigate("/user")}>
           <div className="bg-gray-400 bg-clip-padding backdrop-filter backdrop-blur-sm bg-opacity-10 border border-white w-[30vh] h-[6vh] sticky rounded-full ring-1 ring-sky-700/50 flex flex-row justify-center items-center gap-x-2">
             <div className="w-[24vh] h-[5vh] justify-end items-center">
               <div className="flex flex-col h-[5vh] justify-center items-end">
@@ -38,7 +40,6 @@ const UserSection = () => {
             </div>
           </div>
         </div>
-      )}
       <div className="bottom-5 left-7 fixed">
         <div className="bg-white-700 w-[20vh] h-[15vh] sticky">
           <p className="text-transparent font-bold">Sid is NOOB</p>

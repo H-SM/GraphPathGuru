@@ -93,7 +93,8 @@ const History = () => {
         </p>
       ) : (
         <>
-        <div className="lg:h-[37rem]">
+        <div className="lg:h-[50rem] xl:h-[37rem]">
+          {/* lg:h-[50rem] xl:h-[37rem] */}
           <div class="flex flex-col mt-8">
             <div class="overflow-x-auto sm:-mx-6 lg:-mx-8 flex-row justify-center items-center gap-y-3">
               <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
@@ -220,10 +221,9 @@ const History = () => {
                   </table>
                 </div>
               </div>
-            </div>
+            </div> 
           </div>
           </div>
-          <div>
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-8 w-full mt-3">
               <IconButton
@@ -250,6 +250,7 @@ const History = () => {
               </IconButton>
             </div>
           )}
+            <div>
           </div>
         </>
       )}
