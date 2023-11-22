@@ -73,7 +73,7 @@ const GraphState = (props) => {
   };
   const editname = async (id, name) => {
     let newGraphs = JSON.parse(JSON.stringify(graphs));
-    //TODO: checker for uniwue naming convention 
+
     for (let index = 0; index < newGraphs.length; index++) {
       const element = newGraphs[index];
       if (element._id === id) {
@@ -87,6 +87,7 @@ const GraphState = (props) => {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
+        "auth-token": localStorage.getItem("token"),
       },
       body: JSON.stringify({ name }),
     });
