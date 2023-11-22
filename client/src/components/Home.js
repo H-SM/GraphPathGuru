@@ -48,6 +48,7 @@ import UserSection from "./UserSection";
 import visualiseYenK from "./AlgoVisualise/YenK";
 import visualiseDjikstra from "./AlgoVisualise/Djikstra";
 import visualiseBellman from "./AlgoVisualise/BellmanFord";
+import visualiseFloyd from "./AlgoVisualise/Floyd";
 
 // TODO: can't ping up the .env file here
 // const host = "http://localhost:5000";
@@ -91,9 +92,10 @@ const AddNodeOnEdgeDrop = () => {
   const { addgraph } = gContext;
 
   const startProcess = () => {
-    visualiseYenK(nodes, edges, setNodes, setEdges);
+    // visualiseYenK(nodes, edges, setNodes, setEdges);
     // visualiseDjikstra(nodes, edges, setNodes, setEdges);
     // visualiseBellman(nodes, edges, setNodes, setEdges);
+    visualiseFloyd(nodes, edges, setNodes, setEdges);
   };
 
   // runs everytime we connect two nodes
@@ -240,40 +242,46 @@ const AddNodeOnEdgeDrop = () => {
   // writing data to file
   const writeFile = async () => {
     const data = {
-        nodes: nodes,
-        edges: edges,
+      nodes: nodes,
+      edges: edges,
+    };
+    console.log("this is data\n", data);
+    const nexter = userData.graphs + 1;
+    const req = await fetch(`${host}/write-file`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+    const response = await req.json();
+    console.log(response);
+    performAlgo();
+    //TODO: async
+    // userData, changegraph
+    changegraph(nexter);
+    console.log(algoID);
+    //TODO: WONT WORK AS UNIQUE NAME SYSTEM NEED TO BE MADE
+    const namer = `${algoID}-${userData.graphs}`;
+    if (namer.length < 0 || namer.length > 25) {
+      alert("name too big (0-15 characters). please make it smaller");
+    } else {
+      console.log(namer);
+      const samp_data = {
+        result:
+          "<result> \n 12321ms \n 12.2MB \n 3,0 \n -1 2 0 \n 0 2 1 \n </result>",
+        graph: "0 -65 -3: 1,12 2,1 \n 1 118 -12: \n 2 182 134: 1,1",
+        name: namer,
+        favourite: false,
       };
-      console.log("this is data\n", data);
-      const nexter = userData.graphs + 1;
-      const req = await fetch(`${host}/write-file`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data.nodes,data.edges),
-      });
-      const response = await req.json();
-      console.log(response);
-      performAlgo();
-      //TODO: async 
-      // userData, changegraph
-      changegraph(nexter);
-          console.log(algoID);
-          //TODO: WONT WORK AS UNIQUE NAME SYSTEM NEED TO BE MADE
-          const namer =  `${algoID}-${userData.graphs}`;
-          if(namer.length < 0 || namer.length > 25){
-              alert("name too big (0-15 characters). please make it smaller")
-          }else{
-          console.log(namer);
-          const samp_data = { 
-              result : "<result> \n 12321ms \n 12.2MB \n 3,0 \n -1 2 0 \n 0 2 1 \n </result>",
-              graph: "0 -65 -3: 1,12 2,1 \n 1 118 -12: \n 2 182 134: 1,1",
-              name : namer,
-              favourite : false
-          }
-          console.log(samp_data);
-          addgraph(samp_data.result, samp_data.graph, samp_data.name, samp_data.favourite);
-        }
+      console.log(samp_data);
+      addgraph(
+        samp_data.result,
+        samp_data.graph,
+        samp_data.name,
+        samp_data.favourite
+      );
+    }
   };
 
   // Object to map the correct algo ID for back end
@@ -469,14 +477,53 @@ const AddNodeOnEdgeDrop = () => {
                         <span class="absolute inset-0 w-full h-full duration-300 delay-300 bg-gray-900 opacity-0 group-hover:opacity-100"></span>
                         <span class="relative transition-colors duration-300 delay-200 group-hover:text-white ease font-bold">Perform Dijktra</span>
                     </button> */}
-          <label htmlFor="dropdown" className=" text-gray-700 text-sm font-bold ">Select an Algorithm:</label>
-          <select id="dropdown" className="text-gray-700 ap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-bold shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 mt-[-1vh]"  onChange={selectAlgo} value={algoID || ""}>
-            <option className="text-gray-700 text-sm font-semibold" value="Dijkstra" defaultChecked>Dijkstra</option>
-            <option className="text-gray-700 text-sm font-semibold" value="Bellman Ford">Bellman Ford</option>
-            <option className="text-gray-700 text-sm font-semibold" value="SPFA">SPFA</option>
-            <option className="text-gray-700 text-sm font-semibold" value="Floyd Warshall">Floyd Warshall</option>
-            <option className="text-gray-700 text-sm font-semibold" value="Johnson's Algorithm">Johnson's Algorithm</option>
-            <option className="text-gray-700 text-sm font-semibold" value="Yen's K shortest Paths">
+          <label
+            htmlFor="dropdown"
+            className=" text-gray-700 text-sm font-bold "
+          >
+            Select an Algorithm:
+          </label>
+          <select
+            id="dropdown"
+            className="text-gray-700 ap-x-1.5 rounded-md bg-white px-3 py-2 text-sm font-bold shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 mt-[-1vh]"
+            onChange={selectAlgo}
+            value={algoID || ""}
+          >
+            <option
+              className="text-gray-700 text-sm font-semibold"
+              value="Dijkstra"
+              defaultChecked
+            >
+              Dijkstra
+            </option>
+            <option
+              className="text-gray-700 text-sm font-semibold"
+              value="Bellman Ford"
+            >
+              Bellman Ford
+            </option>
+            <option
+              className="text-gray-700 text-sm font-semibold"
+              value="SPFA"
+            >
+              SPFA
+            </option>
+            <option
+              className="text-gray-700 text-sm font-semibold"
+              value="Floyd Warshall"
+            >
+              Floyd Warshall
+            </option>
+            <option
+              className="text-gray-700 text-sm font-semibold"
+              value="Johnson's Algorithm"
+            >
+              Johnson's Algorithm
+            </option>
+            <option
+              className="text-gray-700 text-sm font-semibold"
+              value="Yen's K shortest Paths"
+            >
               Yen's K shortest Paths
             </option>
           </select>
