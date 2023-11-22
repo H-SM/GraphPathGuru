@@ -21,17 +21,6 @@ using std::vector;
 pair<vector<int>, vector<int>> floyd(int V, vector<vector<int>> &adj, int S, std::string &output)
 {
 
-    // Initialising distTo list with a large number to
-    // indicate the nodes are unvisited initially.
-    // This list contains distance from source to the nodes.
-    vector<int> distTo(V, INT_MAX);
-
-    // Predecessor list is initialized to -1. A -1 in the final pred list means that that node is unreachable.
-    vector<int> pred(V, -1);
-
-    // Source initialised with dist=0.
-    distTo[S] = 0;
-
     // size of the adjacency matrix
     int n = adj.size();
 
@@ -39,36 +28,40 @@ pair<vector<int>, vector<int>> floyd(int V, vector<vector<int>> &adj, int S, std
     for (int k = 0; k < n; k++)
     {
         output += "<ds>\n\t";
-        output += std::to_string(k); // via k node
 
-        output += "\n\t";
-        for (auto &d : distTo)
-        { // Putting dist to output
-            if (d == INT_MAX)
-                output += "INF ";
-            else
-                output += std::to_string(d) + " ";
+        for (int a = 0; a < adj.size(); a++)
+        {
+            for (int b = 0; b < adj.size(); b++)
+            {
+                if(adj[a][b] == 1e9)
+                {
+                    output += "INF ";
+                }
+                else
+                    output += std::to_string(adj[a][b]) + " ";
+            }
+            output += "\n\t";
         }
-        output += "\n\t";
-        for (auto &p : pred)
-        { // putting pred to output
-            output += std::to_string(p) + " ";
-        }
+
         output += "\n</ds>\n"; // <ds> stops here
 
         for (int i = 0; i < n; i++)
         {
             output += "<adj>\n\t"; // Adj begins here
-            output += std::to_string(i) + ", " + std::to_string(distTo[i]) + ":";
+            output += std::to_string(i) + ", " + std::to_string(adj[i][k]) + ":";
 
             // check for all the nodes
             for (int j = 0; j < n; j++)
             {
-                output += "\n\t" + std::to_string(j) + ", " + std::to_string(distTo[j]) + ", ";
+                if (i == j)
+                {
+                    adj[i][j] = 0;
+                    continue;
+                }
+
+                output += "\n\t" + std::to_string(j) + ", " + std::to_string(adj[i][j]) + ", ";
 
                 // distance from node to itseld will be zero
-                if (i == j)
-                    adj[i][j] = 0;
 
                 bool f = 0;
 
@@ -79,21 +72,17 @@ pair<vector<int>, vector<int>> floyd(int V, vector<vector<int>> &adj, int S, std
                     {
                         f = 1;
                         adj[i][j] = adj[i][k] + adj[k][j];
-                        pred[j] = k;
-                        distTo[j] = adj[S][j]; // updating distance from source to j
                     }
                 }
 
                 if (f) // outputing different things depending on comparision result
-                    output += "1, " + std::to_string(pred[j]) + ", " + std::to_string(distTo[j]);
+                    output += "1,";
                 else
-                    output += "0, -1, -1";
+                    output += "0,";
             }
             output += "\n</adj>\n";
         }
     }
-
-    return {distTo, pred};
 }
 
 vector<int> restore_path(int s, int t, vector<int> const &p)
@@ -152,6 +141,18 @@ pair<int, vector<vector<int>>> make_graph()
     pair<int, vector<vector<int>>> res;
     int V = lines.size();
     vector<vector<int>> adj(V, vector<int>(V, 1e9));
+
+    for (int i = 0; i < adj.size(); i++)
+    {
+        for (int j = 0; j < adj.size(); j++)
+        {
+            if (i == j)
+            {
+                adj[i][j] = 0;
+            }
+        }
+    }
+
     for (auto line : lines)
     {
         int pointer = 0;
@@ -244,24 +245,19 @@ int main()
     auto adj = g.second;
     std::string output;
 
-    auto temp = floyd(V, adj, S, output);
+    floyd(V, adj, S, output);
 
-    auto dists = temp.first, pred = temp.second;
     output += "<result>\n\t";
-    output += std::to_string(V) + "," + std::to_string(S) + "\n\t";
 
-    for (auto i : pred)
+    for (int a = 0; a < adj.size(); a++)
     {
-        output += std::to_string(i) + " ";
+        for (int b = 0; b < adj.size(); b++)
+        {
+            output += std::to_string(adj[a][b]) + " ";
+        }
+        output += "\n\t";
     }
-    output += "\n\t";
 
-    std::vector<int> path = restore_path(S, t, pred);
-
-    for (int i = 0; i < V; i++)
-    {
-        output += std::to_string(dists[i]) + " ";
-    }
     output += "\n</result>\n";
 
     // Storing the result for front end to read
