@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import graphContext from "../context/Graph/graphContext.js";
 import { useNavigate } from "react-router-dom";
 
@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 const HistoryItem = (props) => {
     let context = useContext(graphContext);
     const navigate = useNavigate();
-    const { editfavgraph } = context;
+    const { editfavgraph, editname } = context;
 
     const formatTime = (isoTime) => {
         const date = new Date(isoTime);
@@ -27,8 +27,7 @@ const HistoryItem = (props) => {
          e.target.value = e.target.value.slice(0, e.target.maxLength)
           }
         }
-      const [namechanger,setNamechanger] = useState(false);
-
+    
       const handleNameChange = () => {
         setNamechanger(!namechanger);
       };
@@ -56,7 +55,28 @@ const HistoryItem = (props) => {
   const { graph } = props;
   const { numNodes, numEdges } = extractEdgesAndNodes(
     graph.graph
-  );
+  ); 
+
+  const [namechanger,setNamechanger] = useState(false);
+  const [newname, setNewname ] = useState('');
+
+  const onChange = (e) =>{
+    setNewname(e.target.value);
+  }
+
+  const handleclick = () =>{
+    if(newname !== ''){
+      editname(graph._id, newname);
+    }else{
+      alert("the feild was empty!");
+    }
+    setNamechanger(!namechanger);
+  }
+
+  // useEffect(() =>{
+  //   console.log(graph._id);
+  // },[props])
+
   // Extract TC and SC from the result string
   const resultArray = graph.result
     .split("\n")
@@ -69,14 +89,24 @@ const HistoryItem = (props) => {
         if(namechanger === false) handleNameChange();
         }}>
         {namechanger ? 
-        <div className="flex flex-row w-[20vh]">  
-          <div className="relative w-[18vh] h-[4vh]">
-          <input id="nameinp" type ="string" classname="" maxLength = "25" onInput={maxLengthCheck}/>
-          <label htmlFor="nameinp" className=" absolute bottom-0 right-0 text-gray-700 text-sm font-bold ">{25 }</label>
+        <div className="flex flex-row w-[24vh]">  
+          <div className="relative w-[22vh] h-[3vh] ">
+          <input id="nameinp" type ="string" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-1" maxLength = "25" onInput={maxLengthCheck}
+          //  value={newname}
+          onChange={onChange} placeholder={graph.name}
+           />
+          <label htmlFor="nameinp" className="absolute bottom-0 right-2 text-gray-700/30 text-md font-semibold">{25 - newname.length}</label>
           </div>
-          <button className="w-[2vh] h-[2vh]" onClick={handleNameChange}>
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="hover:scale-100 scale-95"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M5 5L19 19M5 19L19 5" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+          <div className="flex items-center justify-center h-[3vh]">
+          <button className="w-[2vh] " onClick={handleNameChange}>
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition ease-in-out duration-200 scale-90 hover:scale-100"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M5 5L19 19M5 19L19 5" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
           </button>
+
+          <button className="w-[2vh] transition ease-in-out duration-200 scale-90 hover:scale-100" onClick={handleclick}>
+          <svg viewBox="0 -0.5 25 25" className="hover:scale-100 scale-95  w-5 h-5" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M5.5 12.5L10.167 17L19.5 8" stroke="#000000" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path> </g></svg>
+          </button>
+
+          </div>
         </div>
         : 
         graph.name
