@@ -4,8 +4,8 @@ import { Link } from 'react-router-dom'
 const HeroSection = () => {
   return (
     <>
-    <div class="relative z-10 pb-5 pt-1">
-      <div class="relative z-20 mx-auto max-w-container px-4 pt-14 sm:px-6 sm:pt-20 lg:px-8"><div class="mx-auto max-w-[45rem] text-center"><h1 class="text-base font-semibold leading-7 text-sky-500">Make graphs the way you want.</h1><p class="mt-4 text-5xl font-extrabold leading-[3.5rem] tracking-tight text-slate-900">Make Graphs, anywhere.</p><p class="mt-4 text-lg text-slate-700"> Shortest path algorithms can be difficult to understand due to their complexity. We aim to simplify them through visualization.Educators struggle to teach these complex algorithms effectively. Our project provides an interactive learning tool.</p></div></div></div>
+    <div className="relative z-10 pb-5 pt-1">
+      <div className="relative z-20 mx-auto max-w-container px-4 pt-14 sm:px-6 sm:pt-20 lg:px-8"><div className="mx-auto max-w-[45rem] text-center"><h1 className="text-base font-semibold leading-7 text-sky-500">Make graphs the way you want.</h1><p className="mt-4 text-5xl font-extrabold leading-[3.5rem] tracking-tight text-slate-900">Make Graphs, anywhere.</p><p className="mt-4 text-lg text-slate-700"> Shortest path algorithms can be difficult to understand due to their complexity. We aim to simplify them through visualization.Educators struggle to teach these complex algorithms effectively. Our project provides an interactive learning tool.</p></div></div></div>
 
       <div className="z-30">
       <div className="mx-auto max-w-7xl py-24 sm:px-6 sm:py-32 lg:px-8">

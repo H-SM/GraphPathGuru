@@ -25,20 +25,20 @@ const Docpage = () => {
     <div>
       <NavbarOut />
 
-      <div class="isolate bg-white px-6 py-24 sm:py-32 lg:px-8">
+      <div className="isolate bg-white px-6 py-24 sm:py-32 lg:px-8">
         
 
-        <div class="mx-auto max-w-2xl text-center">
-          <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+        <div className="mx-auto max-w-2xl text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Documentation
           </h2>
-          <p class="mt-2 text-lg leading-8 text-gray-600">
+          <p className="mt-2 text-lg leading-8 text-gray-600">
             Know our project further with the diverse documentation over various aspects
           </p>
         </div>
 
         <div className='flex justify-center items-center mt-9'>
-          <section class="grid grid-cols-1 gap-x-8 gap-y-6 pb-20 xl:grid-cols-4"><h2 class="text-3xl font-bold tracking-tight text-slate-900">Start Looking into it!</h2><div class="col-span-3"><div class="max-w-[54rem] text-lg leading-8 text-slate-600"><p>Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy.</p><p class="mt-6">Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).</p></div></div></section>
+          <section className="grid grid-cols-1 gap-x-8 gap-y-6 pb-20 xl:grid-cols-4"><h2 className="text-3xl font-bold tracking-tight text-slate-900">Start Looking into it!</h2><div className="col-span-3"><div className="max-w-[54rem] text-lg leading-8 text-slate-600"><p>Many desktop publishing packages and web page editors now use Lorem Ipsum as their default model text, and a search for 'lorem ipsum' will uncover many web sites still in their infancy.</p><p className="mt-6">Various versions have evolved over the years, sometimes by accident, sometimes on purpose (injected humour and the like).</p></div></div></section>
         </div>
 
         <div
@@ -53,27 +53,27 @@ const Docpage = () => {
             }}
           ></div>
         </div>
-        <div class="divide-y divide-slate-700/10 border-t border-slate-700/10 flex justify-center items-center mt-9">
-          <section id="start" class="grid grid-cols-1 gap-x-8 gap-y-6 pb-20 pt-10 xl:grid-cols-4 max-w-[80%] justify-center  ">
-            <h3 class="text-2xl font-semibold leading-9 tracking-tight text-slate-900">How to Start?</h3>
-            <div class="col-span-3">
-              <p class="max-w-3xl text-base leading-8 text-slate-700">Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages.</p>
-              <div class="mt-12 grid grid-cols-1 gap-x-8 gap-y-14 text-sm leading-6 sm:grid-cols-2 lg:grid-cols-3">
-                <div><div class="relative aspect-[280/190] overflow-hidden rounded-xl bg-slate-200"><img src="" alt="" />
-                  <div class="absolute inset-0 rounded-xl ring-1 ring-inset ring-black/5"></div>
+        <div className="divide-y divide-slate-700/10 border-t border-slate-700/10 flex justify-center items-center mt-9">
+          <section id="start" className="grid grid-cols-1 gap-x-8 gap-y-6 pb-20 pt-10 xl:grid-cols-4 max-w-[80%] justify-center  ">
+            <h3 className="text-2xl font-semibold leading-9 tracking-tight text-slate-900">How to Start?</h3>
+            <div className="col-span-3">
+              <p className="max-w-3xl text-base leading-8 text-slate-700">Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages.</p>
+              <div className="mt-12 grid grid-cols-1 gap-x-8 gap-y-14 text-sm leading-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div><div className="relative aspect-[280/190] overflow-hidden rounded-xl bg-slate-200"><img src="" alt="" />
+                  <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-black/5"></div>
                 </div>
-                  <p class="mt-6 text-slate-700"><strong class="font-semibold text-slate-900">Step 1</strong> – There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.</p>
+                  <p className="mt-6 text-slate-700"><strong className="font-semibold text-slate-900">Step 1</strong> – There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour.</p>
                 </div>
                 <div>
-                  <div class="relative aspect-[280/190] overflow-hidden rounded-xl bg-slate-200"><img src="" alt="" /><div class="absolute inset-0 rounded-xl ring-1 ring-inset ring-black/5"></div></div><p class="mt-6 text-slate-700"><strong class="font-semibold text-slate-900">Step 2</strong> – All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet.</p>
+                  <div className="relative aspect-[280/190] overflow-hidden rounded-xl bg-slate-200"><img src="" alt="" /><div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-black/5"></div></div><p className="mt-6 text-slate-700"><strong className="font-semibold text-slate-900">Step 2</strong> – All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet.</p>
                 </div>
-                <div><div class="relative aspect-[280/190] overflow-hidden rounded-xl bg-slate-200"><img src="" alt="" /><div class="absolute inset-0 rounded-xl ring-1 ring-inset ring-black/5"></div></div><p class="mt-6 text-slate-700"><strong class="font-semibold text-slate-900">Step 3</strong> – randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text.</p></div>
+                <div><div className="relative aspect-[280/190] overflow-hidden rounded-xl bg-slate-200"><img src="" alt="" /><div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-black/5"></div></div><p className="mt-6 text-slate-700"><strong className="font-semibold text-slate-900">Step 3</strong> – randomised words which don't look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn't anything embarrassing hidden in the middle of text.</p></div>
               </div>
-              <div class="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-y-10"><div>
-                <p class="text-base leading-7 text-slate-700"><strong class="font-semibold text-slate-900">More on it</strong> — <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</span>
+              <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-y-10"><div>
+                <p className="text-base leading-7 text-slate-700"><strong className="font-semibold text-slate-900">More on it</strong> — <span>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam.</span>
                 </p>
               </div>
-                <div><p class="text-base leading-7 text-slate-700"><strong class="font-semibold text-slate-900">Hundreds of ideas</strong> — <span>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo.</span></p></div></div></div>
+                <div><p className="text-base leading-7 text-slate-700"><strong className="font-semibold text-slate-900">Hundreds of ideas</strong> — <span>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo.</span></p></div></div></div>
           </section>
 
         </div>

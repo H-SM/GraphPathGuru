@@ -67,42 +67,42 @@ const Login = () => {
       }}
     ></div>
   </div>
-  {/* <div class="relative z-20 mx-auto max-w-container px-4 pt-14 sm:px-6 sm:pt-20 lg:px-8">
-    <div class="mx-auto max-w-[45rem] text-center">
-      <h1 class="text-base font-semibold leading-7 text-sky-500">Graphs anywhere, anytime.</h1>
+  {/* <div className="relative z-20 mx-auto max-w-container px-4 pt-14 sm:px-6 sm:pt-20 lg:px-8">
+    <div className="mx-auto max-w-[45rem] text-center">
+      <h1 className="text-base font-semibold leading-7 text-sky-500">Graphs anywhere, anytime.</h1>
       <div className='flex justify-center items-center'>
     <img src={logo} alt="logo_here" className='w-[50vh]'/>
     </div> */}
-    {/* <p class="mt-4 text-md text-slate-700"> Shortest path algorithms can be difficult to understand due to their complexity. We aim to simplify them through visualization.Educators struggle to teach these complex algorithms effectively. Our project provides an interactive learning tool.</p> */}
+    {/* <p className="mt-4 text-md text-slate-700"> Shortest path algorithms can be difficult to understand due to their complexity. We aim to simplify them through visualization.Educators struggle to teach these complex algorithms effectively. Our project provides an interactive learning tool.</p> */}
     {/* </div>
     </div> */}
     <section >
-  <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-      <a href="#" class="flex items-center mb-6">
-          <img class="w-[25vh]" src={logo} alt="logo"/>    
+  <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+      <a href="#" className="flex items-center mb-6">
+          <img className="w-[25vh]" src={logo} alt="logo"/>    
       </a>
-      <div class="w-full bg-transparent rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0">
-          <div class="p-6 space-y-4 md:space-y-6 sm:p-8">
-              <h1 class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl ">
+      <div className="w-full bg-transparent rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0">
+          <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
+              <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl ">
                   {signup ? "Create a new account" : "Sign in to your account"}
               </h1>
-              <form onSubmit={handleSubmit} class="space-y-4 md:space-y-6" action="#">
+              <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6" action="#">
                 {signup &&
                     <div>
-                      <label for="text" class="block mb-2 text-sm font-medium text-gray-900 ">Your name</label>
-                      <input type="text" name="name" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 " placeholder="h-sm" onChange={onChange} minLength={3} required/>
+                      <label htmlFor="text" className="block mb-2 text-sm font-medium text-gray-900 ">Your name</label>
+                      <input type="text" name="name" id="name" className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 " placeholder="h-sm" onChange={onChange} minLength={3} required/>
                   </div>
                 }
                   <div>
-                      <label for="email" class="block mb-2 text-sm font-medium text-gray-900 ">Your email</label>
-                      <input type="email" name="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 " placeholder="email@gmail.com" onChange={onChange} minLength={3} required/>
+                      <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-900 ">Your email</label>
+                      <input type="email" name="email" id="email" className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 " placeholder="email@gmail.com" onChange={onChange} minLength={3} required/>
                   </div>
                   <div >
                     <div className='relative'>
-                      <label for="password" class="block mb-2 text-sm font-medium text-gray-900">Password</label>
+                      <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-900">Password</label>
                       <input type=
                       {showpassword ? 'text' : 'password'}
-                       name="password" id="password" placeholder={showpassword ? 'password' : "••••••••"} class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" onChange={onChange} minLength={3} required/>
+                       name="password" id="password" placeholder={showpassword ? 'password' : "••••••••"} className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" onChange={onChange} minLength={3} required/>
             <button
               type="button"
               className="absolute right-3 top-[55%] text-[#fff] focus:outline-none"
@@ -110,12 +110,12 @@ const Login = () => {
             >
              
               {showpassword ? (
-                <svg class="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 18">
-                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M1.933 10.909A4.357 4.357 0 0 1 1 9c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 19 9c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M2 17 18 1m-5 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+                <svg className="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 18">
+                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M1.933 10.909A4.357 4.357 0 0 1 1 9c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 19 9c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M2 17 18 1m-5 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
               </svg>         
               ) : (
-                <svg class="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 14">
-                <g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+                <svg className="w-6 h-6 text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 14">
+                <g stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2">
                   <path d="M10 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/>
                   <path d="M10 13c4.97 0 9-2.686 9-6s-4.03-6-9-6-9 2.686-9 6 4.03 6 9 6Z"/>
                 </g>
@@ -124,19 +124,19 @@ const Login = () => {
             </button>
             </div>
                 {!signup ? 
-                      <a href="#" class="text-sm text-end font-medium text-primary-600 hover:underline">Forgot password?</a> 
+                      <a href="#" className="text-sm text-end font-medium text-primary-600 hover:underline">Forgot password?</a> 
                       : 
                       <div>
-                      <label for="password" class="block mb-2 mt-4 text-sm font-medium text-gray-900">Refill password</label>
+                      <label htmlFor="password" className="block mb-2 mt-4 text-sm font-medium text-gray-900">Refill password</label>
                       <input type='password'
-                       name="cpassword" id="cpassword" placeholder= "••••••••" class="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" onChange={onChange} minLength={3} required/>
+                       name="cpassword" id="cpassword" placeholder= "••••••••" className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5" onChange={onChange} minLength={3} required/>
             </div>
             }
                   </div>
-                  <button type='submit' class="w-full text-white bg-cyan-600 hover:bg-cyan-500 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg px-5 py-2.5 text-center">{signup ? "Sign up" : "Log in"}</button>
-                  <p class="text-sm font-light">
+                  <button type='submit' className="w-full text-white bg-cyan-600 hover:bg-cyan-500 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg px-5 py-2.5 text-center">{signup ? "Sign up" : "Log in"}</button>
+                  <p className="text-sm font-light">
                       {signup ? "Already have an account? " : "Don't have an account yet? "}
-                      <a onClick={() => setSignup(!signup)} class="font-medium text-primary-600 hover:underline hover:cursor-pointer select-none">{ signup ? "Log in":"Sign up"}</a>
+                      <a onClick={() => setSignup(!signup)} className="font-medium text-primary-600 hover:underline hover:cursor-pointer select-none">{ signup ? "Log in":"Sign up"}</a>
                   </p>
               </form>
           </div>
