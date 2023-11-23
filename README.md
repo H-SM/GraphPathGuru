@@ -31,3 +31,7 @@ GraphPathGuru/
 ```bash 
 REACT_APP_BACKEND_LOCALHOST=http://localhost:5000
 ```
+
+<a href="https://github.com/H-SM/GraphPathGuru/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=H-SM/GraphPathGuru" />
+</a>
