@@ -34,28 +34,21 @@ const HistoryItem = (props) => {
 
       //get no. of nodes and edges
       const extractEdgesAndNodes = (graphData) => {
-        const lines = graphData.split("\n");
-    
-        let numEdges = 0;
-        let numNodes = 0;
-    
-        lines.forEach((line) => {
-          const parts = line.split(" ");
-    
-          if (parts.length >= 1) {
-            numNodes++;
-    
-            // TODO: show's wrong answer
-            numEdges += parts.length - 1;
-          }
-        });
-    
-        return { numEdges, numNodes };
+        let edges = [];
+        let nodes = [];
+        return { edges, nodes };
       };
+
+      const extractEdgeNodeCounts = (result) => {
+        const lines = result.split("\n");
+        return [1 , 2];
+      }
   const { graph } = props;
-  const { numNodes, numEdges } = extractEdgesAndNodes(
+  const { edges, nodes } = extractEdgesAndNodes(
     graph.graph
   ); 
+  let numNodes = 0;
+  let numEdges = 0;
 
   const [namechanger,setNamechanger] = useState(false);
   const [newname, setNewname ] = useState('');

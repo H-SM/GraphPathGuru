@@ -239,6 +239,16 @@ const AddNodeOnEdgeDrop = () => {
     setEdges(updatedEdges);
   };
 
+  // TODO: make a POST request to take out the graph string and 
+  const extract_graph = () => {
+      return;
+  };
+
+  const extract_result = () => {
+    return;
+  };
+
+
   // writing data to file
   const writeFile = async () => {
     const data = {
@@ -261,7 +271,6 @@ const AddNodeOnEdgeDrop = () => {
     // userData, changegraph
     changegraph(nexter);
     console.log(algoID);
-    //TODO: WONT WORK AS UNIQUE NAME SYSTEM NEED TO BE MADE
     const namer = `${algoID}-${userData.graphs}`;
     if (namer.length < 0 || namer.length > 25) {
       alert("name too big (0-15 characters). please make it smaller");
@@ -376,6 +385,7 @@ const AddNodeOnEdgeDrop = () => {
   useEffect(() => {
     console.log(userData);
   }, [userData]);
+  
   return (
     <>
       <div className="flex justify-center items-center">
@@ -405,12 +415,6 @@ const AddNodeOnEdgeDrop = () => {
       >
         <div
           className="wrapper w-[70%] h-[80vh] ring-2 ring-zinc-200 ring-offset-2 rounded-sm"
-          // style={{
-          //     width: "80%",
-          //     height: "100vh",
-          //     // borderColor: "black",
-          //     // borderWidth: "3px"
-          // }}
           ref={reactFlowWrapper}
         >
           <ReactFlow

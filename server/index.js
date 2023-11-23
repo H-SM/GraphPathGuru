@@ -137,6 +137,13 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
+
+// app.get("/read-file", (req, res) => {
+//     const lines = fs.readFileSync("./file io/output.txt", "utf-8");
+
+// }
+
+
 app.get("/read-file", (req, res) => {
   const fileContent = fs.readFileSync("./file io/output.txt", "utf-8");
 
