@@ -1,6 +1,6 @@
 import React, { useContext, useEffect } from "react";
 import userContext from "../context/User/userContext";
-import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
+import { UserCircleIcon } from "@heroicons/react/24/solid";
 import { useNavigate } from "react-router-dom";
 
 const UserSection = () => {

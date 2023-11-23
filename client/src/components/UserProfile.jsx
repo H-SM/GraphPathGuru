@@ -59,7 +59,7 @@ const UserProfile = () => {
             <div className="w-full flex justify-center">
                 <div className="relative">
                   {userData?.image ?
-                    <img src={userData?.image} className="shadow-xl rounded-full align-middle border-none absolute -m-16 -ml-20 lg:-ml-16 max-w-[150px] bg-white"/>
+                    <img src={userData?.image} className="shadow-xl rounded-full align-middle border-none absolute -m-16 -ml-20 lg:-ml-16 max-w-[150px] bg-white" alt='pfp'/>
                     :
                     <UserCircleIcon className="shadow-xl rounded-full align-middle border-none absolute -m-16 -ml-20 lg:-ml-16 max-w-[150px] bg-white"/>}
                 </div>

@@ -1,10 +1,7 @@
 import React, { useContext, useState } from 'react';
-import Navbar from './Navbar';
 import logo from '../assets/logo.png';
 import userContext from "../context/User/userContext";
 import { useNavigate } from 'react-router-dom';
-import Footer from './Footer';
-
 
 const Login = () => {
   const [ credentails , setCredentails ] =useState({email: "", password: "", name : "", cpassword: ""});
@@ -78,9 +75,9 @@ const Login = () => {
     </div> */}
     <section >
   <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-      <a href="#" className="flex items-center mb-6">
+      <div className="flex items-center mb-6">
           <img className="w-[25vh]" src={logo} alt="logo"/>    
-      </a>
+      </div>
       <div className="w-full bg-transparent rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0">
           <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
               <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl ">
@@ -124,7 +121,7 @@ const Login = () => {
             </button>
             </div>
                 {!signup ? 
-                      <a href="#" className="text-sm text-end font-medium text-primary-600 hover:underline">Forgot password?</a> 
+                      <a href="/forgot-password" className="text-sm text-end font-medium text-primary-600 hover:underline">Forgot password?</a> 
                       : 
                       <div>
                       <label htmlFor="password" className="block mb-2 mt-4 text-sm font-medium text-gray-900">Refill password</label>
@@ -134,10 +131,10 @@ const Login = () => {
             }
                   </div>
                   <button type='submit' className="w-full text-white bg-cyan-600 hover:bg-cyan-500 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg px-5 py-2.5 text-center">{signup ? "Sign up" : "Log in"}</button>
-                  <p className="text-sm font-light">
-                      {signup ? "Already have an account? " : "Don't have an account yet? "}
-                      <a onClick={() => setSignup(!signup)} className="font-medium text-primary-600 hover:underline hover:cursor-pointer select-none">{ signup ? "Log in":"Sign up"}</a>
-                  </p>
+                  <div className="text-sm font-light flex flex-row items-center justify-center gap-1">
+                      <p>{signup ? "Already have an account? " : "Don't have an account yet? "}</p>
+                      <p onClick={() => setSignup(!signup)} className="font-medium text-primary-600 hover:underline hover:cursor-pointer select-none">{ signup ? "Log in":"Sign up"}</p>
+                  </div>
               </form>
           </div>
       </div>
