@@ -3,7 +3,7 @@ import graphContext from "../context/Graph/graphContext.js";
 import { useNavigate } from "react-router-dom";
 import { IconButton, Typography } from "@material-tailwind/react";
 import { ArrowRightIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
-import HistoryItem from "./HistoryItem.js";
+import HistoryItem from "./HistoryItem";
 
 const History = () => {
   const [active, setActive] = useState(1);
@@ -66,18 +66,17 @@ const History = () => {
   const endIndex = startIndex + itemsPerPage;
   return (
     <>
-      <div
-        id="team"
-        class="relative z-20 mx-auto max-w-container px-4 pt-14 sm:px-6 sm:pt-20 lg:px-8"
+      <div id="history"
+        className="relative z-20 mx-auto max-w-container px-4 pt-14 sm:px-6 sm:pt-20 lg:px-8"
       >
-        <div class="mx-auto max-w-[45rem] text-center">
-          <h1 class="text-base font-semibold leading-7 text-sky-500">
+        <div className="mx-auto max-w-[45rem] text-center">
+          <h1 className="text-base font-semibold leading-7 text-sky-500">
             What all you did before?
           </h1>
-          <p class="mt-4 text-5xl font-extrabold leading-[3.5rem] tracking-tight text-slate-900">
+          <p className="mt-4 text-5xl font-extrabold leading-[3.5rem] tracking-tight text-slate-900">
             Your History.
           </p>
-          <p class="mt-4 text-lg text-slate-700">
+          <p className="mt-4 text-lg text-slate-700">
             {" "}
             Explore your journey through captivating graphs! Your user history
             showcases the beautiful tapestry of charts and insights you've woven
@@ -95,14 +94,14 @@ const History = () => {
         <>
         <div className="lg:h-[50rem] xl:h-[37rem]">
           {/* lg:h-[50rem] xl:h-[37rem] */}
-          <div class="flex flex-col mt-8">
-            <div class="overflow-x-auto sm:-mx-6 lg:-mx-8 flex-row justify-center items-center gap-y-3">
-              <div class="inline-block min-w-full py-2 sm:px-6 lg:px-8">
-                <div class="mx-[10%] overflow-hidden">
-                  <div class="flex flex-row justify-end my-1 sm:mb-0">
-                    <div class="relative">
+          <div className="flex flex-col mt-8">
+            <div className="overflow-x-auto sm:-mx-6 lg:-mx-8 flex-row justify-center items-center gap-y-3">
+              <div className="inline-block min-w-full py-2 sm:px-6 lg:px-8">
+                <div className="mx-[10%] overflow-hidden">
+                  <div className="flex flex-row justify-end my-1 sm:mb-0">
+                    <div className="relative">
                       <select
-                        class="appearance-none h-full rounded-md border-t sm:rounded-r-none sm:border-r-0 border-r border-b block w-full bg-white border-sky-700 text-gray-700 py-2 px-4 pr-8 leading-tight focus:outline-none focus:border-l focus:border-r focus:bg-white focus:border-gray-500 focus:ring-0 focus:ring-offset-0"
+                        className="appearance-none h-full rounded-md border-t sm:rounded-r-none sm:border-r-0 border-r border-b block w-full bg-white border-sky-700 text-gray-700 py-2 px-4 pr-8 leading-tight focus:outline-none focus:border-l focus:border-r focus:bg-white focus:border-gray-500 focus:ring-0 focus:ring-offset-0"
                         value={sorterGraph}
                         onChange={(e) => setSorterGraph(e.target.value)}
                       >
@@ -112,18 +111,18 @@ const History = () => {
                       </select>
                     </div>
 
-                    <div class="block relative">
-                      <span class="h-full absolute inset-y-0 left-0 flex items-center pl-2">
+                    <div className="block relative">
+                      <span className="h-full absolute inset-y-0 left-0 flex items-center pl-2">
                         <svg
                           viewBox="0 0 24 24"
-                          class="h-4 w-4 fill-current text-gray-500"
+                          className="h-4 w-4 fill-current text-gray-500"
                         >
                           <path d="M10 4a6 6 0 100 12 6 6 0 000-12zm-8 6a8 8 0 1114.32 4.906l5.387 5.387a1 1 0 01-1.414 1.414l-5.387-5.387A8 8 0 012 10z"></path>
                         </svg>
                       </span>
                       <input
                         placeholder="Search (Name)"
-                        class="appearance-none rounded-r rounded-l sm:rounded-l-none border border-sky-700 border-b block pl-8 pr-6 py-2 w-full bg-white text-sm placeholder-gray-400 text-gray-700 focus:bg-white focus:placeholder-gray-600 focus:text-gray-700 focus:outline-none focus:ring-0 focus:ring-offset-0"
+                        className="appearance-none rounded-r rounded-l sm:rounded-l-none border border-sky-700 border-b block pl-8 pr-6 py-2 w-full bg-white text-sm placeholder-gray-400 text-gray-700 focus:bg-white focus:placeholder-gray-600 focus:text-gray-700 focus:outline-none focus:ring-0 focus:ring-offset-0"
                         onChange={(e) => {
                           e.preventDefault();
                           setSearchedGraph(e.target.value);
@@ -131,54 +130,54 @@ const History = () => {
                       />
                     </div>
                   </div>
-                  <table class="min-w-full text-left text-sm font-light">
-                    <thead class="border-b font-medium dark:border-sky-500">
+                  <table className="min-w-full text-left text-sm font-light">
+                    <thead className="border-b font-medium dark:border-sky-500">
                       <tr>
                         <th
                           scope="col"
-                          class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6"
+                          className="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6"
                         >
                           Name
                         </th>
                         <th
                           scope="col"
-                          class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6"
+                          className="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6"
                         >
                           <p className="hidden">Date</p>
                         </th>
                         <th
                           scope="col"
-                          class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6"
+                          className="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6"
                         >
                           Number of Nodes
                         </th>
                         <th
                           scope="col"
-                          class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6"
+                          className="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6"
                         >
                           Number of Edges
                         </th>
                         <th
                           scope="col"
-                          class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6"
+                          className="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6"
                         >
                           Time Taken
                         </th>
                         <th
                           scope="col"
-                          class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6"
+                          className="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6"
                         >
                           Space Taken
                         </th>
                         <th
                           scope="col"
-                          class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6"
+                          className="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6"
                         >
                           <p className="hidden">favourite</p>
                         </th>
                         <th
                           scope="col"
-                          class="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-sky-500 px-6"
+                          className="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-sky-500 px-6"
                         >
                           <p className="hidden">Visit</p>
                         </th>

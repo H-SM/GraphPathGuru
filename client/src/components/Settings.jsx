@@ -4,7 +4,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import contextValue from "../context/User/userContext.js";
 import { useNavigate } from "react-router-dom";
-import CloudinaryUploadWidget from "./cloudinaryUpload.js";
+import CloudinaryUploadWidget from "./cloudinaryUpload";
 
 const Settings = () => {
   const [details, setDetails] = useState({
@@ -121,7 +121,7 @@ const Settings = () => {
     <>
       <Navbar />
 
-      <div class="isolate  px-6 py-24 sm:py-32 lg:px-8">
+      <div className="isolate  px-6 py-24 sm:py-32 lg:px-8">
         <div
           className="absolute inset-x-0 top-[-10rem] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[-20rem]"
           aria-hidden="true"
@@ -135,7 +135,7 @@ const Settings = () => {
           ></div>
         </div>
 
-        <div class="mx-auto max-w-2xl text-center">
+        <div className="mx-auto max-w-2xl text-center">
           <div
             className="absolute 
         right-[17%] top-[25%]
@@ -162,10 +162,10 @@ my-3 mx-3 z-50"
               </svg>
             </button>
           </div>
-          <h2 class="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
             Settings
           </h2>
-          <p class="mt-2 text-lg leading-8 text-gray-600">
+          <p className="mt-2 text-lg leading-8 text-gray-600">
             This information will be displayed publicly so be careful what you
             share.
           </p>
@@ -255,7 +255,7 @@ my-3 mx-3 z-50"
                       >
                         {showOldPassword ? (
                           <svg
-                            class="w-6 h-6 text-gray-800"
+                            className="w-6 h-6 text-gray-800"
                             aria-hidden="true"
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
@@ -263,15 +263,15 @@ my-3 mx-3 z-50"
                           >
                             <path
                               stroke="currentColor"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
                               d="M1.933 10.909A4.357 4.357 0 0 1 1 9c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 19 9c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M2 17 18 1m-5 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
                             />
                           </svg>
                         ) : (
                           <svg
-                            class="w-6 h-6 text-gray-800"
+                            className="w-6 h-6 text-gray-800"
                             aria-hidden="true"
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
@@ -279,9 +279,9 @@ my-3 mx-3 z-50"
                           >
                             <g
                               stroke="currentColor"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
                             >
                               <path d="M10 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
                               <path d="M10 13c4.97 0 9-2.686 9-6s-4.03-6-9-6-9 2.686-9 6 4.03 6 9 6Z" />
@@ -292,7 +292,7 @@ my-3 mx-3 z-50"
                     </div>
                     <a
                       href="#"
-                      class="text-sm text-end font-medium text-primary-600 hover:underline"
+                      className="text-sm text-end font-medium text-primary-600 hover:underline"
                     >
                       Forgot password?
                     </a>
@@ -323,7 +323,7 @@ my-3 mx-3 z-50"
                       >
                         {showNewPassword ? (
                           <svg
-                            class="w-6 h-6 text-gray-800"
+                            className="w-6 h-6 text-gray-800"
                             aria-hidden="true"
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
@@ -331,15 +331,15 @@ my-3 mx-3 z-50"
                           >
                             <path
                               stroke="currentColor"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
                               d="M1.933 10.909A4.357 4.357 0 0 1 1 9c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 19 9c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M2 17 18 1m-5 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
                             />
                           </svg>
                         ) : (
                           <svg
-                            class="w-6 h-6 text-gray-800"
+                            className="w-6 h-6 text-gray-800"
                             aria-hidden="true"
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
@@ -347,9 +347,9 @@ my-3 mx-3 z-50"
                           >
                             <g
                               stroke="currentColor"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                              stroke-width="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth="2"
                             >
                               <path d="M10 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
                               <path d="M10 13c4.97 0 9-2.686 9-6s-4.03-6-9-6-9 2.686-9 6 4.03 6 9 6Z" />
