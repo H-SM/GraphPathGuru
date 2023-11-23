@@ -6,25 +6,22 @@
 #include <queue>
 #include <algorithm>
 #include <Windows.h>
-#include <windows.h>
 #include <chrono>
 
 
-#pragma comment(lib, "Kernel32.lib")
+// #pragma comment(lib, "Kernel32.lib")
 
 
 
 std::string epath;
 
-// using std::pair;
-// using std::greater;
-// using std::vector;
-// using std::priority_queue;
-// using std::string;
-// using std::cout;
-// using std::endl;
-
-using namespace std;
+using std::pair;
+using std::greater;
+using std::vector;
+using std::priority_queue;
+using std::string;
+using std::cout;
+using std::endl;
 
 pair<vector<int>, vector<int>> dijkstra(int V, vector<vector<pair<int, int>>>& adj, int S, std::string &output){
     // Create a priority queue for storing the nodes as a pair {dist,node}
