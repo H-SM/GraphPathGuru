@@ -1,5 +1,5 @@
 import React, { useCallback, useRef, useContext, useEffect, useState } from "react";
-import NavbarOut from "./NavbarOut";
+import NavbarOut from "./NavbarOut.jsx";
 import { Link, useParams } from "react-router-dom";
 import graphContext from "../context/Graph/graphContext.js";
 import userContext from "../context/User/userContext.js";
@@ -25,7 +25,7 @@ import ReactFlow, {
 } from "reactflow";
 
 import "reactflow/dist/style.css";
-import Footer from "./Footer.js";
+import Footer from "./Footer";
 
 
 

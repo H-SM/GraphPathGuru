@@ -50,8 +50,6 @@ import visualiseDjikstra from "./AlgoVisualise/Djikstra";
 import visualiseBellman from "./AlgoVisualise/BellmanFord";
 import visualiseFloyd from "./AlgoVisualise/Floyd";
 
-// TODO: can't ping up the .env file here
-// const host = "http://localhost:5000";
 const host = process.env.REACT_APP_BACKEND_LOCALHOST;
 
 const initialNodes = [
@@ -264,17 +262,14 @@ const AddNodeOnEdgeDrop = () => {
       body: JSON.stringify(data),
     });
     const response = await req.json();
-    console.log(response);
     performAlgo();
     //TODO: async
     // userData, changegraph
     changegraph(nexter);
-    console.log(algoID);
     const namer = `${algoID}-${userData.graphs}`;
     if (namer.length < 0 || namer.length > 25) {
-      alert("name too big (0-15 characters). please make it smaller");
+      alert("name too big (0-25 characters) . please make it smaller");
     } else {
-      console.log(namer);
       const samp_data = {
         result:
           "<result> \n 12321ms \n 12.2MB \n 3,0 \n -1 2 0 \n 0 2 1 \n </result>",
@@ -282,7 +277,6 @@ const AddNodeOnEdgeDrop = () => {
         name: namer,
         favourite: false,
       };
-      console.log(samp_data);
       addgraph(
         samp_data.result,
         samp_data.graph,

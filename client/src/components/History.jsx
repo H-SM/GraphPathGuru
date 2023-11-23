@@ -3,7 +3,7 @@ import graphContext from "../context/Graph/graphContext.js";
 import { useNavigate } from "react-router-dom";
 import { IconButton, Typography } from "@material-tailwind/react";
 import { ArrowRightIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
-import HistoryItem from "./HistoryItem.js";
+import HistoryItem from "./HistoryItem";
 
 const History = () => {
   const [active, setActive] = useState(1);

@@ -4,7 +4,7 @@ import Navbar from "./Navbar";
 import Footer from "./Footer";
 import contextValue from "../context/User/userContext.js";
 import { useNavigate } from "react-router-dom";
-import CloudinaryUploadWidget from "./cloudinaryUpload.js";
+import CloudinaryUploadWidget from "./cloudinaryUpload";
 
 const Settings = () => {
   const [details, setDetails] = useState({
@@ -264,7 +264,7 @@ my-3 mx-3 z-50"
                             <path
                               stroke="currentColor"
                               strokeLinecap="round"
-                              stroke-linejoin="round"
+                              strokeLinejoin="round"
                               strokeWidth="2"
                               d="M1.933 10.909A4.357 4.357 0 0 1 1 9c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 19 9c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M2 17 18 1m-5 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
                             />
@@ -280,7 +280,7 @@ my-3 mx-3 z-50"
                             <g
                               stroke="currentColor"
                               strokeLinecap="round"
-                              stroke-linejoin="round"
+                              strokeLinejoin="round"
                               strokeWidth="2"
                             >
                               <path d="M10 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
@@ -332,7 +332,7 @@ my-3 mx-3 z-50"
                             <path
                               stroke="currentColor"
                               strokeLinecap="round"
-                              stroke-linejoin="round"
+                              strokeLinejoin="round"
                               strokeWidth="2"
                               d="M1.933 10.909A4.357 4.357 0 0 1 1 9c0-1 4-6 9-6m7.6 3.8A5.068 5.068 0 0 1 19 9c0 1-3 6-9 6-.314 0-.62-.014-.918-.04M2 17 18 1m-5 8a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
                             />
@@ -348,7 +348,7 @@ my-3 mx-3 z-50"
                             <g
                               stroke="currentColor"
                               strokeLinecap="round"
-                              stroke-linejoin="round"
+                              strokeLinejoin="round"
                               strokeWidth="2"
                             >
                               <path d="M10 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
