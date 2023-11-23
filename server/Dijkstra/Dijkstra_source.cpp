@@ -6,7 +6,12 @@
 #include <queue>
 #include <algorithm>
 #include <Windows.h>
-#include <climits>
+#include <chrono>
+
+
+// #pragma comment(lib, "Kernel32.lib")
+
+
 
 std::string epath;
 
@@ -210,7 +215,7 @@ void storeOutput(string output) {
 std::string getExecutablePath() {
     char buffer[MAX_PATH];
     // @ts-ignore
-    GetModuleFileName(NULL, buffer, MAX_PATH);  // ignore this error it doesn't matter
+    GetModuleFileName(NULL, buffer, MAX_PATH); // ignore this error it doesn't matter
     return std::string(buffer);
 }
 
@@ -223,12 +228,26 @@ int main() {
     int t = 0;
     auto adj = g.second;
     std::string output; 
+    
 
+    // Timing the actual algo with chrono
+    auto startTime = std::chrono::high_resolution_clock::now();
     auto temp = dijkstra(V, adj, S, output);
-
+    auto endTime = std::chrono::high_resolution_clock::now();
     auto dists = temp.first, pred = temp.second;
+
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
+
+    auto time_taken = duration.count();
+    
+    int E = 0;
+    for (auto i: adj) {
+        E += i.size();
+    }
+    std::cout << "Time taken was: " << time_taken << std::endl;
+
     output += "<result>\n\t";
-    output += std::to_string(V) + "," + std::to_string(S) + "\n\t";
+    output += std::to_string(time_taken) + " " + std::to_string(V) + " " + std::to_string(E) + " " + std::to_string(S) + "\n\t";
 
     for (auto i: pred) {
         output += std::to_string(i) + " ";

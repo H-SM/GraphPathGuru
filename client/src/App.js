@@ -13,6 +13,7 @@ import Login from "./components/Login";
 import Grapher from './components/Grapher';
 import NotFound from './components/NotFound';
 import UserProfile from './components/UserProfile';
+import ReactFlowProvider from "reactflow";
 
 function App() {
 

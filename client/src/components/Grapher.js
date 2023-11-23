@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useRef, useContext, useEffect, useState } from "react";
 import NavbarOut from "./NavbarOut";
 import { Link, useParams } from "react-router-dom";
 import graphContext from "../context/Graph/graphContext.js";
@@ -26,6 +26,274 @@ import ReactFlow, {
 
 import "reactflow/dist/style.css";
 import Footer from "./Footer.js";
+
+
+
+const fitViewOptions = {
+  padding: 3,
+};
+
+
+const Graphlet = () => {
+  const contextgraph = useContext(graphContext);
+  const { viewGraph } = contextgraph;
+
+
+  const reactFlowWrapper = useRef(null);
+  const connectingNodeId = useRef(null);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const { project } = useReactFlow();
+  const [nid, setNid] = useState(0);
+  console.log("I am alive, Graphlet", nid);
+
+  // change id when new node is added
+  const getId = () => {
+    setNid(prevNid => {
+      const n = prevNid + 1;
+      return n;
+    });
+    return `${nid-1}`;
+  }
+
+  const setId = () => {
+    setNid(prevNid => {
+      const n = prevNid - 1;
+      return n;
+    });
+
+    return `${nid+1}`;
+  }
+  const onConnect = useCallback((params) => {
+    const redEdge = {
+      ...params,
+      id: `${connectingNodeId.current}_${params.target}`,
+      style: { stroke: "red", strokeWidth: 1 },
+      type: "straight",
+      markerEnd: {
+        type: MarkerType.ArrowClosed,
+        width: 30,
+        height: 20,
+        color: "green",
+      },
+    };
+    setEdges((els) => addEdge(redEdge, els));
+    console.log(edges);
+  }, []);
+
+  const onConnectStart = useCallback((_, { nodeId }) => {
+    connectingNodeId.current = nodeId;
+  }, []);
+
+  // it runs when new node is created by dragging and dropping
+  const onConnectEnd = useCallback(
+    (event) => {
+      const targetIsPane = event.target.classList.contains("react-flow__pane");
+
+      if (targetIsPane) {
+        const { top, left } = reactFlowWrapper.current.getBoundingClientRect();
+        getId();
+        const newNode = {
+          nid,
+          position: project({
+            x: event.clientX - left - 75,
+            y: event.clientY - top,
+          }),
+          style: { height: "50px", width: "50px", borderRadius: "100px" },
+          data: { label: `${nid}` },
+          targetPosition: "left",
+          sourcePosition: "left",
+        };
+
+        setNodes((nds) => nds.concat(newNode));
+        setEdges((eds) =>
+          eds.concat({
+            nid: `${connectingNodeId.current}_${nid}`,
+            source: connectingNodeId.current,
+            type: "straight",
+            target: nid,
+            style: { stroke: "red", strokeWidth: 1 },
+            markerEnd: {
+              type: MarkerType.ArrowClosed,
+              width: 30,
+              height: 20,
+              color: "green",
+            },
+          })
+        );
+        console.log(edges);
+      }
+    },
+    [project]
+  );
+
+  // it runs when we delete a node or edge
+  const onNodesDelete = useCallback(
+    (deleted) => {
+      const id = setId();
+      setEdges(
+        deleted.reduce((acc, node) => {
+          const incomers = getIncomers(node, nodes, edges);
+          const outgoers = getOutgoers(node, nodes, edges);
+          const connectedEdges = getConnectedEdges([node], edges);
+
+          const remainingEdges = acc.filter(
+            (edge) => !connectedEdges.includes(edge)
+          );
+
+          const createdEdges = incomers.flatMap(({ id: source }) =>
+            outgoers.map(({ id: target }) => ({
+              id: `${source}->${target}`,
+              source,
+              target,
+            }))
+          );
+
+          return [...remainingEdges, ...createdEdges];
+        }, edges)
+      );
+    },
+    [nodes, edges]
+  );
+
+  const makeNodesEdges = (gdata, nodes, edges) => {
+    const lines = "0 100 100: 1,10 2,1 3,2\n1 200 -200: 2,20 3,40\n2 300 300: \n 3 -100 50:".split('\n');
+    console.log("THIS IS THFCISJOIJDIOWQJDOI", lines);
+    const adj = [];
+
+    for (const line of lines) {
+      let pointer = 0;
+      let temp = '';
+
+      while (pointer < line.length && line[pointer] == ' ') {
+        pointer++;
+      }
+
+      let nodeInfo = "";
+      while (pointer < line.length && line[pointer] !== ':') {
+        nodeInfo += line[pointer];
+        pointer++;
+      }
+      nodeInfo = nodeInfo.split(' ')
+      console.log("WHATHIOEHRIROIQJRHOIOIIQWIOJQWEJIOQWEOIJQWOEIQWOIEQWOIEJQWOIEJQWIOEJQOIEJQWODJASDKHASKDJHQWIDASCLKNQWOIFHQWOI", nodeInfo);
+      
+      pointer += 2; // Skip ": "
+
+      const connectedNodes = [];
+      while (pointer < line.length) {
+        // Get connected node and weight
+        while (pointer < line.length && line[pointer] !== ',') {
+          temp += line[pointer];
+          pointer++;
+        }
+        const connectedNode = parseInt(temp, 10);
+        temp = '';
+
+        pointer++; // Skip the comma
+
+        while (pointer < line.length && line[pointer] !== ' ' && line[pointer] !== undefined) {
+          temp += line[pointer];
+          pointer++;
+        }
+        const weight = parseInt(temp, 10);
+        temp = '';
+
+        if (!isNaN(connectedNode) && !isNaN(weight)) {
+          connectedNodes.push([connectedNode, weight]);
+        }
+      }
+      console.log("THIS IS SPARTA", nodeInfo);
+      adj.push([nodeInfo, ...connectedNodes]);
+    }
+
+    console.log("Amazing adj", adj);
+
+    const sx = adj[0][0][0], sy = adj[0][0][1];
+    adj.forEach((nodeInfo, index) => {
+      console.log("ahah trhis is sod funny bruht", nodeInfo)
+      const nodeId = nodeInfo[0][0];
+      const position = { x: nodeInfo[0][1], y: nodeInfo[0][2] };
+
+      // Create a node object
+      const node = {
+        id: nodeId.toString(),
+        type: 'default',
+        position: position,
+        style: { height: '50px', width: '50px', borderRadius: '100px' },
+        data: {
+          label: nodeId.toString(),
+        },
+        targetPosition: 'right',
+        sourcePosition: 'right',
+      };
+      
+      setNodes((nds) => nds.concat(node))
+      getId();
+      
+      // Create edges for connected nodes
+      for (let i = 1; i < nodeInfo.length; i++) {
+        const [connectedNode, weight] = nodeInfo[i];
+        const edgeId = `${nodeId}_${connectedNode}`;
+        const edge = {
+          id: edgeId,
+          source: nodeId.toString(),
+          target: connectedNode.toString(),
+          type: 'straight',
+          label: weight.toString(),
+          style: { stroke: 'red', strokeWidth: 1 },
+          markerEnd: { type: 'arrowclosed', width: 30, height: 20, color: 'green' },
+        };
+        console.log("THIS IS A FUCKIGN edge", edge);
+
+        setEdges((els) => addEdge(edge, els));
+      }
+    });
+
+    // Output the nodes and edges arrays
+    console.log('Nodes: IS LE FUNNYNY', nodes);
+    console.log('Edges: gfo ahead an dplea seofheu rh euhurry hp ashsohw ', edges);
+    return;
+  };
+
+  if (nodes.length === 0) {
+    makeNodesEdges(viewGraph.graph, nodes, edges, nid);
+    console.log("THI SIS AHASIDHOASHD", nodes)
+    if (nodes.length !== 0) {
+      setNid(nodes.length);
+    }
+  }
+
+  return (
+    <>
+      <div
+        id="graph"
+        className="flex flex-col justify-center items-center gap-3 bg-blue/30"
+      >
+        <div
+          className="wrapper w-[70%] h-[80vh] ring-2 ring-zinc-200 ring-offset-2 rounded-sm"
+          ref={reactFlowWrapper}
+        >
+          <ReactFlow
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            onConnect={onConnect}
+            onNodesDelete={onNodesDelete}
+            onConnectStart={onConnectStart}
+            onConnectEnd={onConnectEnd}
+            fitView
+            fitViewOptions={fitViewOptions}
+          >
+            <Background />
+            <Controls />
+          </ReactFlow>
+        </div>
+      </div>
+    </>
+  );
+};
+
 
 const Grapher = () => {
   const { id } = useParams();
@@ -177,31 +445,13 @@ const Grapher = () => {
             }}
           ></div> */}
           </div>
-
+          <ReactFlowProvider>
+            <Graphlet />
+          </ReactFlowProvider>
           <div
-            id="graph"
-            className="flex flex-col justify-center items-center gap-3"
+            id="userInfo"
+            className="flex flex-col justify-center items-center gap-3 bg-blue/30"
           >
-            <div
-              className="wrapper lg:w-[120vh] w-[90vh] h-[70vh] ring-2 ring-zinc-200 ring-offset-2 rounded-sm bg-white/80"
-              // ref={reactFlowWrapper}
-            >
-              <ReactFlow
-              // nodes={nodes}
-              // edges={edges}
-              // onNodesChange={onNodesChange}
-              // onEdgesChange={onEdgesChange}
-              // onConnect={onConnect}
-              // onNodesDelete={onNodesDelete}
-              // onConnectStart={onConnectStart}
-              // onConnectEnd={onConnectEnd}
-              // fitView
-              // fitViewOptions={fitViewOptions}
-              >
-                <Background />
-                <Controls />
-              </ReactFlow>
-            </div>
             <div className="w-[60vh] flex flex-col items-center">
               <p class="mt-4 text-3xl font-bold leading-[3.5rem] tracking-tight text-slate-900">
                 Made By
@@ -229,11 +479,11 @@ const Grapher = () => {
                 </div>
               </div>
               <p class="font-medium text-[15px] mt-2 flex flex-row gap-1">
-                      Share this graph with others<span aria-hidden="true">→ </span>
-                      <a onClick={() => navigator.clipboard.writeText(`http://localhost:3000/graph/${id}`)} class="font-medium text-sky-700 hover:underline hover:cursor-pointer select-none flex flex-row items-center opacity-90 hover:opacity-100">
-                        click here <svg viewBox="0 0 25 25" fill="none" width="20" height="20" xmlns="http://www.w3.org/2000/svg" ><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12.5 6.25C12.9142 6.25 13.25 5.91421 13.25 5.5C13.25 5.08579 12.9142 4.75 12.5 4.75V6.25ZM20.25 12.5C20.25 12.0858 19.9142 11.75 19.5 11.75C19.0858 11.75 18.75 12.0858 18.75 12.5H20.25ZM19.5 6.25C19.9142 6.25 20.25 5.91421 20.25 5.5C20.25 5.08579 19.9142 4.75 19.5 4.75V6.25ZM15.412 4.75C14.9978 4.75 14.662 5.08579 14.662 5.5C14.662 5.91421 14.9978 6.25 15.412 6.25V4.75ZM20.25 5.5C20.25 5.08579 19.9142 4.75 19.5 4.75C19.0858 4.75 18.75 5.08579 18.75 5.5H20.25ZM18.75 9.641C18.75 10.0552 19.0858 10.391 19.5 10.391C19.9142 10.391 20.25 10.0552 20.25 9.641H18.75ZM20.0303 6.03033C20.3232 5.73744 20.3232 5.26256 20.0303 4.96967C19.7374 4.67678 19.2626 4.67678 18.9697 4.96967L20.0303 6.03033ZM11.9697 11.9697C11.6768 12.2626 11.6768 12.7374 11.9697 13.0303C12.2626 13.3232 12.7374 13.3232 13.0303 13.0303L11.9697 11.9697ZM12.5 4.75H9.5V6.25H12.5V4.75ZM9.5 4.75C6.87665 4.75 4.75 6.87665 4.75 9.5H6.25C6.25 7.70507 7.70507 6.25 9.5 6.25V4.75ZM4.75 9.5V15.5H6.25V9.5H4.75ZM4.75 15.5C4.75 18.1234 6.87665 20.25 9.5 20.25V18.75C7.70507 18.75 6.25 17.2949 6.25 15.5H4.75ZM9.5 20.25H15.5V18.75H9.5V20.25ZM15.5 20.25C18.1234 20.25 20.25 18.1234 20.25 15.5H18.75C18.75 17.2949 17.2949 18.75 15.5 18.75V20.25ZM20.25 15.5V12.5H18.75V15.5H20.25ZM19.5 4.75H15.412V6.25H19.5V4.75ZM18.75 5.5V9.641H20.25V5.5H18.75ZM18.9697 4.96967L11.9697 11.9697L13.0303 13.0303L20.0303 6.03033L18.9697 4.96967Z" fill="#000000"></path> </g></svg>
-                      </a>
-                  </p>
+                Share this graph with others<span aria-hidden="true">→ </span>
+                <a onClick={() => navigator.clipboard.writeText(`http://localhost:3000/graph/${id}`)} class="font-medium text-sky-700 hover:underline hover:cursor-pointer select-none flex flex-row items-center opacity-90 hover:opacity-100">
+                  click here <svg viewBox="0 0 25 25" fill="none" width="20" height="20" xmlns="http://www.w3.org/2000/svg" ><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12.5 6.25C12.9142 6.25 13.25 5.91421 13.25 5.5C13.25 5.08579 12.9142 4.75 12.5 4.75V6.25ZM20.25 12.5C20.25 12.0858 19.9142 11.75 19.5 11.75C19.0858 11.75 18.75 12.0858 18.75 12.5H20.25ZM19.5 6.25C19.9142 6.25 20.25 5.91421 20.25 5.5C20.25 5.08579 19.9142 4.75 19.5 4.75V6.25ZM15.412 4.75C14.9978 4.75 14.662 5.08579 14.662 5.5C14.662 5.91421 14.9978 6.25 15.412 6.25V4.75ZM20.25 5.5C20.25 5.08579 19.9142 4.75 19.5 4.75C19.0858 4.75 18.75 5.08579 18.75 5.5H20.25ZM18.75 9.641C18.75 10.0552 19.0858 10.391 19.5 10.391C19.9142 10.391 20.25 10.0552 20.25 9.641H18.75ZM20.0303 6.03033C20.3232 5.73744 20.3232 5.26256 20.0303 4.96967C19.7374 4.67678 19.2626 4.67678 18.9697 4.96967L20.0303 6.03033ZM11.9697 11.9697C11.6768 12.2626 11.6768 12.7374 11.9697 13.0303C12.2626 13.3232 12.7374 13.3232 13.0303 13.0303L11.9697 11.9697ZM12.5 4.75H9.5V6.25H12.5V4.75ZM9.5 4.75C6.87665 4.75 4.75 6.87665 4.75 9.5H6.25C6.25 7.70507 7.70507 6.25 9.5 6.25V4.75ZM4.75 9.5V15.5H6.25V9.5H4.75ZM4.75 15.5C4.75 18.1234 6.87665 20.25 9.5 20.25V18.75C7.70507 18.75 6.25 17.2949 6.25 15.5H4.75ZM9.5 20.25H15.5V18.75H9.5V20.25ZM15.5 20.25C18.1234 20.25 20.25 18.1234 20.25 15.5H18.75C18.75 17.2949 17.2949 18.75 15.5 18.75V20.25ZM20.25 15.5V12.5H18.75V15.5H20.25ZM19.5 4.75H15.412V6.25H19.5V4.75ZM18.75 5.5V9.641H20.25V5.5H18.75ZM18.9697 4.96967L11.9697 11.9697L13.0303 13.0303L20.0303 6.03033L18.9697 4.96967Z" fill="#000000"></path> </g></svg>
+                </a>
+              </p>
             </div>
           </div>
           <div class="mx-auto max-w-2xl text-center">

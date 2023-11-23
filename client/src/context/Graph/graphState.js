@@ -18,7 +18,7 @@ const GraphState = (props) => {
     setGraphs(json);
   };
 
-  //add a note
+  //add a graph
   const addgraph = async (result, graph, name, favourite) => {
     //API call
     const response = await fetch(`${host}/api/graph/addgraph/`, {
