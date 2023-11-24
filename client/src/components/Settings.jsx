@@ -57,7 +57,7 @@ const Settings = (props) => {
       details.checkpassword.trim() !== ""
     ) {
       if (details.newpassword !== details.checkpassword) {
-        showAlert("Recheck your new password!","warning");
+        showAlert("Recheck your new password!", "warning");
         return;
       } else {
         try {
@@ -67,7 +67,7 @@ const Settings = (props) => {
           });
 
           if (!updatedUser.success) {
-            showAlert(updatedUser.error,"danger");
+            showAlert(updatedUser.error, "danger");
           } else {
             flag = true;
           }
@@ -77,9 +77,9 @@ const Settings = (props) => {
       }
     }
     if (flag) {
-      showAlert("details updated","success");
+      showAlert("details updated", "success");
     } else {
-      showAlert("Recheck your credentails!","warning");
+      showAlert("Recheck your credentails!", "warning");
     }
   };
   //looks over closing of the window
@@ -227,7 +227,7 @@ my-3 mx-3 z-50"
                           aria-hidden="true"
                         />
                       )}
-                      <CloudinaryUploadWidget showAlert={showAlert}/>
+                      <CloudinaryUploadWidget showAlert={showAlert} />
                     </div>
                   </div>
                 </div>

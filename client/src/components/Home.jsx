@@ -239,12 +239,12 @@ const AddNodeOnEdgeDrop = () => {
       },
       body: JSON.stringify(data),
     });
-    
+
     const response = await req_write.json();
     console.log("Write file response is:", response.graph);
 
     const res_string = await performAlgo();
-    
+
     console.log("perform algo response is:", res_string);
     //TODO: async
     changegraph(nexter);
@@ -259,6 +259,7 @@ const AddNodeOnEdgeDrop = () => {
         name: namer,
         favourite: false,
       };
+      console.log("This is sample data: ", samp_data);
       addgraph(
         samp_data.result,
         samp_data.graph,
@@ -291,7 +292,7 @@ const AddNodeOnEdgeDrop = () => {
     if (algoID === "") {
       return;
     }
-  
+
     try {
       const req = await fetch(`${host}/perform-algo`, {
         method: "POST",
@@ -300,14 +301,14 @@ const AddNodeOnEdgeDrop = () => {
         },
         body: JSON.stringify({ algoID: algoMap[algoID] }),
       });
-  
+
       console.log(`${host}/perform-algo`, "pinged");
-  
+
       if (!req.ok) {
         // Check if the HTTP response status is not in the range 200-299
         throw new Error(`HTTP error! Status: ${req.status}`);
       }
-  
+
       const response = await req.json();
       return response.result;
     } catch (error) {
@@ -316,7 +317,7 @@ const AddNodeOnEdgeDrop = () => {
       return null; // or throw error if needed
     }
   };
-  
+
 
   // for flipping the node
   const flipNode = () => {
@@ -588,7 +589,7 @@ const AddNodeOnEdgeDrop = () => {
   );
 };
 const Home = (props) => {
-  const {showAlert} = props;
+  const { showAlert } = props;
   let navigate = useNavigate();
   useEffect(() => {
     if (localStorage.getItem("token")) {
@@ -622,7 +623,7 @@ const Home = (props) => {
       </ReactFlowProvider>
 
       <div className="w-full h-[20vh]"></div>
-      <History showAlert={showAlert}/>
+      <History showAlert={showAlert} />
       <AboutUs />
       <TechStack />
       <Footer />

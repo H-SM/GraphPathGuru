@@ -12,7 +12,7 @@ const Footer = () => {
           <p className="mt-5 text-center text-sm leading-6 text-slate-500">© 2023 GraphPathGuru. All rights reserved.</p>
         </div>
       </footer>
-      
+
     </>
   );
 };
