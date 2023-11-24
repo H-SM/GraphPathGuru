@@ -264,11 +264,10 @@ const AddNodeOnEdgeDrop = () => {
     const response = await req.json();
     performAlgo();
     //TODO: async
-    // userData, changegraph
     changegraph(nexter);
     const namer = `${algoID}-${userData.graphs}`;
     if (namer.length < 0 || namer.length > 25) {
-      alert("name too big (0-25 characters) . please make it smaller");
+      alert("name too big (0-25 characters). please make it smaller");
     } else {
       const samp_data = {
         result:
@@ -620,15 +619,12 @@ const Home = (props) => {
           <HeroSection />
         </div>
       </div>
-      <div>
-        <button onClick={() => {props.showAlert("OH you clicked it!", "success");}}>click me!</button>
-      </div>
       <ReactFlowProvider>
         <AddNodeOnEdgeDrop />
       </ReactFlowProvider>
 
       <div className="w-full h-[20vh]"></div>
-      <History />
+      <History showAlert={showAlert}/>
       <AboutUs />
       <TechStack />
       <Footer />

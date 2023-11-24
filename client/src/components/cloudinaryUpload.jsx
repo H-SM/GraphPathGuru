@@ -2,7 +2,7 @@ import React, { useContext, useEffect } from "react";
 import contextValue from "../context/User/userContext.js";
 
 const CloudinaryUploadWidget = ( props ) => {
-  const { handleUploadSuccess } = props
+  const { handleUploadSuccess, showAlert } = props
   const cloudName = "defrwqxv6";
   const uploadPreset = "dfr2meo6";
 
@@ -35,13 +35,14 @@ const CloudinaryUploadWidget = ( props ) => {
         const updatedUser = await changeimage(url); 
         
         if(!updatedUser.success){
-          alert(updatedUser.error);
+          showAlert(updatedUser.error,"danger");
         }
         else{
           setUserData((prevUserData) => ({
             ...prevUserData,
             image: url
           }));
+          showAlert("profile picture updated","success");
         }
       } catch (error) {
         console.error('Error updating name:', error);

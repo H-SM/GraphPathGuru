@@ -5,7 +5,9 @@ import { IconButton, Typography } from "@material-tailwind/react";
 import { ArrowRightIcon, ArrowLeftIcon } from "@heroicons/react/24/outline";
 import HistoryItem from "./HistoryItem";
 
-const History = () => {
+const History = (props) => {
+  const { showAlert } = props;
+  console.log(props)
   const [active, setActive] = useState(1);
   const [searchedGraph, setSearchedGraph] = useState("");
   const [sorterGraph, setSorterGraph] = useState("Time (new-to-old)");
@@ -13,7 +15,6 @@ const History = () => {
 
   let context = useContext(graphContext);
   let navigate = useNavigate();
-
   const { graphs, getallgraph } = context;
 
   useEffect(() => {
@@ -187,7 +188,7 @@ const History = () => {
                       {searchedGraph === "" ? (
                         sortAndFilterGraphs(graphs)
                           .map((graph, index) => {
-                            return <HistoryItem graph={graph} key={index} />;
+                            return <HistoryItem graph={graph} showAlert={showAlert} key={index}/>;
                           })
                           .slice(startIndex, endIndex)
                       ) : TotalSearched > 0 ? (
@@ -199,7 +200,7 @@ const History = () => {
                           )
                           .sort((a, b) => new Date(b.date) - new Date(a.date))
                           .map((graph, index) => (
-                            <HistoryItem graph={graph} key={index} />
+                            <HistoryItem graph={graph} showAlert={showAlert} key={index} />
                           ))
                           .slice(startIndex, endIndex)
                       ) : (

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 
 
 const HistoryItem = (props) => {
+    const { graph, showAlert } = props;
     let context = useContext(graphContext);
     const navigate = useNavigate();
     const { editfavgraph, editname } = context;
@@ -43,7 +44,6 @@ const HistoryItem = (props) => {
         const lines = result.split("\n");
         return [1 , 2];
       }
-  const { graph } = props;
   const { edges, nodes } = extractEdgesAndNodes(
     graph.graph
   ); 
@@ -58,12 +58,13 @@ const HistoryItem = (props) => {
   }
 
   const handleclick = useCallback(() => {
+    //TODO: implement unique naming sequence here 
     if (newname !== '') {
       editname(graph._id, newname);
+      setNamechanger(!namechanger);
     } else {
-      alert('The field was empty!');
+      showAlert("name can't be empty!");
     }
-    setNamechanger(!namechanger);
   }, [newname, graph._id, editname, namechanger]);
 
   useEffect(() => {
