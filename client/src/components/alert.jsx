@@ -16,8 +16,8 @@ const Alert = (props) => {
               props.alert.type === "success"
                 ? "bg-sky-600 border-sky-600"
                 : props.alert.type === "warning"
-                ? "bg-orange-600 border-orange-600"
-                : "bg-red-600 border-red-600"
+                  ? "bg-orange-600 border-orange-600"
+                  : "bg-red-600 border-red-600"
             )}
           >
             <div className="flex items-center w-full  max-w-xs">
@@ -28,8 +28,8 @@ const Alert = (props) => {
                   props.alert.type === "success"
                     ? "text-green-500 bg-green-100"
                     : props.alert.type === "warning"
-                    ? "text-orange-500 bg-orange-100"
-                    : "text-red-500 bg-red-100"
+                      ? "text-orange-500 bg-orange-100"
+                      : "text-red-500 bg-red-100"
                 )}
               >
                 {props.alert.type === "success" ? (
@@ -71,8 +71,8 @@ const Alert = (props) => {
                   props.alert.type === "success"
                     ? "text-sky-900"
                     : props.alert.type === "warning"
-                    ? "text-orange-700"
-                    : "text-red-700"
+                      ? "text-orange-700"
+                      : "text-red-700"
                 )}
               >
                 {props.alert.msg}

@@ -173,7 +173,6 @@ const Graphlet = () => {
         pointer++;
       }
       nodeInfo = nodeInfo.split(' ')
-      console.log("WHATHIOEHRIROIQJRHOIOIIQWIOJQWEJIOQWEOIJQWOEIQWOIEQWOIEJQWOIEJQWIOEJQOIEJQWODJASDKHASKDJHQWIDASCLKNQWOIFHQWOI", nodeInfo);
       
       pointer += 2; // Skip ": "
 
@@ -318,38 +317,22 @@ const Grapher = () => {
   const [sc, setSc] = useState("");
   const [throughput, setThroughput] = useState("");
 
-  const extractEdgesAndNodes = (graphData) => {
-    const lines = graphData.split("\n");
-
-    let edgesCount = 0;
-    let nodesCount = 0;
-
-    lines.forEach((line) => {
-      const parts = line.split(" ");
-      if (parts.length >= 1) {
-        // Assuming each line represents a node, increment nodesCount
-        nodesCount++;
-
-        // Assuming each part after the first represents an edge, increment edgesCount
-        edgesCount += parts.length - 1;
-      }
-    });
-
-    // Update state variables together
-    setNumEdges(edgesCount);
-    setNumNodes(nodesCount);
-  };
 
   useEffect(() => {
     if (showUser.length !== 0) {
-      extractEdgesAndNodes(viewGraph.graph);
       // Extract TC and SC from the result string
+      // const resultArray = viewGraph.result
+      //   .split("\n")
+      //   .filter((item) => item.trim() !== "");
+      // setTc(resultArray[1]?.trim() || "N/A");
+      // setSc(resultArray[2]?.trim() || "N/A");
+      // calculateThroughput(tc, sc);
       const resultArray = viewGraph.result
-        .split("\n")
-        .filter((item) => item.trim() !== "");
-      setTc(resultArray[1]?.trim() || "N/A");
-      setSc(resultArray[2]?.trim() || "N/A");
-      calculateThroughput(tc, sc);
+    .split("\n")[1].split(' ');
+    setTc(resultArray[0]|| "N/A");
+    setNumNodes(resultArray[1] || "N/A");
+    setNumEdges(resultArray[2] || "N/A");
+    setSc(resultArray[3] || "N/A");
     }
   }, [showUser, viewGraph, tc, sc]);
 
@@ -419,9 +402,9 @@ const Grapher = () => {
   function calculateThroughput(tc, sc) {
     // Calculate throughput in Mbps
     const timeInMilliseconds = parseFloat(tc, 10);
-    const spaceInMegabytes = parseFloat(sc, 10);
+    const spaceInMegabytes = parseFloat(sc, 10);  // when I do this thing, it would be Kb
     const throughputMbps = Math.ceil(
-      spaceInMegabytes / (timeInMilliseconds / 1000)
+      ( spaceInMegabytes + 1 ) / (timeInMilliseconds / 1000)
     );
 
     setThroughput(`${throughputMbps} mbps`);

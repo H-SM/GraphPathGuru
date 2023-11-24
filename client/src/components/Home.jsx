@@ -1,15 +1,3 @@
-/*
-TODO:
-- Have vinay refactor this entire file; do arrangements of code 
-- make a functinoal API b/w our js script and react flow:
- example: we need functions like this: 
- color_node(nodes, edges, node_id, color_hex)
- change_edge(nodes, edges, edge_id, edge_to_change, new_label)
- and so on
- this will make our animations far more modular and will allow us to make the animations for all the algos much more easily
- also the code will look pretty :)
-*/
-
 import React, {
   useCallback,
   useRef,
@@ -236,16 +224,6 @@ const AddNodeOnEdgeDrop = () => {
     setEdges(updatedEdges);
   };
 
-  // TODO: make a POST request to take out the graph string and 
-  const extract_graph = () => {
-      return;
-  };
-
-  const extract_result = () => {
-    return;
-  };
-
-
   // writing data to file
   const writeFile = async () => {
     const data = {
@@ -254,15 +232,20 @@ const AddNodeOnEdgeDrop = () => {
     };
     console.log("this is data\n", data);
     const nexter = userData.graphs + 1;
-    const req = await fetch(`${host}/write-file`, {
+    const req_write = await fetch(`${host}/write-file`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(data),
     });
-    const response = await req.json();
-    performAlgo();
+    
+    const response = await req_write.json();
+    console.log("Write file response is:", response.graph);
+
+    const res_string = await performAlgo();
+    
+    console.log("perform algo response is:", res_string);
     //TODO: async
     changegraph(nexter);
     const namer = `${algoID}-${userData.graphs}`;
@@ -271,8 +254,8 @@ const AddNodeOnEdgeDrop = () => {
     } else {
       const samp_data = {
         result:
-          "<result> \n 12321ms \n 12.2MB \n 3,0 \n -1 2 0 \n 0 2 1 \n </result>",
-        graph: "0 -65 -3: 1,12 2,1 \n 1 118 -12: \n 2 182 134: 1,1",
+          res_string,
+        graph: response.graph,
         name: namer,
         favourite: false,
       };
@@ -308,17 +291,32 @@ const AddNodeOnEdgeDrop = () => {
     if (algoID === "") {
       return;
     }
-    console.log(algoMap[algoID]);
-    await fetch(`${host}/perform-algo`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ algoID: algoMap[algoID] }),
-    }).then(() => {
+  
+    try {
+      const req = await fetch(`${host}/perform-algo`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ algoID: algoMap[algoID] }),
+      });
+  
       console.log(`${host}/perform-algo`, "pinged");
-    });
+  
+      if (!req.ok) {
+        // Check if the HTTP response status is not in the range 200-299
+        throw new Error(`HTTP error! Status: ${req.status}`);
+      }
+  
+      const response = await req.json();
+      return response.result;
+    } catch (error) {
+      console.error("Error during performAlgo:", error.message);
+      // Handle the error appropriately
+      return null; // or throw error if needed
+    }
   };
+  
 
   // for flipping the node
   const flipNode = () => {

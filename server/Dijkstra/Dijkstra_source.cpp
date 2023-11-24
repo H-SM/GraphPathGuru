@@ -36,6 +36,8 @@ pair<vector<int>, vector<int>> dijkstra(int V, vector<vector<pair<int, int>>>& a
     // Predecessor list is initialized to -1. A -1 in the final pred list means that that node is unreachable.
     vector<int> pred(V, -1);
 
+    uint64_t space = 0;
+
     // Source initialised with dist=0.
     distTo[S] = 0;
     pq.push({0, S});
@@ -202,7 +204,7 @@ void storeOutput(string output) {
     std::ofstream outputFile(goBackDir(path, 1)+"\\file io\\output.txt");
 
     if (outputFile.is_open()) {
-        outputFile << output << std::endl << std::endl; 
+        outputFile << output;; 
         outputFile.close(); // Close the file
     } else {
         std::cerr << "Failed to open the output file." << std::endl;
@@ -259,7 +261,7 @@ int main() {
     for (int i = 0; i < V; i++) {
         output += std::to_string(dists[i]) + " ";
     }
-    output += "\n</result>\n";
+    output += "\n</result>";
     
     // Storing the result for front end to read
     storeOutput(output);

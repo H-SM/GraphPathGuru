@@ -20,12 +20,10 @@ app.use("/api/auth", require("./routes/auth"));
 app.use("/api/graph", require("./routes/graph"));
 
 app.post("/write-file", (req, res) => {
+  let output = "";
   try {
     const { nodes, edges } = req.body;
 
-    console.log(nodes);
-    console.log(edges);
-    let output = "";
     const mp = {};
     let w = 0;
     for (var i = 0; i < nodes.length; i++) {
@@ -54,48 +52,16 @@ app.post("/write-file", (req, res) => {
         }
       output += "\n";
     }
-    console.log(output);
     fs.writeFileSync("./file io/input.txt", output);
-    res.status(200).json({ success: true, res: output });
+    res.status(200).json({ success: true, graph: output });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ error: "Failed to save data to file" });
   }
 });
 
-// app.post('/perform-dijktra', (req, res) => {
 
-//     // Specify the path to your C++ executable
-//     let dijkstraExecutable;
-
-//     if (os.platform() === 'win32') {
-//         dijkstraExecutable = './Dijkstra/Dijkstra.exe';
-//     }
-//     else if (os.platform() === 'linux') {
-//         dijkstraExecutable = './Dijkstra_linux/Dijkstra';
-//     }
-
-//     // Execute the C++ program
-//     execFile(dijkstraExecutable, (error, stdout, stderr) => {
-//         if (error) {
-//             console.error('Error:', error);
-//             res.status(500).send('An error occurred during execution.');
-//             return;
-//         }
-
-//         if (stderr) {
-//             console.error('Error:', stderr);
-//             res.status(500).send('An error occurred during execution.');
-//             return;
-//         }
-
-//         console.log('C++ program output:', stdout);
-
-//         res.send('C++ program executed successfully.');
-//     });
-// });
-
-// run bellman-ford
+// run c++ backend
 app.post("/perform-algo", (req, res) => {
   // Specify the path to your C++ executable
   console.log("I made the perform-algo POST call!");
@@ -127,9 +93,27 @@ app.post("/perform-algo", (req, res) => {
 
     // Process the output if needed
     console.log("C++ program output:", stdout);
-
+    let res_string = "";
+    const lines = fs.readFileSync("./file io/output.txt", "utf-8");
+    let f = 1;
+    console.log("LINES BEGIN HERE");
+    let temp = "";
+    for (let i = lines.length-1; i >= 0; i--) {
+      temp += lines[i];
+      if (i > 6 && lines.slice(i,i+6) === "result") {
+        if (f === 1) {
+          f -= 1;
+          continue;
+        }
+        temp += lines[i-1];
+        res_string = temp.split('').reverse().join('');
+        // console.log(res_string);
+        break;
+      }
+    }
+    
     // Send a response to the client
-    res.send("C++ program executed successfully.");
+    res.status(200).json({ success: true, result: res_string });
   });
 });
 
