@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { PhotoIcon, UserCircleIcon } from "@heroicons/react/24/solid";
+import { UserCircleIcon } from "@heroicons/react/24/solid";
 import Navbar from "./Navbar";
 import Footer from "./Footer";
 import contextValue from "../context/User/userContext.js";
@@ -291,7 +291,7 @@ my-3 mx-3 z-50"
                       </button>
                     </div>
                     <a
-                      href="#"
+                      href="/forgot-password"
                       className="text-sm text-end font-medium text-primary-600 hover:underline"
                     >
                       Forgot password?

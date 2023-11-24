@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useEffect, useState } from "react";
 import graphContext from "../context/Graph/graphContext.js";
 import { useNavigate } from "react-router-dom";
 
@@ -57,14 +57,14 @@ const HistoryItem = (props) => {
     setNewname(e.target.value);
   }
 
-  const handleclick = () =>{
-    if(newname !== ''){
+  const handleclick = useCallback(() => {
+    if (newname !== '') {
       editname(graph._id, newname);
-    }else{
-      alert("the feild was empty!");
+    } else {
+      alert('The field was empty!');
     }
     setNamechanger(!namechanger);
-  }
+  }, [newname, graph._id, editname, namechanger]);
 
   useEffect(() => {
     const handleKeyClick = (event) => {

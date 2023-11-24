@@ -1,5 +1,4 @@
 import React from 'react'
-import imager from '../assets/beams-pricing.png'
 import { Link } from 'react-router-dom'
 const HeroSection = () => {
   return (

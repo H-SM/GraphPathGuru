@@ -590,7 +590,8 @@ const AddNodeOnEdgeDrop = () => {
     </>
   );
 };
-const Home = () => {
+const Home = (props) => {
+  const {showAlert} = props;
   let navigate = useNavigate();
   useEffect(() => {
     if (localStorage.getItem("token")) {
@@ -618,6 +619,9 @@ const Home = () => {
           <Navbar />
           <HeroSection />
         </div>
+      </div>
+      <div>
+        <button onClick={() => {props.showAlert("OH you clicked it!", "success");}}>click me!</button>
       </div>
       <ReactFlowProvider>
         <AddNodeOnEdgeDrop />

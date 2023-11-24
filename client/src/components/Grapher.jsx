@@ -1,13 +1,11 @@
 import React, { useCallback, useRef, useContext, useEffect, useState } from "react";
 import NavbarOut from "./NavbarOut.jsx";
-import { Link, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import graphContext from "../context/Graph/graphContext.js";
 import userContext from "../context/User/userContext.js";
-import CircularProgress from "@mui/material/CircularProgress";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
-import logo from "../assets/logo.png";
 
 import ReactFlow, {
   useNodesState,
@@ -165,7 +163,7 @@ const Graphlet = () => {
       let pointer = 0;
       let temp = '';
 
-      while (pointer < line.length && line[pointer] == ' ') {
+      while (pointer < line.length && line[pointer] === ' ') {
         pointer++;
       }
 
