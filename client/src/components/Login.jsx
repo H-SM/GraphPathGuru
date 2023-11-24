@@ -3,7 +3,8 @@ import logo from '../assets/logo.png';
 import userContext from "../context/User/userContext";
 import { useNavigate } from 'react-router-dom';
 
-const Login = () => {
+const Login = (props) => {
+  const {showAlert} = props;
   const [ credentails , setCredentails ] =useState({email: "", password: "", name : "", cpassword: ""});
   
   const [signup,setSignup] = useState(false);
@@ -19,9 +20,8 @@ const Login = () => {
   let json;
 
   if (signup) {
-    // If signup is true, call the signin context
     if(credentails.password !== credentails.cpassword){
-      alert("Recheck your new password!");
+      showAlert("Recheck your new password!", "warning");
       return ;
     }
     json = await signin({name : credentails.name, email: credentails.email , password : credentails.password });
@@ -30,19 +30,19 @@ const Login = () => {
       localStorage.removeItem('token');
       localStorage.setItem('token', json.jwt_token);
       navigate("/");
-      alert("Account created successfully!", "success");
+      showAlert("Account created successfully!", "success");
   }else{
-      alert("Invalid Credentials! Please check again...");
+    showAlert("Invalid Credentials! Please check again.", "danger");
   }
   } else {
     // If signup is false, call the login context
     json = await login({email: credentails.email , password : credentails.password});
     if(json.success){
       localStorage.setItem('token', json.auth_token);
-      alert("Logged in successfully!", "success");
+      showAlert("Logged in successfully!", "success");
       navigate("/");
   }else{
-      alert("Invalid credentails! Please check again...")
+      showAlert("Invalid Credentials! Please check again.", "warning");
   }
   }
   }

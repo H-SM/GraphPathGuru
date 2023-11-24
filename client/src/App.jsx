@@ -35,15 +35,15 @@ const [alert , setAlert ] = useState(null);
     <GraphState>
     {/* <Alert alert={alert}/> */}
     <div className="App">
-    <Alert alert={alert}/>
+    <Alert alert={alert} setAlert={setAlert}/>
       <Router>
           <Routes>
             <Route exact path="/" element={<Home showAlert={showAlert}/>} />
             <Route exact path="/docs" element={<Docpage />} />
 
-            <Route exact path="/settings" element={<Settings />} />
+            <Route exact path="/settings" element={<Settings showAlert={showAlert}/>} />
 
-            <Route exact path="/login" element={<Login />} />
+            <Route exact path="/login" element={<Login showAlert={showAlert}/>} />
             <Route exact path="/graph/:id" element={<Grapher />} />
             <Route exact path="/user" element={<UserProfile />} />
 

@@ -6,7 +6,8 @@ import contextValue from "../context/User/userContext.js";
 import { useNavigate } from "react-router-dom";
 import CloudinaryUploadWidget from "./cloudinaryUpload";
 
-const Settings = () => {
+const Settings = (props) => {
+  const { showAlert } = props;
   const [details, setDetails] = useState({
     oldpassword: "",
     newpassword: "",
@@ -38,7 +39,7 @@ const Settings = () => {
       try {
         const updatedUser = await changename({ name: details.name });
         if (!updatedUser.success) {
-          alert(updatedUser.error);
+          showAlert(updatedUser.error, "danger");
         } else {
           setUserData((prevUserData) => ({
             ...prevUserData,
@@ -56,7 +57,7 @@ const Settings = () => {
       details.checkpassword.trim() !== ""
     ) {
       if (details.newpassword !== details.checkpassword) {
-        alert("Recheck your new password!");
+        showAlert("Recheck your new password!","warning");
         return;
       } else {
         try {
@@ -66,7 +67,7 @@ const Settings = () => {
           });
 
           if (!updatedUser.success) {
-            alert(updatedUser.error);
+            showAlert(updatedUser.error,"danger");
           } else {
             flag = true;
           }
@@ -76,9 +77,9 @@ const Settings = () => {
       }
     }
     if (flag) {
-      alert("details updated");
+      showAlert("details updated","success");
     } else {
-      alert("Recheck your credentails!");
+      showAlert("Recheck your credentails!","warning");
     }
   };
   //looks over closing of the window
@@ -226,7 +227,7 @@ my-3 mx-3 z-50"
                           aria-hidden="true"
                         />
                       )}
-                      <CloudinaryUploadWidget />
+                      <CloudinaryUploadWidget showAlert={showAlert}/>
                     </div>
                   </div>
                 </div>
