@@ -58,16 +58,7 @@ adjDataArray.forEach((row) => {
   distance_curr.push(numbersBeforeColon);
 });
 
-const dsMatches = fileContent.match(/<source>[\s\S]*?<\/source>/g);
-
-const numbersArray = dsMatches.map((str) => {
-  const match = str.match(/\t(\d+)\r/); // Regular expression to capture the number between \t and \r
-  if (match && match[1]) {
-    return parseInt(match[1]); // Extracted number from the match and parse it as an integer
-  }
-  return null; // Return null or handle if no match is found
-});
-
-console.log(numbersArray); 
+const dsMatches = fileContent.match(/<ds>[\s\S]*?<\/ds>/g);
 
 
+console.log(dsMatches)
