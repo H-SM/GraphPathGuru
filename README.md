@@ -4,6 +4,7 @@
 <div align="center">
 
 ![](https://img.shields.io/github/last-commit/H-SM/GraphPathGuru.svg)
+![](https://img.shields.io/github/contributors/H-SM/GraphPathGuru.svg)
 ![](https://img.shields.io/github/stars/H-SM/GraphPathGuru.svg)
 ![](https://img.shields.io/github/forks/H-SM/GraphPathGuru.svg)
 ![](https://img.shields.io/github/license/H-SM/GraphPathGuru.svg)
