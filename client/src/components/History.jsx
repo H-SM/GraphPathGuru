@@ -7,7 +7,6 @@ import HistoryItem from "./HistoryItem";
 
 const History = (props) => {
   const { showAlert } = props;
-  console.log(props)
   const [active, setActive] = useState(1);
   const [searchedGraph, setSearchedGraph] = useState("");
   const [sorterGraph, setSorterGraph] = useState("Time (new-to-old)");
