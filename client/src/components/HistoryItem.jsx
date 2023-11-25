@@ -4,56 +4,39 @@ import { useNavigate } from "react-router-dom";
 
 
 const HistoryItem = (props) => {
-    const { graph, showAlert } = props;
-    let context = useContext(graphContext);
-    const navigate = useNavigate();
-    const { editfavgraph, editname } = context;
+  const { graph, showAlert } = props;
+  let context = useContext(graphContext);
+  const navigate = useNavigate();
+  const { editfavgraph, editname } = context;
 
-    const formatTime = (isoTime) => {
-        const date = new Date(isoTime);
-        const options = {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          hour12: true,
-        };
-    
-        return date.toLocaleString("en-US", options);
-      };
+  const formatTime = (isoTime) => {
+    const date = new Date(isoTime);
+    const options = {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    };
 
-      const maxLengthCheck = (e) => {
-        if (e.target.value.length > e.target.maxLength) {
-         e.target.value = e.target.value.slice(0, e.target.maxLength)
-          }
-        }
-    
-      const handleNameChange = () => {
-        setNamechanger(!namechanger);
-      };
+    return date.toLocaleString("en-US", options);
+  };
 
-      //get no. of nodes and edges
-      const extractEdgesAndNodes = (graphData) => {
-        let edges = [];
-        let nodes = [];
-        return { edges, nodes };
-      };
+  const maxLengthCheck = (e) => {
+    if (e.target.value.length > e.target.maxLength) {
+      e.target.value = e.target.value.slice(0, e.target.maxLength)
+    }
+  }
 
-      const extractEdgeNodeCounts = (result) => {
-        const lines = result.split("\n");
-        return [1 , 2];
-      }
-  const { edges, nodes } = extractEdgesAndNodes(
-    graph.graph
-  ); 
-  let numNodes = 0;
-  let numEdges = 0;
+  const handleNameChange = () => {
+    setNamechanger(!namechanger);
+  };
 
-  const [namechanger,setNamechanger] = useState(false);
-  const [newname, setNewname ] = useState('');
+  const [namechanger, setNamechanger] = useState(false);
+  const [newname, setNewname] = useState('');
 
-  const onChange = (e) =>{
+  const onChange = (e) => {
     setNewname(e.target.value);
   }
 
@@ -91,38 +74,49 @@ const HistoryItem = (props) => {
   // },[props])
 
   // Extract TC and SC from the result string
+  // const resultArray = graph.result
+  //   .split("\n")
+  //   .filter((item) => item.trim() !== "");
+  // const tc = resultArray[1]?.trim() || "N/A";
+  // const numNodes = resultArray[2]?.trim() || "N/A";
+  // const numEdges = resultArray[3]?.trim() || "N/A";
+  // const sc = resultArray[4]?.trim() || "N/A";
+
   const resultArray = graph.result
-    .split("\n")
-    .filter((item) => item.trim() !== "");
-  const tc = resultArray[1]?.trim() || "N/A";
-  const sc = resultArray[2]?.trim() || "N/A";
+    .split("\n")[1].split(' ');
+  const tc = resultArray[0] || "N/A";
+  const numNodes = resultArray[1] || "N/A";
+  const numEdges = resultArray[2] || "N/A";
+  const sc = resultArray[3] || "N/A";
+
+
   return (
     <tr className="border-b dark:border-sky-200/80">
       <td className="relative py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6 w-[18rem] hover:cursor-pointer" onClick={() => {
-        if(namechanger === false) handleNameChange();
-        }}>
-        {namechanger ? 
-        <div className="flex flex-row w-[24vh]">  
-          <div className="relative w-[22vh] h-[3vh] ">
-          <input id="nameinp" type ="string" className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-1" maxLength = "25" onInput={maxLengthCheck}
-          //  value={newname}
-          onChange={onChange} placeholder={graph.name}
-           />
-          <label htmlFor="nameinp" className="absolute bottom-0 right-2 text-gray-700/30 text-md font-semibold">{25 - newname.length}</label>
-          </div>
-          <div className="flex items-center justify-center h-[3vh]">
-          <button className="w-[2vh] " onClick={handleNameChange}>
-          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition ease-in-out duration-200 scale-90 hover:scale-100"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M5 5L19 19M5 19L19 5" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path> </g></svg>
-          </button>
+        if (namechanger === false) handleNameChange();
+      }}>
+        {namechanger ?
+          <div className="flex flex-row w-[24vh]">
+            <div className="relative w-[22vh] h-[3vh] ">
+              <input id="nameinp" type="string" className="bg-gray-50 border border-gray-300 text-gray-900 sm:text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-1" maxLength="25" onInput={maxLengthCheck}
+                //  value={newname}
+                onChange={onChange} placeholder={graph.name}
+              />
+              <label htmlFor="nameinp" className="absolute bottom-0 right-2 text-gray-700/30 text-md font-semibold">{25 - newname.length}</label>
+            </div>
+            <div className="flex items-center justify-center h-[3vh]">
+              <button className="w-[2vh] " onClick={handleNameChange}>
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 transition ease-in-out duration-200 scale-90 hover:scale-100"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M5 5L19 19M5 19L19 5" stroke="#000000" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"></path> </g></svg>
+              </button>
 
-          <button className="w-[2vh] transition ease-in-out duration-200 scale-90 hover:scale-100" onClick={handleclick}>
-          <svg viewBox="0 -0.5 25 25" className="hover:scale-100 scale-95  w-6 h-6" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M5.5 12.5L10.167 17L19.5 8" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path> </g></svg>
-          </button>
+              <button className="w-[2vh] transition ease-in-out duration-200 scale-90 hover:scale-100" onClick={handleclick}>
+                <svg viewBox="0 -0.5 25 25" className="hover:scale-100 scale-95  w-6 h-6" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M5.5 12.5L10.167 17L19.5 8" stroke="#000000" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"></path> </g></svg>
+              </button>
 
+            </div>
           </div>
-        </div>
-        : 
-        graph.name
+          :
+          graph.name
         }
       </td>
       <td className="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-light font-mono text-opacity-100 text-gray-400 px-6">
@@ -135,14 +129,14 @@ const HistoryItem = (props) => {
         {numEdges}
       </td>
       <td className="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-semibold font-mono  text-opacity-100 text-gray-700 px-6">
-        {tc}
+        {tc + "μs"}
       </td>
       <td className="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-semibold font-mono  text-opacity-100 text-gray-700 px-6">
-        {sc}
+        {sc + "KB"}
       </td>
       <td
         className="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-semibold font-mono text-opacity-100 text-gray-700 px-6 hover:cursor-pointer"
-        onClick={() => {editfavgraph(graph._id,!graph.favourite)}}
+        onClick={() => { editfavgraph(graph._id, !graph.favourite) }}
       >
         {graph.favourite ? (
           <svg
@@ -187,8 +181,8 @@ const HistoryItem = (props) => {
         </button>
         <button className=" transition duration-150 ease-in-out opacity-30 hover:opacity-90" onClick={() => navigator.clipboard.writeText(`http://localhost:3000/graph/${graph._id}`)}>
           <div>
-        <svg viewBox="0 -0.5 25 25" fill="none" width="20" height="20" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12.5 6.25C12.9142 6.25 13.25 5.91421 13.25 5.5C13.25 5.08579 12.9142 4.75 12.5 4.75V6.25ZM20.25 12.5C20.25 12.0858 19.9142 11.75 19.5 11.75C19.0858 11.75 18.75 12.0858 18.75 12.5H20.25ZM19.5 6.25C19.9142 6.25 20.25 5.91421 20.25 5.5C20.25 5.08579 19.9142 4.75 19.5 4.75V6.25ZM15.412 4.75C14.9978 4.75 14.662 5.08579 14.662 5.5C14.662 5.91421 14.9978 6.25 15.412 6.25V4.75ZM20.25 5.5C20.25 5.08579 19.9142 4.75 19.5 4.75C19.0858 4.75 18.75 5.08579 18.75 5.5H20.25ZM18.75 9.641C18.75 10.0552 19.0858 10.391 19.5 10.391C19.9142 10.391 20.25 10.0552 20.25 9.641H18.75ZM20.0303 6.03033C20.3232 5.73744 20.3232 5.26256 20.0303 4.96967C19.7374 4.67678 19.2626 4.67678 18.9697 4.96967L20.0303 6.03033ZM11.9697 11.9697C11.6768 12.2626 11.6768 12.7374 11.9697 13.0303C12.2626 13.3232 12.7374 13.3232 13.0303 13.0303L11.9697 11.9697ZM12.5 4.75H9.5V6.25H12.5V4.75ZM9.5 4.75C6.87665 4.75 4.75 6.87665 4.75 9.5H6.25C6.25 7.70507 7.70507 6.25 9.5 6.25V4.75ZM4.75 9.5V15.5H6.25V9.5H4.75ZM4.75 15.5C4.75 18.1234 6.87665 20.25 9.5 20.25V18.75C7.70507 18.75 6.25 17.2949 6.25 15.5H4.75ZM9.5 20.25H15.5V18.75H9.5V20.25ZM15.5 20.25C18.1234 20.25 20.25 18.1234 20.25 15.5H18.75C18.75 17.2949 17.2949 18.75 15.5 18.75V20.25ZM20.25 15.5V12.5H18.75V15.5H20.25ZM19.5 4.75H15.412V6.25H19.5V4.75ZM18.75 5.5V9.641H20.25V5.5H18.75ZM18.9697 4.96967L11.9697 11.9697L13.0303 13.0303L20.0303 6.03033L18.9697 4.96967Z" fill="#000000"></path> </g></svg>
-        </div>
+            <svg viewBox="0 -0.5 25 25" fill="none" width="20" height="20" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12.5 6.25C12.9142 6.25 13.25 5.91421 13.25 5.5C13.25 5.08579 12.9142 4.75 12.5 4.75V6.25ZM20.25 12.5C20.25 12.0858 19.9142 11.75 19.5 11.75C19.0858 11.75 18.75 12.0858 18.75 12.5H20.25ZM19.5 6.25C19.9142 6.25 20.25 5.91421 20.25 5.5C20.25 5.08579 19.9142 4.75 19.5 4.75V6.25ZM15.412 4.75C14.9978 4.75 14.662 5.08579 14.662 5.5C14.662 5.91421 14.9978 6.25 15.412 6.25V4.75ZM20.25 5.5C20.25 5.08579 19.9142 4.75 19.5 4.75C19.0858 4.75 18.75 5.08579 18.75 5.5H20.25ZM18.75 9.641C18.75 10.0552 19.0858 10.391 19.5 10.391C19.9142 10.391 20.25 10.0552 20.25 9.641H18.75ZM20.0303 6.03033C20.3232 5.73744 20.3232 5.26256 20.0303 4.96967C19.7374 4.67678 19.2626 4.67678 18.9697 4.96967L20.0303 6.03033ZM11.9697 11.9697C11.6768 12.2626 11.6768 12.7374 11.9697 13.0303C12.2626 13.3232 12.7374 13.3232 13.0303 13.0303L11.9697 11.9697ZM12.5 4.75H9.5V6.25H12.5V4.75ZM9.5 4.75C6.87665 4.75 4.75 6.87665 4.75 9.5H6.25C6.25 7.70507 7.70507 6.25 9.5 6.25V4.75ZM4.75 9.5V15.5H6.25V9.5H4.75ZM4.75 15.5C4.75 18.1234 6.87665 20.25 9.5 20.25V18.75C7.70507 18.75 6.25 17.2949 6.25 15.5H4.75ZM9.5 20.25H15.5V18.75H9.5V20.25ZM15.5 20.25C18.1234 20.25 20.25 18.1234 20.25 15.5H18.75C18.75 17.2949 17.2949 18.75 15.5 18.75V20.25ZM20.25 15.5V12.5H18.75V15.5H20.25ZM19.5 4.75H15.412V6.25H19.5V4.75ZM18.75 5.5V9.641H20.25V5.5H18.75ZM18.9697 4.96967L11.9697 11.9697L13.0303 13.0303L20.0303 6.03033L18.9697 4.96967Z" fill="#000000"></path> </g></svg>
+          </div>
         </button>
       </td>
     </tr>

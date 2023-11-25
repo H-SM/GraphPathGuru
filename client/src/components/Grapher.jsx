@@ -43,24 +43,18 @@ const Graphlet = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const { project } = useReactFlow();
   const [nid, setNid] = useState(0);
-  console.log("I am alive, Graphlet", nid);
+
+  console.log("I am alive, Graphlet", nodes);
 
   // change id when new node is added
   const getId = () => {
-    setNid(prevNid => {
-      const n = prevNid + 1;
-      return n;
-    });
-    return `${nid-1}`;
+    setNid(prevNid => prevNid + 1);
+    return `${nid - 1}`;
   }
 
   const setId = () => {
-    setNid(prevNid => {
-      const n = prevNid - 1;
-      return n;
-    });
-
-    return `${nid+1}`;
+    setNid(prevNid => prevNid - 1);
+    return `${nid + 1}`;
   }
   const onConnect = useCallback((params) => {
     const redEdge = {
@@ -154,8 +148,8 @@ const Graphlet = () => {
     [nodes, edges]
   );
 
-  const makeNodesEdges = (gdata, nodes, edges) => {
-    const lines = "0 100 100: 1,10 2,1 3,2\n1 200 -200: 2,20 3,40\n2 300 300: \n 3 -100 50:".split('\n');
+  const makeNodesEdges = useCallback((gdata, nodes, edges) => {
+    const lines = gdata.split('\n');
     console.log("THIS IS THFCISJOIJDIOWQJDOI", lines);
     const adj = [];
 
@@ -173,8 +167,7 @@ const Graphlet = () => {
         pointer++;
       }
       nodeInfo = nodeInfo.split(' ')
-      console.log("WHATHIOEHRIROIQJRHOIOIIQWIOJQWEJIOQWEOIJQWOEIQWOIEQWOIEJQWOIEJQWIOEJQOIEJQWODJASDKHASKDJHQWIDASCLKNQWOIFHQWOI", nodeInfo);
-      
+
       pointer += 2; // Skip ": "
 
       const connectedNodes = [];
@@ -201,6 +194,9 @@ const Graphlet = () => {
         }
       }
       console.log("THIS IS SPARTA", nodeInfo);
+      if (nodeInfo.length !== 3) {
+        continue;
+      }
       adj.push([nodeInfo, ...connectedNodes]);
     }
 
@@ -208,7 +204,7 @@ const Graphlet = () => {
 
     const sx = adj[0][0][0], sy = adj[0][0][1];
     adj.forEach((nodeInfo, index) => {
-      console.log("ahah trhis is sod funny bruht", nodeInfo)
+      console.log(" bruht", nodeInfo)
       const nodeId = nodeInfo[0][0];
       const position = { x: nodeInfo[0][1], y: nodeInfo[0][2] };
 
@@ -224,10 +220,11 @@ const Graphlet = () => {
         targetPosition: 'right',
         sourcePosition: 'right',
       };
-      
+
+
       setNodes((nds) => nds.concat(node))
-      getId();
-      
+
+
       // Create edges for connected nodes
       for (let i = 1; i < nodeInfo.length; i++) {
         const [connectedNode, weight] = nodeInfo[i];
@@ -241,25 +238,29 @@ const Graphlet = () => {
           style: { stroke: 'red', strokeWidth: 1 },
           markerEnd: { type: 'arrowclosed', width: 30, height: 20, color: 'green' },
         };
-        console.log("THIS IS A FUCKIGN edge", edge);
+        console.log("THIS IS A  edge", edge);
+
 
         setEdges((els) => addEdge(edge, els));
+
       }
     });
 
-    // Output the nodes and edges arrays
-    console.log('Nodes: IS LE FUNNYNY', nodes);
-    console.log('Edges: gfo ahead an dplea seofheu rh euhurry hp ashsohw ', edges);
+    console.log("THIS IS NODES: ", nodes);
+    console.log("THIS IS edges: ", edges);
     return;
-  };
+  }, [setNodes, setEdges]);
 
-  if (nodes.length === 0) {
-    makeNodesEdges(viewGraph.graph, nodes, edges, nid);
-    console.log("THI SIS AHASIDHOASHD", nodes)
-    if (nodes.length !== 0) {
-      setNid(nodes.length);
+  useEffect(() => {
+    setTimeout(() => {
+    }, 1000);
+    if (nodes.length === 0) {
+      makeNodesEdges(viewGraph.graph, nodes, edges, nid);
     }
-  }
+    // if (nodes.length !== 0) {
+    setNid(nodes.length);
+    // }
+  }, []);
 
   return (
     <>
@@ -318,38 +319,22 @@ const Grapher = () => {
   const [sc, setSc] = useState("");
   const [throughput, setThroughput] = useState("");
 
-  const extractEdgesAndNodes = (graphData) => {
-    const lines = graphData.split("\n");
-
-    let edgesCount = 0;
-    let nodesCount = 0;
-
-    lines.forEach((line) => {
-      const parts = line.split(" ");
-      if (parts.length >= 1) {
-        // Assuming each line represents a node, increment nodesCount
-        nodesCount++;
-
-        // Assuming each part after the first represents an edge, increment edgesCount
-        edgesCount += parts.length - 1;
-      }
-    });
-
-    // Update state variables together
-    setNumEdges(edgesCount);
-    setNumNodes(nodesCount);
-  };
 
   useEffect(() => {
     if (showUser.length !== 0) {
-      extractEdgesAndNodes(viewGraph.graph);
       // Extract TC and SC from the result string
+      // const resultArray = viewGraph.result
+      //   .split("\n")
+      //   .filter((item) => item.trim() !== "");
+      // setTc(resultArray[1]?.trim() || "N/A");
+      // setSc(resultArray[2]?.trim() || "N/A");
+      // calculateThroughput(tc, sc);
       const resultArray = viewGraph.result
-        .split("\n")
-        .filter((item) => item.trim() !== "");
-      setTc(resultArray[1]?.trim() || "N/A");
-      setSc(resultArray[2]?.trim() || "N/A");
-      calculateThroughput(tc, sc);
+        .split("\n")[1].split(' ');
+      setTc(resultArray[0] || "N/A");
+      setNumNodes(resultArray[1] || "N/A");
+      setNumEdges(resultArray[2] || "N/A");
+      setSc(resultArray[3] || "N/A");
     }
   }, [showUser, viewGraph, tc, sc]);
 
@@ -419,9 +404,9 @@ const Grapher = () => {
   function calculateThroughput(tc, sc) {
     // Calculate throughput in Mbps
     const timeInMilliseconds = parseFloat(tc, 10);
-    const spaceInMegabytes = parseFloat(sc, 10);
+    const spaceInMegabytes = parseFloat(sc, 10);  // when I do this thing, it would be Kb
     const throughputMbps = Math.ceil(
-      spaceInMegabytes / (timeInMilliseconds / 1000)
+      (spaceInMegabytes + 1) / (timeInMilliseconds / 1000)
     );
 
     setThroughput(`${throughputMbps} mbps`);
@@ -477,11 +462,11 @@ const Grapher = () => {
                 </div>
               </div>
               <p className="font-medium text-[15px] mt-2 flex flex-row gap-1">
-                      Share this graph with others<span aria-hidden="true">→ </span>
-                      <a onClick={() => navigator.clipboard.writeText(`http://localhost:3000/graph/${id}`)} className="font-medium text-sky-700 hover:underline hover:cursor-pointer select-none flex flex-row items-center opacity-90 hover:opacity-100">
-                        click here <svg viewBox="0 0 25 25" fill="none" width="20" height="20" xmlns="http://www.w3.org/2000/svg" ><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12.5 6.25C12.9142 6.25 13.25 5.91421 13.25 5.5C13.25 5.08579 12.9142 4.75 12.5 4.75V6.25ZM20.25 12.5C20.25 12.0858 19.9142 11.75 19.5 11.75C19.0858 11.75 18.75 12.0858 18.75 12.5H20.25ZM19.5 6.25C19.9142 6.25 20.25 5.91421 20.25 5.5C20.25 5.08579 19.9142 4.75 19.5 4.75V6.25ZM15.412 4.75C14.9978 4.75 14.662 5.08579 14.662 5.5C14.662 5.91421 14.9978 6.25 15.412 6.25V4.75ZM20.25 5.5C20.25 5.08579 19.9142 4.75 19.5 4.75C19.0858 4.75 18.75 5.08579 18.75 5.5H20.25ZM18.75 9.641C18.75 10.0552 19.0858 10.391 19.5 10.391C19.9142 10.391 20.25 10.0552 20.25 9.641H18.75ZM20.0303 6.03033C20.3232 5.73744 20.3232 5.26256 20.0303 4.96967C19.7374 4.67678 19.2626 4.67678 18.9697 4.96967L20.0303 6.03033ZM11.9697 11.9697C11.6768 12.2626 11.6768 12.7374 11.9697 13.0303C12.2626 13.3232 12.7374 13.3232 13.0303 13.0303L11.9697 11.9697ZM12.5 4.75H9.5V6.25H12.5V4.75ZM9.5 4.75C6.87665 4.75 4.75 6.87665 4.75 9.5H6.25C6.25 7.70507 7.70507 6.25 9.5 6.25V4.75ZM4.75 9.5V15.5H6.25V9.5H4.75ZM4.75 15.5C4.75 18.1234 6.87665 20.25 9.5 20.25V18.75C7.70507 18.75 6.25 17.2949 6.25 15.5H4.75ZM9.5 20.25H15.5V18.75H9.5V20.25ZM15.5 20.25C18.1234 20.25 20.25 18.1234 20.25 15.5H18.75C18.75 17.2949 17.2949 18.75 15.5 18.75V20.25ZM20.25 15.5V12.5H18.75V15.5H20.25ZM19.5 4.75H15.412V6.25H19.5V4.75ZM18.75 5.5V9.641H20.25V5.5H18.75ZM18.9697 4.96967L11.9697 11.9697L13.0303 13.0303L20.0303 6.03033L18.9697 4.96967Z" fill="#000000"></path> </g></svg>
-                      </a>
-                  </p>
+                Share this graph with others<span aria-hidden="true">→ </span>
+                <a onClick={() => navigator.clipboard.writeText(`http://localhost:3000/graph/${id}`)} className="font-medium text-sky-700 hover:underline hover:cursor-pointer select-none flex flex-row items-center opacity-90 hover:opacity-100">
+                  click here <svg viewBox="0 0 25 25" fill="none" width="20" height="20" xmlns="http://www.w3.org/2000/svg" ><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12.5 6.25C12.9142 6.25 13.25 5.91421 13.25 5.5C13.25 5.08579 12.9142 4.75 12.5 4.75V6.25ZM20.25 12.5C20.25 12.0858 19.9142 11.75 19.5 11.75C19.0858 11.75 18.75 12.0858 18.75 12.5H20.25ZM19.5 6.25C19.9142 6.25 20.25 5.91421 20.25 5.5C20.25 5.08579 19.9142 4.75 19.5 4.75V6.25ZM15.412 4.75C14.9978 4.75 14.662 5.08579 14.662 5.5C14.662 5.91421 14.9978 6.25 15.412 6.25V4.75ZM20.25 5.5C20.25 5.08579 19.9142 4.75 19.5 4.75C19.0858 4.75 18.75 5.08579 18.75 5.5H20.25ZM18.75 9.641C18.75 10.0552 19.0858 10.391 19.5 10.391C19.9142 10.391 20.25 10.0552 20.25 9.641H18.75ZM20.0303 6.03033C20.3232 5.73744 20.3232 5.26256 20.0303 4.96967C19.7374 4.67678 19.2626 4.67678 18.9697 4.96967L20.0303 6.03033ZM11.9697 11.9697C11.6768 12.2626 11.6768 12.7374 11.9697 13.0303C12.2626 13.3232 12.7374 13.3232 13.0303 13.0303L11.9697 11.9697ZM12.5 4.75H9.5V6.25H12.5V4.75ZM9.5 4.75C6.87665 4.75 4.75 6.87665 4.75 9.5H6.25C6.25 7.70507 7.70507 6.25 9.5 6.25V4.75ZM4.75 9.5V15.5H6.25V9.5H4.75ZM4.75 15.5C4.75 18.1234 6.87665 20.25 9.5 20.25V18.75C7.70507 18.75 6.25 17.2949 6.25 15.5H4.75ZM9.5 20.25H15.5V18.75H9.5V20.25ZM15.5 20.25C18.1234 20.25 20.25 18.1234 20.25 15.5H18.75C18.75 17.2949 17.2949 18.75 15.5 18.75V20.25ZM20.25 15.5V12.5H18.75V15.5H20.25ZM19.5 4.75H15.412V6.25H19.5V4.75ZM18.75 5.5V9.641H20.25V5.5H18.75ZM18.9697 4.96967L11.9697 11.9697L13.0303 13.0303L20.0303 6.03033L18.9697 4.96967Z" fill="#000000"></path> </g></svg>
+                </a>
+              </p>
             </div>
           </div>
           <div className="mx-auto max-w-2xl text-center">
@@ -540,7 +525,7 @@ const Grapher = () => {
                     Time Taken
                   </dt>
                   <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-                    {tc}
+                    {tc + "μs"}
                   </dd>
                 </div>
                 <div key="5" className="mx-auto flex max-w-xs flex-col gap-y-4">
@@ -556,7 +541,7 @@ const Grapher = () => {
                     Space taken
                   </dt>
                   <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-                    {sc}
+                    {sc + "KB"}
                   </dd>
                 </div>
               </dl>
