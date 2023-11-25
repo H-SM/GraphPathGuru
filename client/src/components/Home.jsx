@@ -37,6 +37,8 @@ import visualiseYenK from "./AlgoVisualise/YenK";
 import visualiseDjikstra from "./AlgoVisualise/Djikstra";
 import visualiseBellman from "./AlgoVisualise/BellmanFord";
 import visualiseFloyd from "./AlgoVisualise/Floyd";
+import visualiseJohnson from "./AlgoVisualise/Johnson";
+import visualiseSPFA from "./AlgoVisualise/SPFA";
 
 const host = process.env.REACT_APP_BACKEND_LOCALHOST;
 
@@ -80,7 +82,9 @@ const AddNodeOnEdgeDrop = () => {
     // visualiseYenK(nodes, edges, setNodes, setEdges);
     // visualiseDjikstra(nodes, edges, setNodes, setEdges);
     // visualiseBellman(nodes, edges, setNodes, setEdges);
-    visualiseFloyd(nodes, edges, setNodes, setEdges);
+    // visualiseFloyd(nodes, edges, setNodes, setEdges);
+    // visualiseJohnson(nodes, edges, setNodes, setEdges);
+    visualiseSPFA(nodes, edges, setNodes, setEdges);
   };
 
   // runs everytime we connect two nodes

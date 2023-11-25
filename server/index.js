@@ -72,7 +72,7 @@ app.post("/perform-algo", (req, res) => {
     "./Bellman_Ford/Bellman.exe",
     "./SPFA/SPFA.exe",
     "./Floyd_Warshall/Floyd_warshall.exe",
-    "./Johnsons/Johnson.exe",
+    "./Johnson/Johnson.exe",
     "./Yen/Yen.exe",
   ];
   let algoExecutable = algo_execs[id];
@@ -121,12 +121,10 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-
 // app.get("/read-file", (req, res) => {
 //     const lines = fs.readFileSync("./file io/output.txt", "utf-8");
 
 // }
-
 
 app.get("/read-file", (req, res) => {
   const fileContent = fs.readFileSync("./file io/output.txt", "utf-8");
@@ -425,6 +423,119 @@ app.get("/read-file-Floyd", (req, res) => {
     distance,
     distance_curr,
     curr_node,
+  };
+
+  res.json(responseData);
+});
+
+app.get("/read-file-Johnson", (req, res) => {
+  const fileContent = fs.readFileSync("./file io/output.txt", "utf-8");
+
+  const regex = /<adj2>([\s\S]*?)<\/adj2>/g;
+
+  const adjDataArray = [];
+
+  let match;
+  while ((match = regex.exec(fileContent)) !== null) {
+    const adjData = match[1].trim();
+    adjDataArray.push(adjData);
+  }
+
+  console.log(adjDataArray);
+
+  const result = [];
+  const checkNode = []; // New array to store third values
+  const distance_curr = [];
+  const curr_node = [];
+
+  for (const line of adjDataArray) {
+    const match = line.match(/^(\d+)/); // Regular expression to match the first number
+    if (match) {
+      const firstNumber = parseInt(match[1], 10);
+      curr_node.push(firstNumber);
+    }
+  }
+
+  adjDataArray.forEach((row) => {
+    const lines = row.split("\n");
+    const values = [];
+    const thirdValues = [];
+
+    const numbersBeforeColon = [];
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const match = line.match(/(\d+):/); // Regular expression to match the number before ':'
+      if (match) {
+        const number = parseInt(match[1], 10); // Extract and convert to an integer
+        numbersBeforeColon.push(number);
+      }
+
+      if (i > 0) {
+        const parts = lines[i].split("\t")[1];
+        if (parts) {
+          const firstNumericValue = parseInt(parts.split(",")[0], 10);
+          const thirdNumericValue = parseInt(parts.split(",")[2], 10);
+          values.push(firstNumericValue);
+          thirdValues.push(thirdNumericValue);
+        }
+      }
+    }
+
+    checkNode.push(values);
+    result.push(thirdValues);
+    distance_curr.push(numbersBeforeColon);
+  });
+
+  const distance = [];
+
+  const dsMatches = fileContent.match(/<ds2>[\s\S]*?<\/ds2>/g);
+
+  if (dsMatches) {
+    const dsArray = dsMatches.map((ds) => {
+      const dsContent = ds.match(/<ds2>([\s\S]*?)<\/ds2>/)[1].trim();
+      const dsLines = dsContent.split("\n");
+      return dsLines.map((line) =>
+        line
+          .trim()
+          .split(/\s+/)
+          .map((val) => (val === "INF" ? "INF" : parseInt(val, 10)))
+      );
+    });
+
+    for (let i = 0; i < dsArray.length; i++) {
+      distance.push(dsArray[i][1]);
+    }
+  }
+
+  const dsMatches1 = fileContent.match(/<source>[\s\S]*?<\/source>/g);
+
+  const source = dsMatches1.map((str) => {
+    const match = str.match(/\t(\d+)\r/);
+    if (match && match[1]) {
+      return parseInt(match[1]);
+    }
+    return null;
+  });
+
+  // to remove the undefined (0) error due to timeout function
+  checkNode.push([]);
+  result.push([]);
+
+  console.log(distance);
+  console.log(checkNode);
+  console.log(result);
+  console.log(distance_curr);
+  console.log(curr_node);
+  console.log(source);
+
+  const responseData = {
+    result,
+    checkNode,
+    distance,
+    distance_curr,
+    curr_node,
+    source,
   };
 
   res.json(responseData);

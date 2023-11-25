@@ -55,8 +55,13 @@ pair<vector<int>, vector<int>> dijkstra(int V, vector<vector<pair<int, int>>> &a
     // and traverse for all its adjacent nodes.
     while (!pq.empty())
     {
+
+        output += "<source>\n\t";
+        output += std::to_string(S);
+        output += "\n</source>\n";
+
         auto copy = pq;
-        output += "<ds>\n\t"; // begin <ds>
+        output += "<ds2>\n\t"; // begin <ds2>
         while (copy.size())
         { // putting PQ to output
             output += std::to_string(copy.top().first) + "," + std::to_string(copy.top().second) + " ";
@@ -75,13 +80,13 @@ pair<vector<int>, vector<int>> dijkstra(int V, vector<vector<pair<int, int>>> &a
         { // putting pred to output
             output += std::to_string(p) + " ";
         }
-        output += "\n</ds>\n"; // <ds> stops here
+        output += "\n</ds2>\n"; // <ds> stops here
 
         int node = pq.top().second;
         int dis = pq.top().first;
         pq.pop();
 
-        output += "<adj>\n\t"; // Adj begins here
+        output += "<adj2>\n\t"; // Adj begins here
         output += std::to_string(node) + ", " + std::to_string(dis) + ":";
         // Check for all adjacent nodes of the popped out
         // element whether the prev dist is larger than current or not.
@@ -106,19 +111,20 @@ pair<vector<int>, vector<int>> dijkstra(int V, vector<vector<pair<int, int>>> &a
             else
                 output += "0, -1, -1";
         }
-        output += "\n</adj>\n"; // adj ends here
+        output += "\n</adj2>\n"; // adj ends here
     }
     return {distTo, pred};
 }
 
 vector<int> BellmanFord_Algorithm(int V, std::vector<std::array<int, 3>> &edges, int S, std::string &output)
 {
-    vector<int> distTo(V + 1, INT_MAX);
+    vector<int> distTo(V + 1, 1e9);
     vector<int> pred(V + 1, -1);
     distTo[S] = 0;
 
     // adding a new source node
     // and creating an edge from that node to all the nodes with weight as 0.
+    cout << V << endl;
     for (int i = 0; i < V; ++i)
     {
         edges.push_back({V, i, 0});
@@ -142,7 +148,7 @@ vector<int> BellmanFord_Algorithm(int V, std::vector<std::array<int, 3>> &edges,
             output += "\n\t";
             for (auto &d : distTo)
             { // Putting dist to output
-                if (d == INT_MAX)
+                if (d == 1e9)
                     output += "INF ";
                 else
                     output += std::to_string(d) + " ";
@@ -155,13 +161,15 @@ vector<int> BellmanFord_Algorithm(int V, std::vector<std::array<int, 3>> &edges,
             output += "\n</ds>\n"; // <ds> stops here
 
             output += "<adj>\n\t"; // Adj begins here
+
             output += std::to_string(u) + ", " + std::to_string(distTo[u]) + ":";
             output += "\n\t" + std::to_string(v) + ", " + std::to_string(w) + ", ";
 
             // element whether the prev dist is larger than current or not.
             // If current distance is smaller, push it into the queue.
+
             bool f = 0;
-            if (distTo[u] != INT_MAX && distTo[u] + w < distTo[v])
+            if (distTo[u] != 1e9 && distTo[u] + w < distTo[v])
             {
                 distTo[v] = distTo[u] + w;
                 pred[v] = u;
@@ -200,33 +208,6 @@ vector<int> BellmanFord_Algorithm(int V, std::vector<std::array<int, 3>> &edges,
         return distTo;
     }
 }
-
-// vector<int> BellmanFord_Algorithm(vector<std::array<int, 3>> &edges, vector<vector<int>> &graph, int V)
-// {
-//     vector<int> dist(V + 1, INT_MAX);
-//     dist[V] = 0;
-
-//     // adding a new source node
-//     // and creating an edge from that node to all the nodes with weight as 0.
-//     for (int i = 0; i < V; ++i)
-//     {
-//         edges.push_back({V, i, 0});
-//     }
-
-//     // applying bellman ford to find the shortest distance from the new node to all the previously available nodes of the graph
-//     for (int i = 0; i < V; ++i)
-//     {
-//         for (auto &edge : edges)
-//         {
-//             int i = edge[0], j = edge[1], w = edge[2];
-//             if (dist[i] != INT_MAX && dist[i] + w < dist[j])
-//             {
-//                 dist[j] = dist[i] + w;
-//             }
-//         }
-//     }
-//     return vector<int>(dist.begin(), dist.begin() + V);
-// }
 
 std::string goBackDir(std::string path, int levels)
 {
@@ -288,7 +269,7 @@ void JohnsonAlgorithm(int V, vector<vector<int>> &graph, std::string &output)
     {
         for (int j = 0; j < graph[i].size(); ++j)
         {
-            if (graph[i][j] != 0)
+            if (i != j && graph[i][j] != 1e9 && graph[i][j] != 0)
             {
                 edges.push_back({i, j, graph[i][j]});
             }
@@ -300,7 +281,7 @@ void JohnsonAlgorithm(int V, vector<vector<int>> &graph, std::string &output)
     vector<int> Alter_weights = BellmanFord_Algorithm(V, edges, V, output);
 
     // making new graph for altered weights
-    vector<vector<int>> Altered_Graph(graph.size(), vector<int>(graph.size(), 0));
+    vector<vector<int>> Altered_Graph(graph.size(), vector<int>(graph.size(), 1e9));
 
     // making a new graph by reweighting the edges to convert negative edges to positive edges
     for (int i = 0; i < graph.size(); ++i)
@@ -331,13 +312,15 @@ void JohnsonAlgorithm(int V, vector<vector<int>> &graph, std::string &output)
     {
         for (int j = 0; j < Altered_Graph.size(); j++)
         {
-            adj[i].push_back({j, Altered_Graph[i][j]});
+            if (i != j && Altered_Graph[i][j] != 1e9)
+                adj[i].push_back({j, Altered_Graph[i][j]});
         }
     }
 
     // apply dijkstra by taking each node as source node to find all pair shortest path
-    for (int source = 0; source < graph.size(); ++source)
+    for (int source = 0; source < graph.size(); source++)
     {
+
         cout << "\n\nShortest Distance with vertex " << source << " as the source:\n";
         auto temp = dijkstra(Altered_Graph.size(), adj, source, output);
 
@@ -352,17 +335,14 @@ void JohnsonAlgorithm(int V, vector<vector<int>> &graph, std::string &output)
         }
         output += "\n\t";
 
-        std::vector<int> path = restore_path(source, 0, pred);
-
         for (int i = 0; i < V; i++)
         {
             output += std::to_string(dists[i]) + " ";
         }
         output += "\n</result>\n";
-
-        // Storing the result for front end to read
-        storeOutput(output);
     }
+    // Storing the result for front end to read
+    storeOutput(output);
 }
 
 pair<int, vector<vector<int>>> make_graph()

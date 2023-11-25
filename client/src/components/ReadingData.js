@@ -58,38 +58,7 @@ adjDataArray.forEach((row) => {
   distance_curr.push(numbersBeforeColon);
 });
 
-
 const dsMatches = fileContent.match(/<ds>[\s\S]*?<\/ds>/g);
 
 
-const distance = dsMatches.map(str => {
-  const lines = str.split('\r\n\t'); // Split by '\r\n\t' to get individual lines
-
-  // Remove first and last empty elements
-  lines.shift();
-  lines.pop();
-
-  return lines.map(line => {
-    const values = line.split(' '); // Split each line by space
-    return values.filter(val => val !== ''); // Remove empty values
-  });
-});
-
-
-// to remove the undefined (0) error due to timeout function
-checkNode.push([]);
-result.push([]);
-
-console.log(distance[0]);
-console.log(checkNode);
-console.log(result);
-console.log(distance_curr);
-console.log(curr_node);
-
-const responseData = {
-  result,
-  checkNode,
-  distance,
-  distance_curr,
-  curr_node,
-};
+console.log(dsMatches)
