@@ -51,28 +51,6 @@ const colorEdge = (edges, sourceEdge, destinationEdge, animated) => {
 
 // node visualisation starts
 const visualise = async (nodes, edges, setNodes, setEdges) => {
-  // fetching data from output.txt
-  await fetch(`${host}/read-file`)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.json();
-    })
-    .then((data) => {
-      // console.log('Received data:', data.distance_curr);
-      result = data.result;
-      checkNode = data.checkNode;
-      distance = data.distance;
-      distance_curr = data.distance_curr;
-      curr_node = data.curr_node;
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
-
-  console.log(currentNode, index);
-
   if (
     checkNode.length > 0 &&
     checkNode[currentNode].length === 0 &&
@@ -137,11 +115,37 @@ const visualise = async (nodes, edges, setNodes, setEdges) => {
   }, 5000);
 };
 
-const visualiseDjikstra = (nodes, edges, setNodes, setEdges) => {
+const visualiseDjikstra = async (nodes, edges, setNodes, setEdges) => {
+
+  console.log("Djikstra visualisation !");
+
   currentNode = 0;
   currentEdge = 1;
   index = 0;
   pathVal = 0;
+
+  // fetching data from output.txt
+  await fetch(`${host}/read-file`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      // console.log('Received data:', data.distance_curr);
+      result = data.result;
+      checkNode = data.checkNode;
+      distance = data.distance;
+      distance_curr = data.distance_curr;
+      curr_node = data.curr_node;
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+
+  console.log(currentNode, index);
+
   visualise(nodes, edges, setNodes, setEdges);
 };
 

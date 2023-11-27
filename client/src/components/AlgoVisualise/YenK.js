@@ -77,29 +77,6 @@ const colorEdge2 = (edges, checkEdges) => {
 };
 
 const visualise = async (nodes, edges, setNodes, setEdges) => {
-  // fetching data from output.txt
-  await fetch(`${host}/read-file-YenK`)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.json();
-    })
-    .then((data) => {
-      // console.log('Received data:', data.distance_curr);
-      result = data.result;
-      checkNode = data.checkNode;
-      distance = data.distance;
-      distance_curr = data.distance_curr;
-      curr_node = data.curr_node;
-      path = data.path;
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
-
-  console.log(currentNode, index);
-
   if (
     checkNode.length > 0 &&
     checkNode[currentNode].length === 0 &&
@@ -182,11 +159,35 @@ const visualise = async (nodes, edges, setNodes, setEdges) => {
   }, 5000);
 };
 
-const visualiseYenK = (nodes, edges, setNodes, setEdges) => {
+const visualiseYenK = async (nodes, edges, setNodes, setEdges) => {
+  console.log("Yenk visualised !");
+
   currentNode = 0;
   currentEdge = 1;
   index = 0;
   pathVal = 0;
+
+  // fetching data from output.txt
+  await fetch(`${host}/read-file-YenK`)
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      return response.json();
+    })
+    .then((data) => {
+      // console.log('Received data:', data.distance_curr);
+      result = data.result;
+      checkNode = data.checkNode;
+      distance = data.distance;
+      distance_curr = data.distance_curr;
+      curr_node = data.curr_node;
+      path = data.path;
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+
   visualise(nodes, edges, setNodes, setEdges);
 };
 

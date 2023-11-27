@@ -116,6 +116,9 @@ const visualise = async (nodes, edges, setNodes, setEdges) => {
 };
 
 const visualiseSPFA = async (nodes, edges, setNodes, setEdges) => {
+
+  console.log("visualising spfa !");
+
   currentNode = 0;
   currentEdge = 1;
   index = 0;

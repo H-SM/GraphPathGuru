@@ -79,12 +79,29 @@ const AddNodeOnEdgeDrop = () => {
   const { addgraph } = gContext;
 
   const startProcess = () => {
-    // visualiseYenK(nodes, edges, setNodes, setEdges);
-    // visualiseDjikstra(nodes, edges, setNodes, setEdges);
-    // visualiseBellman(nodes, edges, setNodes, setEdges);
-    // visualiseFloyd(nodes, edges, setNodes, setEdges);
-    // visualiseJohnson(nodes, edges, setNodes, setEdges);
-    visualiseSPFA(nodes, edges, setNodes, setEdges);
+    switch (algoID) {
+      case "Dijkstra":
+        visualiseDjikstra(nodes, edges, setNodes, setEdges);
+        break;
+      case "Bellman Ford":
+        visualiseBellman(nodes, edges, setNodes, setEdges);
+        break;
+      case "SPFA":
+        visualiseSPFA(nodes, edges, setNodes, setEdges);
+        break;
+      case "Floyd Warshall":
+        visualiseFloyd(nodes, edges, setNodes, setEdges);
+        break;
+      case "Johnson's Algorithm":
+        visualiseJohnson(nodes, edges, setNodes, setEdges);
+        break;
+      case "Yen's K shortest Paths":
+        visualiseYenK(nodes, edges, setNodes, setEdges);
+        break;
+      default:
+        // Handle default case
+        break;
+    }
   };
 
   // runs everytime we connect two nodes
@@ -257,8 +274,7 @@ const AddNodeOnEdgeDrop = () => {
       alert("name too big (0-25 characters). please make it smaller");
     } else {
       const samp_data = {
-        result:
-          res_string,
+        result: res_string,
         graph: response.graph,
         name: namer,
         favourite: false,
@@ -321,7 +337,6 @@ const AddNodeOnEdgeDrop = () => {
       return null; // or throw error if needed
     }
   };
-
 
   // for flipping the node
   const flipNode = () => {
