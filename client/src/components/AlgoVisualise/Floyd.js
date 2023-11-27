@@ -177,6 +177,9 @@ const visualise = async (nodes, edges, setNodes, setEdges) => {
 };
 
 const visualiseFloyd = async (nodes, edges, setNodes, setEdges) => {
+
+  console.log("Floyd visualised !");
+
   currentNode = 0;
   currentEdge = 1;
   index = 0;
