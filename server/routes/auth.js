@@ -10,8 +10,8 @@ const nodemailer = require("nodemailer");
 
 const JWT_SECRET = process.env.JWT_SECRET_HERE;
 const REACT_HOST = process.env.REACT_HOST;
-const EMAIL = process.env.EMAIL;
-const PASSWORD = process.env.PASSWORD;
+const EMAIL = process.env.EMAIL_ADDRESS;
+const PASSWORD = process.env.EMAIL_PASSWORD;
 
 // Create a Nodemailer transporter using SMTP details of your email provider
 const transporter = nodemailer.createTransport({
@@ -321,17 +321,92 @@ router.post(
           from: "vinay@gmail.com",
           to: email,
           subject: "Password Reset",
-          html: `We have sent you this email in response to your request to reset your password on GraphPathGuru. 
-          To reset your password, please follow the link below:
-      
-          <a href = "${REACT_HOST}/forgot-password?auth_token=${auth_token}">Click here to reset your password</a>
-          <br><br>
-          We recommend that you keep your password secure and not share it with anyone. If your feel your password has been compromised, you can change it again by going to Forgot password again.
-          
-          <br><br>
+          html: `<div bgcolor="#F5F5F5" style="padding:0;margin:0;background:#f5f5f5">
+          <center>
+            <table align="center" bgcolor="#F5F5F5" border="0" cellpadding="0" cellspacing="0" width="100%" role="presentation">
+              <tbody>
+                <tr>
+                  <td align="center" style="padding:0px 0 0 0">
+                    <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" role="presentation">
+                      <tbody>
+                        <tr bgcolor="#F5F5F5" height="32">
+                          <td style="padding:0 0 0 0;height:32px"></td>
+                        </tr>
+                        <tr bgcolor="#F5F5F5">
+                          <td align="center" style="padding:0 0 0 0" width="600px">
+                            <img alt="GraphPathGuru" border="0" src="https://i.imgur.com/FOjB6py.png" style="display:block;outline:none;height:auto;width:320px" width="104" class="CToWUd" data-bit="iit">
+                          </td>
+                        </tr>
+                        <tr bgcolor="#F5F5F5" height="32">
+                          <td style="padding:0 0 0 0;height:32px"></td>
+                        </tr>   
+                        <tr bgcolor="#FFFFFF">
+                          <td align="center" style="padding:0 0 0 0" width="600px">
+                            <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" role="presentation">
+                              <tbody>
+                                <tr bgcolor="#FFFFFF" height="36">
+                                  <td style="padding:0 0 0 0;height:36px"></td>
+                                </tr>
+                                <tr bgcolor="#FFFFFF">
+                                  <td class="m_2351815498272009065side-padding" style="padding:0 44px 0 44px">
+                                    <p style="font-family:'Inter',sans-serif;font-weight:500;font-size:16px;color:#3c4043;letter-spacing:-0.02px;line-height:24px">
+                                      Hi User,
+                                    </p>
+                                 <p style="font-family:'Inter',sans-serif;font-weight:500;font-size:16px;color:#3c4043;letter-spacing:-0.02px;line-height:24px">
+                                 We have sent you this email in response to your request to reset your password on GraphPathGuru. 
+                                  To reset your password, please follow the link below:
+                                  <br>
+                                  <br>
+                                  </p>            
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </td>
+                        </tr>
+                        <tr bgcolor="#FFFFFF">
+                          <td align="center">
+                            <div>
+                              <a href="${REACT_HOST}/forgot-password?auth_token=${auth_token}" style="background-color:#2596be;padding:11px 24px 11px 24px;margin:10px 0 0px 0;border-radius:20px;font-family:'Inter',sans-serif;font-weight:600;font-size:14px;color:#ffffff;letter-spacing:0;display:inline-block;text-align:center;text-decoration:none" title="Reset Password" target="_blank">Reset Password 
+                              </a>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr bgcolor="#FFFFFF">
+                          <td class="m_2351815498272009065side-padding" style="padding:0 44px 0 44px">
+                          <p style="font-family:'Inter',sans-serif;font-weight:500;font-size:16px;color:#3c4043;letter-spacing:-0.02px;line-height:24px">
+                          We recommend that you keep your password secure and not share it with anyone. If your feel your password has been compromised, you can change it by going to Forgot password again.
+                          <br>
+                          <br>
+                          With Regards,<br><br>Graph Path Guru 
+                          </p>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="m_2351815498272009065side-padding" style="padding:0 24px 0 24px">
+                            <p style="font-family:'Inter',sans-serif;font-weight:500;font-size:12px;color:#5f6368;padding-top:30px;letter-spacing:0;text-align:center;line-height:20px">
+                            © 2023 GraphPathGuru. All rights reserved.
+                            </p>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </center>
+        </div>
           `,
         };
-
+        // We have sent you this email in response to your request to reset your password on GraphPathGuru. 
+        // To reset your password, please follow the link below:
+    
+        // <a href = "${REACT_HOST}/forgot-password?auth_token=${auth_token}">Click here to reset your password</a>
+        // <br><br>
+        // We recommend that you keep your password secure and not share it with anyone. If your feel your password has been compromised, you can change it again by going to Forgot password again.
+        
+        // <br><br>
         transporter.sendMail(mailOptions, (error, info) => {
           if (error) {
             console.error("Error occurred while sending email:", error);
