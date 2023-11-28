@@ -15,7 +15,6 @@ const History = (props) => {
   let context = useContext(graphContext);
   let navigate = useNavigate();
   const { graphs, getallgraph } = context;
-
   useEffect(() => {
     if (localStorage.getItem("token")) {
       getallgraph();
@@ -92,7 +91,7 @@ const History = (props) => {
         </p>
       ) : (
         <>
-          <div className="lg:h-[50rem] xl:h-[37rem]">
+          <div>
             {/* lg:h-[50rem] xl:h-[37rem] */}
             <div className="flex flex-col mt-8">
               <div className="overflow-x-auto sm:-mx-6 lg:-mx-8 flex-row justify-center items-center gap-y-3">

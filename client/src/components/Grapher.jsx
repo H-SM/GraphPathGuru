@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useContext, useEffect, useState } from "react";
+import React, { useCallback, useRef, useContext, useEffect, useState, useMemo } from "react";
 import NavbarOut from "./NavbarOut.jsx";
 import { useParams } from "react-router-dom";
 import graphContext from "../context/Graph/graphContext.js";
@@ -44,7 +44,7 @@ const Graphlet = () => {
   const { project } = useReactFlow();
   const [nid, setNid] = useState(0);
 
-  console.log("I am alive, Graphlet", nodes);
+  console.log("I am alive, Graphlet", nodes, edges);
 
   // change id when new node is added
   const getId = () => {
@@ -148,7 +148,7 @@ const Graphlet = () => {
     [nodes, edges]
   );
 
-  const makeNodesEdges = useCallback((gdata, nodes, edges) => {
+  const makeNodesEdges = (gdata, nodes, edges) => {
     const lines = gdata.split('\n');
     console.log("THIS IS THFCISJOIJDIOWQJDOI", lines);
     const adj = [];
@@ -249,19 +249,23 @@ const Graphlet = () => {
     console.log("THIS IS NODES: ", nodes);
     console.log("THIS IS edges: ", edges);
     return;
-  }, [setNodes, setEdges]);
-
-  useEffect(() => {
-    setTimeout(() => {
-    }, 1000);
+  };
+  useMemo(() => {
     if (nodes.length === 0) {
       makeNodesEdges(viewGraph.graph, nodes, edges, nid);
+      setNid(nodes.length);
     }
-    // if (nodes.length !== 0) {
-    setNid(nodes.length);
-    // }
-  }, []);
+  }, [nodes, viewGraph.graph, edges]);
 
+
+  // // useEffect(() => {
+  //   if (nodes.length === 0) {
+      
+  //   }else {
+  //   setNid(nodes.length);
+  //   }
+  // // },[])
+   
   return (
     <>
       <div

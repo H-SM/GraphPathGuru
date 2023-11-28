@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import graphContext from "./graphContext";
 const GraphState = (props) => {
-  const host = process.env.REACT_APP_BACKEND_LOCALHOST;
+  const host = process.env.REACT_APP_BACKEND_HOST;
   const [graphs, setGraphs] = useState([]);
   const [viewGraph, setViewGraph] = useState([]);
 

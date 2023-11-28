@@ -40,7 +40,7 @@ import visualiseFloyd from "./AlgoVisualise/Floyd";
 import visualiseJohnson from "./AlgoVisualise/Johnson";
 import visualiseSPFA from "./AlgoVisualise/SPFA";
 
-const host = process.env.REACT_APP_BACKEND_LOCALHOST;
+const localhost = process.env.REACT_APP_BACKEND_LOCALHOST;
 
 const initialNodes = [
   {
@@ -253,7 +253,7 @@ const AddNodeOnEdgeDrop = () => {
     };
     console.log("this is data\n", data);
     const nexter = userData.graphs + 1;
-    const req_write = await fetch(`${host}/write-file`, {
+    const req_write = await fetch(`${localhost}/write-file`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -314,7 +314,7 @@ const AddNodeOnEdgeDrop = () => {
     }
 
     try {
-      const req = await fetch(`${host}/perform-algo`, {
+      const req = await fetch(`${localhost}/perform-algo`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -322,7 +322,7 @@ const AddNodeOnEdgeDrop = () => {
         body: JSON.stringify({ algoID: algoMap[algoID] }),
       });
 
-      console.log(`${host}/perform-algo`, "pinged");
+      console.log(`${localhost}/perform-algo`, "pinged");
 
       if (!req.ok) {
         // Check if the HTTP response status is not in the range 200-299
