@@ -2,6 +2,10 @@ import React, { useEffect } from "react";
 import Footer from "./Footer";
 import { useLocation } from "react-router-dom";
 import NavbarOut from "./NavbarOut";
+import step1 from '../assets/steps_1.png';
+import step2 from '../assets/steps_2.png';
+import step3 from '../assets/steps_3.png';
+import step4 from '../assets/steps_4.png';
 
 const Docpage = () => {
   const location = useLocation();
@@ -97,9 +101,8 @@ const Docpage = () => {
               </p>
               <div className="mt-12 grid grid-cols-1 gap-x-8 gap-y-14 text-sm leading-6 sm:grid-cols-2 lg:grid-cols-2">
                 <div>
-                  <div className="relative aspect-[280/190] overflow-hidden rounded-xl bg-slate-200">
-                    {/* TODO: */}
-                    <img src="" alt="" />
+                <div className="relative aspect-[3/2] object-contain overflow-hidden rounded-xl bg-slate-200 shadow-lg shadow-cyan-700/30">
+                  <img className="w-full h-full object-cover" src={step1} alt=""/>
                     <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-black/5"></div>
                   </div>
                   <p className="mt-6 text-slate-700">
@@ -112,9 +115,8 @@ const Docpage = () => {
                   </p>
                 </div>
                 <div>
-                  <div className="relative aspect-[280/190] overflow-hidden rounded-xl bg-slate-200">
-                    {/* TODO: */}
-                    <img src="" alt="" />
+                <div className="relative aspect-[3/2] object-contain overflow-hidden rounded-xl bg-slate-200 shadow-lg shadow-cyan-700/30">
+                  <img className="w-full h-full object-cover" src={step2} alt=""/>
                     <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-black/5"></div>
                   </div>
                   <p className="mt-6 text-slate-700">
@@ -129,9 +131,8 @@ const Docpage = () => {
                   </p>
                 </div>
                 <div>
-                  <div className="relative aspect-[280/190] overflow-hidden rounded-xl bg-slate-200">
-                    {/* TODO: */}
-                    <img src="" alt="" />
+                <div className="relative aspect-[3/2] object-contain overflow-hidden rounded-xl bg-slate-200 shadow-lg shadow-cyan-700/30">
+                  <img className="w-full h-full object-cover" src={step3} alt=""/>
                     <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-black/5"></div>
                   </div>
                   <p className="mt-6 text-slate-700">
@@ -147,9 +148,8 @@ const Docpage = () => {
                   </p>
                 </div>
                 <div>
-                  <div className="relative aspect-[280/190] overflow-hidden rounded-xl bg-slate-200">
-                    {/* TODO: */}
-                    <img src="" alt="" />
+                <div className="relative aspect-[3/2] object-contain overflow-hidden rounded-xl bg-slate-200 shadow-lg shadow-cyan-700/30">
+                  <img className="w-full h-full object-cover" src={step4} alt=""/>
                     <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-black/5"></div>
                   </div>
                   <p className="mt-6 text-slate-700">

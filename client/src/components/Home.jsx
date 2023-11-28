@@ -32,6 +32,8 @@ import TechStack from "./techStack";
 import History from "./History";
 import { useLocation, useNavigate } from "react-router-dom";
 import UserSection from "./UserSection";
+import Box from "@mui/material/Box";
+import LinearProgress from "@mui/material/LinearProgress";
 
 import visualiseYenK from "./AlgoVisualise/YenK";
 import visualiseDjikstra from "./AlgoVisualise/Djikstra";
@@ -610,21 +612,21 @@ const AddNodeOnEdgeDrop = () => {
 const Home = (props) => {
   const { showAlert } = props;
   let navigate = useNavigate();
+  const context = useContext(userContext);
+  const {userData, getuserinfo } = context;
   useEffect(() => {
     if (localStorage.getItem("token")) {
+    getuserinfo();
     } else {
       navigate("/login");
     }
     // eslint-disable-next-line
   }, []);
-  const context = useContext(userContext);
-  const { getuserinfo } = context;
 
-  useEffect(() => {
-    getuserinfo();
-  }, []);
   return (
     <>
+    {userData._id ? (
+      <>
       <div>
         <img
           src={imager}
@@ -647,6 +649,12 @@ const Home = (props) => {
       <TechStack />
       <Footer />
       <UserSection />
+      </>
+      ) : (
+        <Box sx={{ width: "100%" }}>
+          <LinearProgress />
+        </Box>
+      )}
     </>
   );
 };
