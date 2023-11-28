@@ -317,6 +317,9 @@ const visualiseD = async (nodes, edges, setNodes, setEdges, source) => {
 };
 
 const visualiseJ = async (nodes, edges, setNodes, setEdges) => {
+
+  console.log("johnson visualised !");
+
   currentNode = 0;
   currentEdge = 1;
   index = 0;

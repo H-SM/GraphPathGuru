@@ -40,7 +40,7 @@ import visualiseFloyd from "./AlgoVisualise/Floyd";
 import visualiseJohnson from "./AlgoVisualise/Johnson";
 import visualiseSPFA from "./AlgoVisualise/SPFA";
 
-const host = process.env.REACT_APP_BACKEND_LOCALHOST;
+const localhost = process.env.REACT_APP_BACKEND_LOCALHOST;
 
 const initialNodes = [
   {
@@ -79,12 +79,29 @@ const AddNodeOnEdgeDrop = () => {
   const { addgraph } = gContext;
 
   const startProcess = () => {
-    // visualiseYenK(nodes, edges, setNodes, setEdges);
-    // visualiseDjikstra(nodes, edges, setNodes, setEdges);
-    // visualiseBellman(nodes, edges, setNodes, setEdges);
-    // visualiseFloyd(nodes, edges, setNodes, setEdges);
-    // visualiseJohnson(nodes, edges, setNodes, setEdges);
-    visualiseSPFA(nodes, edges, setNodes, setEdges);
+    switch (algoID) {
+      case "Dijkstra":
+        visualiseDjikstra(nodes, edges, setNodes, setEdges);
+        break;
+      case "Bellman Ford":
+        visualiseBellman(nodes, edges, setNodes, setEdges);
+        break;
+      case "SPFA":
+        visualiseSPFA(nodes, edges, setNodes, setEdges);
+        break;
+      case "Floyd Warshall":
+        visualiseFloyd(nodes, edges, setNodes, setEdges);
+        break;
+      case "Johnson's Algorithm":
+        visualiseJohnson(nodes, edges, setNodes, setEdges);
+        break;
+      case "Yen's K shortest Paths":
+        visualiseYenK(nodes, edges, setNodes, setEdges);
+        break;
+      default:
+        // Handle default case
+        break;
+    }
   };
 
   // runs everytime we connect two nodes
@@ -236,7 +253,7 @@ const AddNodeOnEdgeDrop = () => {
     };
     console.log("this is data\n", data);
     const nexter = userData.graphs + 1;
-    const req_write = await fetch(`${host}/write-file`, {
+    const req_write = await fetch(`${localhost}/write-file`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -257,8 +274,7 @@ const AddNodeOnEdgeDrop = () => {
       alert("name too big (0-25 characters). please make it smaller");
     } else {
       const samp_data = {
-        result:
-          res_string,
+        result: res_string,
         graph: response.graph,
         name: namer,
         favourite: false,
@@ -298,7 +314,7 @@ const AddNodeOnEdgeDrop = () => {
     }
 
     try {
-      const req = await fetch(`${host}/perform-algo`, {
+      const req = await fetch(`${localhost}/perform-algo`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -306,7 +322,7 @@ const AddNodeOnEdgeDrop = () => {
         body: JSON.stringify({ algoID: algoMap[algoID] }),
       });
 
-      console.log(`${host}/perform-algo`, "pinged");
+      console.log(`${localhost}/perform-algo`, "pinged");
 
       if (!req.ok) {
         // Check if the HTTP response status is not in the range 200-299
@@ -321,7 +337,6 @@ const AddNodeOnEdgeDrop = () => {
       return null; // or throw error if needed
     }
   };
-
 
   // for flipping the node
   const flipNode = () => {
