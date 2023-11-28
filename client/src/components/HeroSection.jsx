@@ -1,5 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import  hero_sec from '../assets/hero_section.png'
 const HeroSection = () => {
   return (
     <>
@@ -46,7 +47,7 @@ const HeroSection = () => {
             <div className="relative mt-16 h-80 lg:mt-8">
               <img
                 className="absolute left-0 top-0 w-[57rem] max-w-none rounded-md bg-white/5 ring-1 ring-white/10"
-                src="https://i.imgur.com/mGXg7o9.png"
+                src={hero_sec}
                 // src="https://tailwindui.com/img/component-images/dark-project-app-screenshot.png"
                 alt="App screenshot"
                 width={1824}
