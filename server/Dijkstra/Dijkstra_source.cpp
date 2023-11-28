@@ -233,7 +233,7 @@ int main() {
     
 
     // Timing the actual algo with chrono
-    auto startTime = std::chrono::high_resolution_clock::now();
+    auto startTime = std::chrono::high_resolution_clock::now(); // starting the timing clock
     auto temp = dijkstra(V, adj, S, output);
     auto endTime = std::chrono::high_resolution_clock::now();
     auto dists = temp.first, pred = temp.second;
@@ -242,6 +242,7 @@ int main() {
 
     auto time_taken = duration.count();
     
+    // Counting the number edges
     int E = 0;
     for (auto i: adj) {
         E += i.size();

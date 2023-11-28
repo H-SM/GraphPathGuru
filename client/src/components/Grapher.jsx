@@ -44,7 +44,6 @@ const Graphlet = () => {
   const { project } = useReactFlow();
   const [nid, setNid] = useState(0);
 
-  console.log("I am alive, Graphlet", nodes, edges);
 
   // change id when new node is added
   const getId = () => {
@@ -70,7 +69,6 @@ const Graphlet = () => {
       },
     };
     setEdges((els) => addEdge(redEdge, els));
-    console.log(edges);
   }, []);
 
   const onConnectStart = useCallback((_, { nodeId }) => {
@@ -113,7 +111,6 @@ const Graphlet = () => {
             },
           })
         );
-        console.log(edges);
       }
     },
     [project]
@@ -150,7 +147,7 @@ const Graphlet = () => {
 
   const makeNodesEdges = (gdata, nodes, edges) => {
     const lines = gdata.split('\n');
-    console.log("THIS IS THFCISJOIJDIOWQJDOI", lines);
+    
     const adj = [];
 
     for (const line of lines) {
@@ -193,18 +190,16 @@ const Graphlet = () => {
           connectedNodes.push([connectedNode, weight]);
         }
       }
-      console.log("THIS IS SPARTA", nodeInfo);
+      
       if (nodeInfo.length !== 3) {
         continue;
       }
       adj.push([nodeInfo, ...connectedNodes]);
     }
 
-    console.log("Amazing adj", adj);
 
     const sx = adj[0][0][0], sy = adj[0][0][1];
     adj.forEach((nodeInfo, index) => {
-      console.log(" bruht", nodeInfo)
       const nodeId = nodeInfo[0][0];
       const position = { x: nodeInfo[0][1], y: nodeInfo[0][2] };
 
@@ -238,7 +233,6 @@ const Graphlet = () => {
           style: { stroke: 'red', strokeWidth: 1 },
           markerEnd: { type: 'arrowclosed', width: 30, height: 20, color: 'green' },
         };
-        console.log("THIS IS A  edge", edge);
 
 
         setEdges((els) => addEdge(edge, els));
@@ -246,8 +240,6 @@ const Graphlet = () => {
       }
     });
 
-    console.log("THIS IS NODES: ", nodes);
-    console.log("THIS IS edges: ", edges);
     return;
   };
   useMemo(() => {
