@@ -6,6 +6,8 @@
 #include <string>
 #include <algorithm>
 #include <Windows.h>
+#include <chrono>
+
 
 std::string epath;
 
@@ -253,10 +255,23 @@ int main()
     std::string output;
     vector<int> dist(V, INF);
     vector<int> p(V, -1);
+
+    // Timing the actual algo with chrono
+    auto startTime = std::chrono::high_resolution_clock::now(); // starting the timing clock
     bool n_c = spfa(S, dist, adj, p, output);
+    auto endTime = std::chrono::high_resolution_clock::now();
+
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
+
+    auto time_taken = duration.count();
+
+    int E = 0;
+    for (auto i: adj) {
+        E += i.size();
+    }
 
     output += "<result>\n\t"; // TODO: dist, p, thats it
-    output += std::to_string(V) + "," + std::to_string(S) + "\n\t";
+    output += std::to_string(time_taken) + " " + std::to_string(V) + " " + std::to_string(E) + " " + std::to_string(S) + " " + std::to_string(n_c) + "\n\t";
     // adding pred
     for (auto i : p)
         output += std::to_string(i) + " ";

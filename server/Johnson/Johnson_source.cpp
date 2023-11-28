@@ -8,6 +8,7 @@
 #include <Windows.h>
 #include <climits>
 #include <array>
+#include <chrono>
 
 std::string epath;
 
@@ -203,10 +204,11 @@ vector<int> BellmanFord_Algorithm(int V, std::vector<std::array<int, 3>> &edges,
         }
     }
 
-    if (flag == 0)
+    if (flag != 0)
     {
-        return distTo;
+        cout << "Negative weight cycle was discovered";
     }
+    return distTo;
 }
 
 std::string goBackDir(std::string path, int levels)
@@ -260,8 +262,9 @@ vector<int> restore_path(int s, int t, vector<int> const &p)
     return path;
 }
 
-void JohnsonAlgorithm(int V, vector<vector<int>> &graph, std::string &output)
+void JohnsonAlgorithm(int V, vector<vector<int>> &graph, std::string &output, int& t_count)
 {
+    auto startTime = std::chrono::high_resolution_clock::now(); // starting the timing clock
     vector<std::array<int, 3>> edges;
 
     // creating an edges vector from the graph matrix
@@ -296,15 +299,6 @@ void JohnsonAlgorithm(int V, vector<vector<int>> &graph, std::string &output)
         }
     }
 
-    cout << "Modified Graph: ";
-    for (auto &row : Altered_Graph)
-    {
-        cout << "\n";
-        for (int val : row)
-        {
-            cout << val << " ";
-        }
-    }
 
     // converting the adjacency matrix into adjacency list for passing it to dijkstra
     vector<vector<pair<int, int>>> adj(V, vector<pair<int, int>>());
@@ -316,17 +310,25 @@ void JohnsonAlgorithm(int V, vector<vector<int>> &graph, std::string &output)
                 adj[i].push_back({j, Altered_Graph[i][j]});
         }
     }
+    auto endTime = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
+    t_count += duration.count();
 
     // apply dijkstra by taking each node as source node to find all pair shortest path
     for (int source = 0; source < graph.size(); source++)
     {
 
         cout << "\n\nShortest Distance with vertex " << source << " as the source:\n";
+
+        startTime = std::chrono::high_resolution_clock::now();
         auto temp = dijkstra(Altered_Graph.size(), adj, source, output);
+        endTime = std::chrono::high_resolution_clock::now();
+        duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
+        t_count += duration.count();
 
         auto dists = temp.first, pred = temp.second;
 
-        output += "<result>\n\t";
+        output += "<dijk-result>\n\t";
         output += std::to_string(V) + "," + std::to_string(source) + "\n\t";
 
         for (auto i : pred)
@@ -339,15 +341,13 @@ void JohnsonAlgorithm(int V, vector<vector<int>> &graph, std::string &output)
         {
             output += std::to_string(dists[i]) + " ";
         }
-        output += "\n</result>\n";
+        output += "\n</dijk-result>\n";
     }
     // Storing the result for front end to read
-    storeOutput(output);
 }
 
 pair<int, vector<vector<int>>> make_graph()
 {
-
     std::ifstream inputFile;
     std::string path = std::string(epath);
     inputFile.open(goBackDir(path, 1) + "\\file io\\input.txt");
@@ -443,8 +443,24 @@ int main()
     int t = 0;
     auto edges = g.second;
     std::string output;
+    int t_count;
 
-    JohnsonAlgorithm(V, edges, output);
+    JohnsonAlgorithm(V, edges, output, t_count);
+
+    // Counting the number edges
+    int E = 0;
+    for (auto i: edges) {
+        for (auto e: i) {
+            if (e != 1e9)
+                E++;
+        }
+    }
+    int S = edges.size();
+    
+    output += "<result>\n\t";
+    output += std::to_string(t_count) + " " + std::to_string(V) + " " + std::to_string(E) + " " + std::to_string(S) + "\n";
+    output += "</result>";
+    storeOutput(output);
 
     return 0;
 }
