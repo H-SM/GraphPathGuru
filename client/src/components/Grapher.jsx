@@ -1,4 +1,4 @@
-import React, { useCallback, useRef, useContext, useEffect, useState, useMemo } from "react";
+import React, { useRef, useContext, useEffect, useState } from "react";
 import NavbarOut from "./NavbarOut.jsx";
 import { useParams } from "react-router-dom";
 import graphContext from "../context/Graph/graphContext.js";
@@ -10,22 +10,12 @@ import { UserCircleIcon } from "@heroicons/react/24/solid";
 import ReactFlow, {
   useNodesState,
   useEdgesState,
-  addEdge,
-  useReactFlow,
   ReactFlowProvider,
-  getIncomers,
-  getOutgoers,
-  getConnectedEdges,
-  MarkerType,
-  useOnSelectionChange,
   Background,
-  Controls,
 } from "reactflow";
 
 import "reactflow/dist/style.css";
 import Footer from "./Footer";
-
-
 
 const fitViewOptions = {
   padding: 3,
@@ -36,228 +26,114 @@ const Graphlet = () => {
   const contextgraph = useContext(graphContext);
   const { viewGraph } = contextgraph;
 
-
   const reactFlowWrapper = useRef(null);
-  const connectingNodeId = useRef(null);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const { project } = useReactFlow();
-  const [nid, setNid] = useState(0);
 
+  const makeNodesEdges = (gdata) => {
+    const lines = gdata.split("\n");
 
-  // change id when new node is added
-  const getId = () => {
-    setNid(prevNid => prevNid + 1);
-    return `${nid - 1}`;
-  }
-
-  const setId = () => {
-    setNid(prevNid => prevNid - 1);
-    return `${nid + 1}`;
-  }
-  const onConnect = useCallback((params) => {
-    const redEdge = {
-      ...params,
-      id: `${connectingNodeId.current}_${params.target}`,
-      style: { stroke: "red", strokeWidth: 1 },
-      type: "straight",
-      markerEnd: {
-        type: MarkerType.ArrowClosed,
-        width: 30,
-        height: 20,
-        color: "green",
-      },
-    };
-    setEdges((els) => addEdge(redEdge, els));
-  }, []);
-
-  const onConnectStart = useCallback((_, { nodeId }) => {
-    connectingNodeId.current = nodeId;
-  }, []);
-
-  // it runs when new node is created by dragging and dropping
-  const onConnectEnd = useCallback(
-    (event) => {
-      const targetIsPane = event.target.classList.contains("react-flow__pane");
-
-      if (targetIsPane) {
-        const { top, left } = reactFlowWrapper.current.getBoundingClientRect();
-        getId();
-        const newNode = {
-          nid,
-          position: project({
-            x: event.clientX - left - 75,
-            y: event.clientY - top,
-          }),
-          style: { height: "50px", width: "50px", borderRadius: "100px" },
-          data: { label: `${nid}` },
-          targetPosition: "left",
-          sourcePosition: "left",
-        };
-
-        setNodes((nds) => nds.concat(newNode));
-        setEdges((eds) =>
-          eds.concat({
-            nid: `${connectingNodeId.current}_${nid}`,
-            source: connectingNodeId.current,
-            type: "straight",
-            target: nid,
-            style: { stroke: "red", strokeWidth: 1 },
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-              width: 30,
-              height: 20,
-              color: "green",
-            },
-          })
-        );
-      }
-    },
-    [project]
-  );
-
-  // it runs when we delete a node or edge
-  const onNodesDelete = useCallback(
-    (deleted) => {
-      const id = setId();
-      setEdges(
-        deleted.reduce((acc, node) => {
-          const incomers = getIncomers(node, nodes, edges);
-          const outgoers = getOutgoers(node, nodes, edges);
-          const connectedEdges = getConnectedEdges([node], edges);
-
-          const remainingEdges = acc.filter(
-            (edge) => !connectedEdges.includes(edge)
-          );
-
-          const createdEdges = incomers.flatMap(({ id: source }) =>
-            outgoers.map(({ id: target }) => ({
-              id: `${source}->${target}`,
-              source,
-              target,
-            }))
-          );
-
-          return [...remainingEdges, ...createdEdges];
-        }, edges)
-      );
-    },
-    [nodes, edges]
-  );
-
-  const makeNodesEdges = (gdata, nodes, edges) => {
-    const lines = gdata.split('\n');
-    
-    const adj = [];
+    const newNodes = [];
+    const newEdges = [];
 
     for (const line of lines) {
       let pointer = 0;
-      let temp = '';
+      let temp = "";
 
-      while (pointer < line.length && line[pointer] === ' ') {
+      while (pointer < line.length && line[pointer] === " ") {
         pointer++;
       }
 
       let nodeInfo = "";
-      while (pointer < line.length && line[pointer] !== ':') {
+      while (pointer < line.length && line[pointer] !== ":") {
         nodeInfo += line[pointer];
         pointer++;
       }
-      nodeInfo = nodeInfo.split(' ')
+      nodeInfo = nodeInfo.split(" ");
 
       pointer += 2; // Skip ": "
 
       const connectedNodes = [];
       while (pointer < line.length) {
         // Get connected node and weight
-        while (pointer < line.length && line[pointer] !== ',') {
+        while (pointer < line.length && line[pointer] !== ",") {
           temp += line[pointer];
           pointer++;
         }
         const connectedNode = parseInt(temp, 10);
-        temp = '';
+        temp = "";
 
         pointer++; // Skip the comma
 
-        while (pointer < line.length && line[pointer] !== ' ' && line[pointer] !== undefined) {
+        while (
+          pointer < line.length &&
+          line[pointer] !== " " &&
+          line[pointer] !== undefined
+        ) {
           temp += line[pointer];
           pointer++;
         }
         const weight = parseInt(temp, 10);
-        temp = '';
+        temp = "";
 
         if (!isNaN(connectedNode) && !isNaN(weight)) {
           connectedNodes.push([connectedNode, weight]);
         }
       }
-      
+
       if (nodeInfo.length !== 3) {
         continue;
       }
-      adj.push([nodeInfo, ...connectedNodes]);
-    }
 
-
-    const sx = adj[0][0][0], sy = adj[0][0][1];
-    adj.forEach((nodeInfo, index) => {
-      const nodeId = nodeInfo[0][0];
-      const position = { x: nodeInfo[0][1], y: nodeInfo[0][2] };
+      const nodeId = nodeInfo[0];
+      const position = { x: parseInt(nodeInfo[1]), y: parseInt(nodeInfo[2]) };
 
       // Create a node object
       const node = {
-        id: nodeId.toString(),
-        type: 'default',
+        id: nodeId,
         position: position,
-        style: { height: '50px', width: '50px', borderRadius: '100px' },
+        style: { height: "50px", width: "50px", borderRadius: "100px" },
         data: {
-          label: nodeId.toString(),
+          label: nodeId,
         },
-        targetPosition: 'right',
-        sourcePosition: 'right',
+        targetPosition: "right",
+        sourcePosition: "right",
       };
 
-
-      setNodes((nds) => nds.concat(node))
-
+      newNodes.push(node);
 
       // Create edges for connected nodes
-      for (let i = 1; i < nodeInfo.length; i++) {
-        const [connectedNode, weight] = nodeInfo[i];
+      for (let i = 0; i < connectedNodes.length; i++) {
+        const [connectedNode, weight] = connectedNodes[i];
         const edgeId = `${nodeId}_${connectedNode}`;
         const edge = {
           id: edgeId,
-          source: nodeId.toString(),
+          source: nodeId,
           target: connectedNode.toString(),
-          type: 'straight',
+          type: "straight",
           label: weight.toString(),
-          style: { stroke: 'red', strokeWidth: 1 },
-          markerEnd: { type: 'arrowclosed', width: 30, height: 20, color: 'green' },
+          style: { stroke: "red", strokeWidth: 1 },
+          markerEnd: {
+            type: "arrowclosed",
+            width: 30,
+            height: 20,
+            color: "green",
+          },
         };
-
-
-        setEdges((els) => addEdge(edge, els));
-
+        newEdges.push(edge);
       }
-    });
-
-    return;
-  };
-  useMemo(() => {
-    if (nodes.length === 0) {
-      makeNodesEdges(viewGraph.graph, nodes, edges, nid);
-      setNid(nodes.length);
     }
-  }, [nodes, viewGraph.graph, edges]);
 
+    setNodes(newNodes);
+    setEdges(newEdges);
+  };
 
-  // // useEffect(() => {
-  //   if (nodes.length === 0) {
-      
-  //   }else {
-  //   setNid(nodes.length);
-  //   }
-  // // },[])
-   
+  useEffect(() => {
+    if (viewGraph.graph) {
+      makeNodesEdges(viewGraph.graph);
+    }
+  }, [viewGraph.graph]);
+
   return (
     <>
       <div
@@ -273,22 +149,16 @@ const Graphlet = () => {
             edges={edges}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            onNodesDelete={onNodesDelete}
-            onConnectStart={onConnectStart}
-            onConnectEnd={onConnectEnd}
             fitView
             fitViewOptions={fitViewOptions}
           >
             <Background />
-            <Controls />
           </ReactFlow>
         </div>
       </div>
     </>
   );
 };
-
 
 const Grapher = () => {
   const { id } = useParams();
@@ -315,7 +185,6 @@ const Grapher = () => {
   const [sc, setSc] = useState("");
   const [throughput, setThroughput] = useState("");
 
-
   useEffect(() => {
     if (showUser.length !== 0) {
       // Extract TC and SC from the result string
@@ -325,8 +194,7 @@ const Grapher = () => {
       // setTc(resultArray[1]?.trim() || "N/A");
       // setSc(resultArray[2]?.trim() || "N/A");
       // calculateThroughput(tc, sc);
-      const resultArray = viewGraph.result
-        .split("\n")[1].split(' ');
+      const resultArray = viewGraph.result.split("\n")[1].split(" ");
       setTc(resultArray[0] || "N/A");
       setNumNodes(resultArray[1] || "N/A");
       setNumEdges(resultArray[2] || "N/A");
@@ -400,7 +268,7 @@ const Grapher = () => {
   function calculateThroughput(tc, sc) {
     // Calculate throughput in Mbps
     const timeInMilliseconds = parseFloat(tc, 10);
-    const spaceInMegabytes = parseFloat(sc, 10);  // when I do this thing, it would be Kb
+    const spaceInMegabytes = parseFloat(sc, 10); // when I do this thing, it would be Kb
     const throughputMbps = Math.ceil(
       (spaceInMegabytes + 1) / (timeInMilliseconds / 1000)
     );
@@ -459,8 +327,36 @@ const Grapher = () => {
               </div>
               <p className="font-medium text-[15px] mt-2 flex flex-row gap-1">
                 Share this graph with others<span aria-hidden="true">→ </span>
-                <a onClick={() => navigator.clipboard.writeText(`http://localhost:3000/graph/${id}`)} className="font-medium text-sky-700 hover:underline hover:cursor-pointer select-none flex flex-row items-center opacity-90 hover:opacity-100">
-                  click here <svg viewBox="0 0 25 25" fill="none" width="20" height="20" xmlns="http://www.w3.org/2000/svg" ><g id="SVGRepo_bgCarrier" strokeWidth="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M12.5 6.25C12.9142 6.25 13.25 5.91421 13.25 5.5C13.25 5.08579 12.9142 4.75 12.5 4.75V6.25ZM20.25 12.5C20.25 12.0858 19.9142 11.75 19.5 11.75C19.0858 11.75 18.75 12.0858 18.75 12.5H20.25ZM19.5 6.25C19.9142 6.25 20.25 5.91421 20.25 5.5C20.25 5.08579 19.9142 4.75 19.5 4.75V6.25ZM15.412 4.75C14.9978 4.75 14.662 5.08579 14.662 5.5C14.662 5.91421 14.9978 6.25 15.412 6.25V4.75ZM20.25 5.5C20.25 5.08579 19.9142 4.75 19.5 4.75C19.0858 4.75 18.75 5.08579 18.75 5.5H20.25ZM18.75 9.641C18.75 10.0552 19.0858 10.391 19.5 10.391C19.9142 10.391 20.25 10.0552 20.25 9.641H18.75ZM20.0303 6.03033C20.3232 5.73744 20.3232 5.26256 20.0303 4.96967C19.7374 4.67678 19.2626 4.67678 18.9697 4.96967L20.0303 6.03033ZM11.9697 11.9697C11.6768 12.2626 11.6768 12.7374 11.9697 13.0303C12.2626 13.3232 12.7374 13.3232 13.0303 13.0303L11.9697 11.9697ZM12.5 4.75H9.5V6.25H12.5V4.75ZM9.5 4.75C6.87665 4.75 4.75 6.87665 4.75 9.5H6.25C6.25 7.70507 7.70507 6.25 9.5 6.25V4.75ZM4.75 9.5V15.5H6.25V9.5H4.75ZM4.75 15.5C4.75 18.1234 6.87665 20.25 9.5 20.25V18.75C7.70507 18.75 6.25 17.2949 6.25 15.5H4.75ZM9.5 20.25H15.5V18.75H9.5V20.25ZM15.5 20.25C18.1234 20.25 20.25 18.1234 20.25 15.5H18.75C18.75 17.2949 17.2949 18.75 15.5 18.75V20.25ZM20.25 15.5V12.5H18.75V15.5H20.25ZM19.5 4.75H15.412V6.25H19.5V4.75ZM18.75 5.5V9.641H20.25V5.5H18.75ZM18.9697 4.96967L11.9697 11.9697L13.0303 13.0303L20.0303 6.03033L18.9697 4.96967Z" fill="#000000"></path> </g></svg>
+                <a
+                  onClick={() =>
+                    navigator.clipboard.writeText(
+                      `http://localhost:3000/graph/${id}`
+                    )
+                  }
+                  className="font-medium text-sky-700 hover:underline hover:cursor-pointer select-none flex flex-row items-center opacity-90 hover:opacity-100"
+                >
+                  click here{" "}
+                  <svg
+                    viewBox="0 0 25 25"
+                    fill="none"
+                    width="20"
+                    height="20"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
+                    <g
+                      id="SVGRepo_tracerCarrier"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    ></g>
+                    <g id="SVGRepo_iconCarrier">
+                      {" "}
+                      <path
+                        d="M12.5 6.25C12.9142 6.25 13.25 5.91421 13.25 5.5C13.25 5.08579 12.9142 4.75 12.5 4.75V6.25ZM20.25 12.5C20.25 12.0858 19.9142 11.75 19.5 11.75C19.0858 11.75 18.75 12.0858 18.75 12.5H20.25ZM19.5 6.25C19.9142 6.25 20.25 5.91421 20.25 5.5C20.25 5.08579 19.9142 4.75 19.5 4.75V6.25ZM15.412 4.75C14.9978 4.75 14.662 5.08579 14.662 5.5C14.662 5.91421 14.9978 6.25 15.412 6.25V4.75ZM20.25 5.5C20.25 5.08579 19.9142 4.75 19.5 4.75C19.0858 4.75 18.75 5.08579 18.75 5.5H20.25ZM18.75 9.641C18.75 10.0552 19.0858 10.391 19.5 10.391C19.9142 10.391 20.25 10.0552 20.25 9.641H18.75ZM20.0303 6.03033C20.3232 5.73744 20.3232 5.26256 20.0303 4.96967C19.7374 4.67678 19.2626 4.67678 18.9697 4.96967L20.0303 6.03033ZM11.9697 11.9697C11.6768 12.2626 11.6768 12.7374 11.9697 13.0303C12.2626 13.3232 12.7374 13.3232 13.0303 13.0303L11.9697 11.9697ZM12.5 4.75H9.5V6.25H12.5V4.75ZM9.5 4.75C6.87665 4.75 4.75 6.87665 4.75 9.5H6.25C6.25 7.70507 7.70507 6.25 9.5 6.25V4.75ZM4.75 9.5V15.5H6.25V9.5H4.75ZM4.75 15.5C4.75 18.1234 6.87665 20.25 9.5 20.25V18.75C7.70507 18.75 6.25 17.2949 6.25 15.5H4.75ZM9.5 20.25H15.5V18.75H9.5V20.25ZM15.5 20.25C18.1234 20.25 20.25 18.1234 20.25 15.5H18.75C18.75 17.2949 17.2949 18.75 15.5 18.75V20.25ZM20.25 15.5V12.5H18.75V15.5H20.25ZM19.5 4.75H15.412V6.25H19.5V4.75ZM18.75 5.5V9.641H20.25V5.5H18.75ZM18.9697 4.96967L11.9697 11.9697L13.0303 13.0303L20.0303 6.03033L18.9697 4.96967Z"
+                        fill="#000000"
+                      ></path>{" "}
+                    </g>
+                  </svg>
                 </a>
               </p>
             </div>
