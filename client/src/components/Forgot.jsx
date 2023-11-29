@@ -1,7 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
 import logo from "../assets/logo.png";
-import userContext from "../context/User/userContext";
+// import userContext from "../context/User/userContext";
 import { useNavigate } from "react-router-dom";
+import NavbarOut from "./NavbarOut";
 
 const Forgot = (props) => {
   const [email, setEmail] = useState("");
@@ -13,8 +14,8 @@ const Forgot = (props) => {
   const token = urlParams.get("auth_token");
   let navigate = useNavigate();
 
-  const context = useContext(userContext);
-  const { forgotPassword } = context;
+  // const context = useContext(userContext);
+  // const { forgotPassword } = context;
 
   const [showpassword, setShowpassword] = useState(false);
 
@@ -22,37 +23,26 @@ const Forgot = (props) => {
   const [cpassword, setcpassword] = useState("");
 
   let json;
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
 
-    if (password != cpassword) {
-      showAlert("Recheck your new password!", "warning");
-      return;
-    }
+  //   if (password != cpassword) {
+  //     showAlert("Recheck your new password!", "warning");
+  //     return;
+  //   }
 
-    if (token) {
-      const sendMail = false;
-      const data = {token, password, sendMail};
-      json = await forgotPassword(data);
+  //     const sendMail = false;
+  //     const data = { password, sendMail};
+  //     json = await forgotPassword(data);
 
-      if (json.success) {
-        navigate("/");
-        showAlert("Password changed Successfully!", "success");
-      } else {
-        showAlert("Wrong token, Try Again!", "danger");
-      }
-    } else {
-      const sendMail = true;
-      const data = { sendMail, email };
-      json = await forgotPassword(data);
-
-      if (json.success) {
-        showAlert("Email Sent Successfully!", "success");
-      } else {
-        showAlert("Error Sending Email, Try Again!", "danger");
-      }
-    }
-  };
+  //     if (json.success) {
+  //       navigate("/");
+  //       showAlert("Password changed Successfully!", "success");
+  //     } else {
+  //       showAlert("Wrong token, Try Again!", "danger");
+  //     }
+  //   } 
+  // };
 
   const onChange = (e) => {
     if (e.target.name == "email") {
@@ -65,9 +55,11 @@ const Forgot = (props) => {
   };
 
   return (
+    <>
+    <NavbarOut/>
     <div>
       <div
-        className="absolute inset-x-0 top-[-10rem] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[-20rem]"
+        className="absolute inset-x-0 top-[10rem] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[-20rem]"
         aria-hidden="true"
       >
         <div
@@ -76,11 +68,11 @@ const Forgot = (props) => {
             clipPath:
               "polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 68.1%, 47.5% 58.3%, 45.2% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%)",
           }}
-        ></div>
+        ></div> 
       </div>
 
       <section>
-        <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+        <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-[50vh] lg:py-0">
           <div className="flex items-center mb-6">
             <img className="w-[25vh]" src={logo} alt="logo" />
           </div>
@@ -90,7 +82,7 @@ const Forgot = (props) => {
                 {"Forgot Password"}
               </h1>
               <form
-                onSubmit={handleSubmit}
+                // onSubmit={handleSubmit}
                 className="space-y-4 md:space-y-6"
                 action="#"
               >
@@ -208,6 +200,7 @@ const Forgot = (props) => {
         </div>
       </section>
     </div>
+    </>
   );
 };
 

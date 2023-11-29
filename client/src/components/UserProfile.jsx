@@ -71,7 +71,7 @@ const UserProfile = () => {
                   <span className="text-md text-slate-400">Joined</span>
                 </div>
                 <div className="p-3 text-center">
-                  <span className="text-2xl font-bold block uppercase tracking-wide text-slate-700">{userData.graphs}</span>
+                  <span className="text-2xl font-bold block uppercase tracking-wide text-slate-700">{userData.graphs - 1}</span>
                   <span className="text-md text-slate-400">Total Graphs</span>
                 </div>
 

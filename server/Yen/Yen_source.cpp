@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <Windows.h>
 #include <climits>
+#include <chrono>
 
 std::string epath;
 
@@ -289,10 +290,23 @@ int main()
     std::string output;
 
     int k = 2;
+    auto startTime = std::chrono::high_resolution_clock::now(); // starting the timing clock
     vector<vector<int>> kShortestPaths = Yen(V, adj, S, D, output, k);
+    auto endTime = std::chrono::high_resolution_clock::now();
 
-    output += "<result>";
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
+
+    auto time_taken = duration.count();
+
+    int E = 0;
+    for (auto i: adj) {
+        E += i.size();
+    }
+
+    output += "<result>\n\t";
+    output += std::to_string(time_taken) + " " + std::to_string(V) + " " + std::to_string(E) + " " + std::to_string(S) + " " + std::to_string(k) + "\n\t";
     cout << "K shortest paths are :";
+      
     for (const auto &path : kShortestPaths)
     {
         output += "\n\t";

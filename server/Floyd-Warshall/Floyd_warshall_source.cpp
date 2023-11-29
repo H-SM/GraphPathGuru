@@ -6,6 +6,7 @@
 #include <queue>
 #include <algorithm>
 #include <Windows.h>
+#include <chrono>
 #include <climits>
 
 std::string epath;
@@ -245,9 +246,21 @@ int main()
     auto adj = g.second;
     std::string output;
 
-    floyd(V, adj, S, output);
+    auto startTime = std::chrono::high_resolution_clock::now(); // starting the timing clock
+    floyd(V, adj, S, output);   
+    auto endTime = std::chrono::high_resolution_clock::now();
+
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
+
+    auto time_taken = duration.count();
+    // Counting the number edges
+    int E = 0;
+    for (auto i: adj) {
+        E += i.size();
+    }
 
     output += "<result>\n\t";
+    output += std::to_string(time_taken) + " " + std::to_string(V) + " " + std::to_string(E) + " " + std::to_string(S) + "\n\t";
 
     for (int a = 0; a < adj.size(); a++)
     {

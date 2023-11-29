@@ -7,7 +7,8 @@
 #include <algorithm>
 #include <Windows.h>
 #include <climits>
-#include <array> 
+#include <array>
+#include <chrono>
 
 std::string epath;
 
@@ -18,7 +19,7 @@ using std::pair;
 using std::string;
 using std::vector;
 
-pair<vector<int>, vector<int>> bellmanFord(int V, std::vector<std::array<int, 3>> &edges, int S, std::string &output) 
+pair<vector<int>, vector<int>> bellmanFord(int V, std::vector<std::array<int, 3>> &edges, int S, std::string &output)
 {
     vector<int> distTo(V, INT_MAX);
     vector<int> pred(V, -1);
@@ -28,12 +29,12 @@ pair<vector<int>, vector<int>> bellmanFord(int V, std::vector<std::array<int, 3>
     {
         // source : from youtube -> code babbar
 
-        // iterating over the edges 
+        // iterating over the edges
         for (int j = 0; j < edges.size(); j++)
         {
-            int u = edges[j][0];  // source node
-            int v = edges[j][1];  // destination node
-            int w = edges[j][2];  // weight betwee the nodes
+            int u = edges[j][0]; // source node
+            int v = edges[j][1]; // destination node
+            int w = edges[j][2]; // weight betwee the nodes
 
             output += "<ds>\n\t"; // begin <ds>
             output += std::to_string(u) + "," + std::to_string(distTo[u]) + " ";
@@ -94,10 +95,11 @@ pair<vector<int>, vector<int>> bellmanFord(int V, std::vector<std::array<int, 3>
         }
     }
 
-    if (flag == 0)
+    if (flag == 1)
     {
-        return {distTo, pred};
+        pred.push_back(-1);
     }
+    return {distTo, pred};
 }
 
 vector<int> restore_path(int s, int t, vector<int> const &p)
@@ -131,28 +133,32 @@ std::string goBackDir(std::string path, int levels)
     return res;
 }
 
-pair<int, vector<std::array<int,3>>> make_graph()
+pair<int, vector<std::array<int, 3>>> make_graph()
 {
     std::ifstream inputFile;
     std::string path = std::string(epath);
     inputFile.open(goBackDir(path, 1) + "\\file io\\input.txt");
     vector<std::string> lines;
-    if (inputFile.is_open()) {
+    if (inputFile.is_open())
+    {
         std::string line;
-        while (std::getline(inputFile, line)) {
+        while (std::getline(inputFile, line))
+        {
             cout << line << endl;
             lines.push_back(line);
         }
         inputFile.close();
-    } else {
+    }
+    else
+    {
         std::cerr << "Error: Unable to open the file." << std::endl;
     }
 
     // cout << "done";
 
-    pair<int, vector<std::array<int,3>>> res;
+    pair<int, vector<std::array<int, 3>>> res;
     int V = lines.size();
-    vector<std::array<int,3>> edges;
+    vector<std::array<int, 3>> edges;
     for (auto line : lines)
     {
         int pointer = 0;
@@ -246,12 +252,22 @@ int main()
     int t = 0;
     auto edges = g.second;
     std::string output;
-
+    // Timing the actual algo with chrono
+    auto startTime = std::chrono::high_resolution_clock::now(); // starting the timing clock
     auto temp = bellmanFord(V, edges, S, output);
+    auto endTime = std::chrono::high_resolution_clock::now();
 
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(endTime - startTime);
+    auto time_taken = duration.count();
+    bool n_c = 0; // Negative cycle flag
     auto dists = temp.first, pred = temp.second;
+    if (pred.size() != V) {
+        pred.pop_back();
+        n_c = 1;
+    }
+    int E = edges.size();
     output += "<result>\n\t";
-    output += std::to_string(V) + "," + std::to_string(S) + "\n\t";
+    output += std::to_string(time_taken) + " " + std::to_string(V) + " " + std::to_string(E) + " " + std::to_string(S) + " " + std::to_string(n_c) + "\n\t";
 
     for (auto i : pred)
     {
