@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import userContext from "./userContext";
 
 const UserState = (props) => {
-  const host = process.env.REACT_APP_BACKEND_LOCALHOST;
+  const host = process.env.REACT_APP_BACKEND_HOST;
   const [userData, setUserData] = useState([]);
   const [showUser, setShowUser] = useState([]);
   const getuserinfo = async () => {
