@@ -2,6 +2,8 @@ import React, { useContext, useState } from "react";
 import logo from "../assets/logo.png";
 import userContext from "../context/User/userContext";
 import { useNavigate } from "react-router-dom";
+import NavbarOutSmall from "./navbarOutSmall";
+import Footer from "./Footer";
 
 const Login = (props) => {
   const { showAlert } = props;
@@ -63,7 +65,9 @@ const Login = (props) => {
   };
 
   return (
+    <>
     <div>
+      <NavbarOutSmall/>
       <div
         className="absolute inset-x-0 top-[-10rem] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[-20rem]"
         aria-hidden="true"
@@ -86,7 +90,7 @@ const Login = (props) => {
       {/* </div>
     </div> */}
       <section>
-        <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
+        <div className="flex flex-col items-center justify-center px-6 py-8 h-[75vh] lg:py-0">
           <div className="flex items-center mb-6">
             <img className="w-[25vh]" src={logo} alt="logo" />
           </div>
@@ -251,6 +255,8 @@ const Login = (props) => {
         </div>
       </section>
     </div>
+    <Footer/>
+    </>
   );
 };
 
