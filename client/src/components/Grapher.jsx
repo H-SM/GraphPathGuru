@@ -18,9 +18,8 @@ import "reactflow/dist/style.css";
 import Footer from "./Footer";
 
 const fitViewOptions = {
-  padding: 3,
+  padding: 0.3,
 };
-
 
 const Graphlet = () => {
   const contextgraph = useContext(graphContext);
@@ -161,6 +160,7 @@ const Graphlet = () => {
 };
 
 const Grapher = () => {
+  const host = process.env.REACT_APP_FRONTEND_HOST;
   const { id } = useParams();
   const contextgraph = useContext(graphContext);
   const contextuser = useContext(userContext);
@@ -329,9 +329,7 @@ const Grapher = () => {
                 Share this graph with others<span aria-hidden="true">→ </span>
                 <a
                   onClick={() =>
-                    navigator.clipboard.writeText(
-                      `http://localhost:3000/graph/${id}`
-                    )
+                    navigator.clipboard.writeText(`${host}/graph/${id}`)
                   }
                   className="font-medium text-sky-700 hover:underline hover:cursor-pointer select-none flex flex-row items-center opacity-90 hover:opacity-100"
                 >
@@ -378,15 +376,9 @@ const Grapher = () => {
               on item.
             </p>
           </div>
-          <div className="order-first text-3xl font-bold  tracking-tight text-gray-900 sm:text-5xl mt-[10vh]">
-            {viewGraph.name}
-          </div>
-          <dt className="text-base leading-7 text-gray-600 mt-2">
-            Name of the Graph
-          </dt>
           <div className="bg-white py-24 sm:py-32">
             <div className="mx-auto max-w-7xl px-6 lg:px-8">
-              <dl className="grid grid-cols-1 gap-x-1 gap-y-16 text-center lg:grid-cols-3">
+              <dl className="grid grid-cols-2 gap-x-1 gap-y-16 text-center lg:grid-cols-3">
                 <div key="1" className="mx-auto flex max-w-xs flex-col gap-y-4">
                   <dt className="text-base leading-7 text-gray-600">
                     Number of Nodes
@@ -398,10 +390,10 @@ const Grapher = () => {
 
                 <div key="2" className="mx-auto flex max-w-xs flex-col gap-y-4">
                   <dt className="text-base leading-7 text-gray-600">
-                    Overall Throughput
+                    Name of the Graph
                   </dt>
                   <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-                    {throughput}
+                    {viewGraph.name}
                   </dd>
                 </div>
                 <div key="3" className="mx-auto flex max-w-xs flex-col gap-y-4">
