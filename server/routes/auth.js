@@ -290,7 +290,6 @@ router.put(
     }
   }
 );
-
 // Forgot password
 router.post(
   "/forgotPassword",
@@ -421,18 +420,18 @@ router.post(
 
         const user = await User.findById(userId);
 
-        if (!user) {
-          return res.status(400).json({
-            success: false,
-            error: "User not found. Please check your email.",
-          });
-        }
+//         if (!user) {
+//           return res.status(400).json({
+//             success: false,
+//             error: "User not found. Please check your email.",
+//           });
+//         }
 
-        const salt = await bcrypt.genSalt(10);
-        const secPass = await bcrypt.hash(password, salt);
+//         const salt = await bcrypt.genSalt(10);
+//         const secPass = await bcrypt.hash(password, salt);
 
-        user.password = secPass;
-        await user.save();
+//         user.password = secPass;
+//         await user.save();
 
         res.json({ success: true, message: "Password reset successful" });
       } catch (err) {
