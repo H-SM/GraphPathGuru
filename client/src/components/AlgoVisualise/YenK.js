@@ -11,6 +11,7 @@ var distance = []; // distance of current node from source
 var distance_curr = []; // distance of the current node
 var curr_node = []; // current node from which the distance of all adjacent nodes is calculated
 var path = [];
+var checkEdges = [];
 
 // coloring the nodes of the graph
 const colorNode = (nodes, nodeId, color) => {
@@ -44,6 +45,15 @@ const colorEdge = (edges, sourceEdge, destinationEdge, animated) => {
           edge.label +
           " < " +
           distance[currentNode][checkNode[currentNode][index]].toString(),
+      };
+    } else if (checkEdges.includes(edge.id)) {
+      return {
+        ...edge,
+        style: {
+          ...edge.style,
+          stroke: "black",
+          strokeWidth: 2,
+        },
       };
     } else {
       return edge;
@@ -83,7 +93,7 @@ const visualise = async (nodes, edges, setNodes, setEdges) => {
     currentNode >= checkNode.length - 1
   ) {
     // setting all things to default at the end
-    console.log("completed");
+    checkEdges = [];
     const updatedEdges = colorEdge2(edges, []);
     setNodes(colorNode(nodes, "-1", "white"));
     setEdges(
@@ -95,7 +105,6 @@ const visualise = async (nodes, edges, setNodes, setEdges) => {
   setTimeout(() => {
     if (curr_node[currentNode] === 0 && currentNode !== 0) {
       setNodes(colorNode(nodes, curr_node[currentNode], "white"));
-      const checkEdges = [];
       for (let i = 0; i < path[pathVal].length - 1; i++) {
         checkEdges.push(
           path[pathVal][i].toString() + "_" + path[pathVal][i + 1].toString()

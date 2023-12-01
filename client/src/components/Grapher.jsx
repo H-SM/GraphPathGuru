@@ -21,7 +21,6 @@ const fitViewOptions = {
   padding: 0.3,
 };
 
-
 const Graphlet = () => {
   const contextgraph = useContext(graphContext);
   const { viewGraph } = contextgraph;
@@ -161,6 +160,7 @@ const Graphlet = () => {
 };
 
 const Grapher = () => {
+  const host = process.env.REACT_APP_FRONTEND_HOST;
   const { id } = useParams();
   const contextgraph = useContext(graphContext);
   const contextuser = useContext(userContext);
@@ -330,9 +330,7 @@ const Grapher = () => {
                 Share this graph with others<span aria-hidden="true">→ </span>
                 <a
                   onClick={() =>
-                    navigator.clipboard.writeText(
-                      `http://localhost:3000/graph/${id}`
-                    )
+                    navigator.clipboard.writeText(`${host}/graph/${id}`)
                   }
                   className="font-medium text-sky-700 hover:underline hover:cursor-pointer select-none flex flex-row items-center opacity-90 hover:opacity-100"
                 >
@@ -393,10 +391,10 @@ const Grapher = () => {
 
                 <div key="2" className="mx-auto flex max-w-xs flex-col gap-y-4">
                   <dt className="text-base leading-7 text-gray-600">
-                  Name of the Graph
+                    Name of the Graph
                   </dt>
                   <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-                  {viewGraph.name}
+                    {viewGraph.name}
                   </dd>
                 </div>
                 <div key="3" className="mx-auto flex max-w-xs flex-col gap-y-4">
