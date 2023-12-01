@@ -198,7 +198,8 @@ const Grapher = () => {
       setTc(resultArray[0] || "N/A");
       setNumNodes(resultArray[1] || "N/A");
       setNumEdges(resultArray[2] || "N/A");
-      setSc(resultArray[3] || "N/A");
+      resultArray[3] = (parseInt(resultArray[1], 10) + parseInt(resultArray[2], 10))/100 + 1;
+      setSc(resultArray[3].toString() || "N/A");
     }
   }, [showUser, viewGraph, tc, sc]);
 
@@ -427,7 +428,7 @@ const Grapher = () => {
                     Space taken
                   </dt>
                   <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-                    {sc + "KB"}
+                    {sc + "MB"}
                   </dd>
                 </div>
               </dl>

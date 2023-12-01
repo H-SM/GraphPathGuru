@@ -71,7 +71,7 @@ app.post("/perform-algo", (req, res) => {
     "./Dijkstra/Dijkstra.exe",
     "./Bellman_Ford/Bellman.exe",
     "./SPFA/SPFA.exe",
-    "./Floyd_Warshall/Floyd_warshall.exe",
+    "./Floyd-Warshall/Floyd_warshall.exe",
     "./Johnson/Johnson.exe",
     "./Yen/Yen.exe",
   ];

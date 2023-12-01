@@ -19,7 +19,7 @@ using std::priority_queue;
 using std::string;
 using std::vector;
 
-pair<vector<int>, vector<int>> floyd(int V, vector<vector<int>> &adj, int S, std::string &output)
+void floyd(int V, vector<vector<int>> &adj, int S, std::string &output)
 {
 
     // size of the adjacency matrix
@@ -84,6 +84,7 @@ pair<vector<int>, vector<int>> floyd(int V, vector<vector<int>> &adj, int S, std
             output += "\n</adj>\n";
         }
     }
+    return ;
 }
 
 vector<int> restore_path(int s, int t, vector<int> const &p)
@@ -246,6 +247,15 @@ int main()
     auto adj = g.second;
     std::string output;
 
+    int E = -1 * adj.size();
+    for (auto i: adj) {
+        for (auto e: i) {
+            if (e == 1e9)
+                continue;
+            E++;
+        }
+    }
+
     auto startTime = std::chrono::high_resolution_clock::now(); // starting the timing clock
     floyd(V, adj, S, output);   
     auto endTime = std::chrono::high_resolution_clock::now();
@@ -254,10 +264,6 @@ int main()
 
     auto time_taken = duration.count();
     // Counting the number edges
-    int E = 0;
-    for (auto i: adj) {
-        E += i.size();
-    }
 
     output += "<result>\n\t";
     output += std::to_string(time_taken) + " " + std::to_string(V) + " " + std::to_string(E) + " " + std::to_string(S) + "\n\t";
@@ -266,7 +272,7 @@ int main()
     {
         for (int b = 0; b < adj.size(); b++)
         {
-            output += std::to_string(adj[a][b]) + " ";
+            output += std::to_string(adj[a][b]) + " "; 
         }
         output += "\n\t";
     }

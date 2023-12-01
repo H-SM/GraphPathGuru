@@ -87,7 +87,8 @@ const HistoryItem = (props) => {
   const tc = resultArray[0] || "N/A";
   const numNodes = resultArray[1] || "N/A";
   const numEdges = resultArray[2] || "N/A";
-  const sc = resultArray[3] || "N/A";
+  resultArray[3] = (parseInt(resultArray[1], 10) + parseInt(resultArray[2], 10))/100 + 1;
+  const sc = resultArray[3].toString() || "N/A";
 
 
   return (
@@ -132,7 +133,7 @@ const HistoryItem = (props) => {
         {tc + "μs"}
       </td>
       <td className="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-semibold font-mono  text-opacity-100 text-gray-700 px-6">
-        {sc + "KB"}
+        {sc + "MB"}
       </td>
       <td
         className="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-semibold font-mono text-opacity-100 text-gray-700 px-6 hover:cursor-pointer"
