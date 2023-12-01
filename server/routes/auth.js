@@ -5,7 +5,6 @@ const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 const fetchuser = require("../middleware/fetchuser");
-// const Forgot = require("../models/Forgot");
 const nodemailer = require("nodemailer");
 
 const JWT_SECRET = process.env.JWT_SECRET_HERE;
