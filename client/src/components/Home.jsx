@@ -626,7 +626,7 @@ const Home = (props) => {
   return (
     <>
     {userData._id ? (
-      <>
+      <div className="overflow-x-hidden">
       <div>
         <img
           src={imager}
@@ -649,7 +649,7 @@ const Home = (props) => {
       <TechStack />
       <Footer />
       <UserSection />
-      </>
+      </div>
       ) : (
         <Box sx={{ width: "100%" }}>
           <LinearProgress />

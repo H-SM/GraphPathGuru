@@ -128,32 +128,33 @@ const UserState = (props) => {
     }
   };
 
-  // const forgotPassword = async (data) => {
-  //   let sendData;
-  //   if (data.sendMail) {
-  //     sendData = { email: data.email, sendMail: data.sendMail };
-  //   } else {
-  //     sendData = {
-  //       password: data.password,
-  //       sendMail: data.sendMail,
-  //     };
-  //   }
+  const forgotPassword = async (data) => {
+    let sendData;
+    if (data.sendMail) {
+      sendData = { email: data.email, sendMail: data.sendMail };
+    } else {
+      sendData = {
+        userId: data.userId,
+        password: data.password,
+        sendMail: data.sendMail,
+      };
+    }
 
-  //   try {
-  //     const response = await fetch(`${host}/api/auth/forgotPassword`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
+    try {
+      const response = await fetch(`${host}/api/auth/forgotPassword`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
 
-  //       body: JSON.stringify(sendData),
-  //     });
-  //     const json = await response.json();
-  //     return json;
-  //   } catch (error) {
-  //     console.error("Error fetching user data:", error);
-  //   }
-  // };
+        body: JSON.stringify(sendData),
+      });
+      const json = await response.json();
+      return json;
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
 
   return (
     <userContext.Provider
@@ -168,7 +169,7 @@ const UserState = (props) => {
         changeimage,
         usershower,
         showUser,
-        // forgotPassword,
+        forgotPassword,
         setShowUser,
         changegraph,
       }}
