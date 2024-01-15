@@ -1,0 +1,1203 @@
+            -Dijkstra:
+use std::collections::BinaryHeap;
+use std::time::Instant;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+struct State {
+    cost: i32,
+    node: usize,
+}
+
+fn dijkstra(
+    v: usize,
+    adj: &Vec<Vec<(usize, i32)>>,
+    s: usize,
+    output: &mut String,
+) -> (Vec<i32>, Vec<i32>) {
+    let mut dist_to: Vec<i32> = vec![i32::MAX; v];
+    let mut pred: Vec<i32> = vec![-1; v];
+
+    let mut pq: BinaryHeap<State> = BinaryHeap::new();
+
+    dist_to[s] = 0;
+    pq.push(State { cost: 0, node: s });
+
+    while let Some(State { cost, node }) = pq.pop() {
+        output.push_str("<ds>\n\t");
+
+        for item in pq.iter() {
+            output.push_str(&format!("{} {} ", item.cost, item.node));
+        }
+
+        output.push_str("\n\t");
+
+        for &d in &dist_to {
+            if d == i32::MAX {
+                output.push_str("INF ");
+            } else {
+                output.push_str(&format!("{} ", d));
+            }
+        }
+
+        output.push_str("\n\t");
+
+        for &p in &pred {
+            output.push_str(&format!("{} ", p));
+        }
+
+        output.push_str("\n</ds>\n");
+
+        output.push_str(&format!("<adj>\n\t{} {}:", node, cost));
+
+        for &(v, w) in &adj[node] {
+            output.push_str(&format!("\n\t{} {} ", v, w));
+
+            if cost + w < dist_to[v] {
+                dist_to[v] = cost + w;
+                pq.push(State {
+                    cost: cost + w,
+                    node: v,
+                });
+                pred[v] = node as i32;
+                output.push_str(&format!("1 {} {}", pred[v], dist_to[v]));
+            } else {
+                output.push_str("0 -1 -1");
+            }
+        }
+
+        output.push_str("\n</adj>\n");
+    }
+
+    (dist_to, pred)
+}
+
+fn restore_path(s: usize, t: usize, p: &Vec<i32>) -> Vec<usize> {
+    let mut path = Vec::new();
+    let mut v = t;
+    while v != s {
+        path.push(v);
+        v = p[v] as usize;
+    }
+    path.push(s);
+    path.reverse();
+    path
+}
+
+fn make_graph(graph: &str) -> (usize, Vec<Vec<(usize, i32)>>) {
+    let mut lines = Vec::new();
+
+    for line in graph.lines() {
+        lines.push(line.to_string());
+    }
+
+    let mut adj: Vec<Vec<(usize, i32)>> = vec![vec![]; lines.len()];
+    for line in &lines {
+        let mut iter = line.split('\n');
+        if let Some(node_str) = iter.next() {
+            let parts: Vec<&str> = node_str.split_whitespace().collect();
+            let mut node: usize = 0;
+            for i in 0..parts.len() {
+                if i == 0 {
+                    node = parts[i][..parts[i].len() - 1].parse::<usize>().unwrap() - 1;
+                    continue;
+                }
+                let parsed_values: Vec<i32> = parts[i]
+                    .split(',')
+                    .map(|part| part.parse::<i32>().unwrap())
+                    .collect();
+
+                adj[node].push((parsed_values[0] as usize, parsed_values[1]));
+            }
+        }
+    }
+
+    (lines.len(), adj)
+}
+
+
+fn main() {
+    let graph = "1: 2,3 \n 2: 1,3 \n 3: 1,2";
+    let (v, adj) = make_graph(graph);
+    let s = 0;
+    let t = 0;
+    let mut output = String::new();
+
+    let start_time = Instant::now();
+    let (dists, pred) = dijkstra(v, &adj, s, &mut output);
+    let end_time = Instant::now();
+
+    let duration = end_time - start_time;
+    let time_taken = duration.as_micros();
+
+    let e = adj.iter().map(|i| i.len()).sum::<usize>();
+    println!("Time taken was: {}", time_taken);
+
+    output.push_str("<result>\n\t");
+    output.push_str(&format!("{} {} {} {}\n\t", time_taken, v, e, s));
+
+    for &i in &pred {
+        output.push_str(&format!("{} ", i));
+    }
+
+    output.push_str("\n\t");
+
+    let _path = restore_path(s, t, &pred);
+    for i in 0..v {
+        output.push_str(&format!("{} ", dists[i]));
+    }
+
+    output.push_str("\n</result>");
+    println!("Output is {}", output)
+}
+
+
+
+
+            -Bellman Ford:
+use std::time::Instant;
+
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+struct State {
+    cost: i32,
+    node: usize,
+}
+
+fn bellman_ford(
+    v: usize,
+    edges: &Vec<[i32; 3]>,
+    s: usize,
+    output: &mut String
+) -> (Vec<i32>, Vec<i32>) {
+    let mut dist_to = vec![i32::MAX; v];
+    let mut pred: Vec<i32> = vec![-1; v];
+
+    dist_to[s] = 0;
+
+    for _ in 0..v - 1 {
+        for edge in edges.iter() {
+            let u = edge[0] as usize;
+            let v = edge[1] as usize;
+            let w = edge[2];
+
+            output.push_str("<ds>\n\t");
+            if dist_to[u] == i32::MAX {
+                output.push_str(&format!("{} INF", u));
+            }
+            else {
+                output.push_str(&format!("{} {}", u, dist_to[u]));
+            }
+
+            output.push_str("\n\t");
+            for d in &dist_to {
+                if *d >= i32::MAX {
+                    output.push_str("INF ");
+                } else {
+                    output.push_str(&format!("{} ", d));
+                }
+            }
+            output.push_str("\n\t");
+            for &p in &pred {
+                output.push_str(&format!("{} ", p));
+            }
+            output.push_str("\n</ds>\n");
+
+            output.push_str("<adj>\n\t");
+            if dist_to[u] == i32::MAX {
+                output.push_str(&format!("{} INF: ", u));
+            }
+            else {
+                output.push_str(&format!("{} {}: ", u, dist_to[u]));
+            }
+            output.push_str(&format!("{} {}, ", v, w));
+
+
+            let mut f = false;
+            if dist_to[u] != i32::MAX && dist_to[u] + w < dist_to[v] {
+                dist_to[v] = dist_to[u] + w;
+                pred[v] = u as i32;
+                f = true;
+            }
+
+            if f {
+                output.push_str(&format!("1, {}, {}", pred[v], dist_to[v]));
+            } else {
+                output.push_str("0, -1, -1");
+            }
+
+            output.push_str("\n</adj>\n");
+        }
+    }
+
+    let mut flag = false;
+    for _ in 0..v - 1 {
+        for edge in edges.iter() {
+            let u = edge[0] as usize;
+            let v = edge[1] as usize;
+            let w = edge[2];
+
+            if dist_to[u] != i32::MAX && dist_to[u] + w < dist_to[v] {
+                flag = true;
+            }
+        }
+    }
+
+    if flag {
+        pred.push(-1);
+    }
+
+    (dist_to, pred)
+}
+
+fn restore_path(s: usize, t: usize, p: &Vec<i32>) -> Vec<usize> {
+    let mut path = Vec::new();
+    let mut v = t;
+    while v != s {
+        path.push(v);
+        v = p[v] as usize;
+    }
+    path.push(s);
+    path.reverse();
+    path
+}
+
+fn make_graph(graph: &str) -> (usize, Vec<[i32; 3]>) {
+    let mut lines = Vec::new();
+
+    for line in graph.lines() {
+        lines.push(line.to_string());
+    }
+
+    let mut edges: Vec<[i32; 3]> =  Vec::with_capacity(lines.len());
+    for line in &lines {
+        let mut iter = line.split('\n');
+        if let Some(node_str) = iter.next() {
+            let parts: Vec<&str> = node_str.split_whitespace().collect();
+            let mut node: i32 = 0;
+            for i in 0..parts.len() {
+                if i == 0 {
+                    node = (parts[i][..parts[i].len() - 1].parse::<usize>().unwrap() - 1) as i32;
+                    continue;
+                }
+                let parsed_values: Vec<i32> = parts[i]
+                    .split(',')
+                    .map(|part| part.parse::<i32>().unwrap())
+                    .collect();
+
+                edges.push([node, parsed_values[0], parsed_values[1]]);
+            }
+        }
+    }
+
+    (lines.len(), edges)
+}
+
+
+fn main() {
+    let graph = "1: 2,3 \n 2: 1,3 \n 3: 1,2";
+    let (v, adj) = make_graph(graph);
+    let s = 0;
+    let t = 0;
+    let mut output = String::new();
+
+    let start_time = Instant::now();
+    let (dists, pred) = bellman_ford(v, &adj, s, &mut output);
+    let end_time = Instant::now();
+
+    let duration = end_time - start_time;
+    let time_taken = duration.as_micros();
+
+    let e = adj.iter().map(|i| i.len()).sum::<usize>();
+    println!("Time taken was: {}", time_taken);
+
+    output.push_str("<result>\n\t");
+    output.push_str(&format!("{} {} {} {}\n\t", time_taken, v, e, s));
+
+    for &i in &pred {
+        output.push_str(&format!("{} ", i));
+    }
+
+    output.push_str("\n\t");
+
+    let _path = restore_path(s, t, &pred);
+    for i in 0..v {
+        output.push_str(&format!("{} ", dists[i]));
+    }
+
+    output.push_str("\n</result>");
+    println!("Output is {}", output);
+}
+
+
+
+
+            Floyd-Warshall:
+use std::time::Instant;
+
+
+fn floyd_warshall (
+    _v: usize,
+    adj: &mut Vec<Vec<i32>>,
+    _s: usize,
+    output: &mut String,
+) -> () {
+    let n = adj.len();
+    for k in 0..n {
+        output.push_str("<ds>\n\t");
+        for a in 0..n {
+            for b in 0..n {
+                if adj[a][b] == 1000000000 {
+                    output.push_str("INF ");
+                }
+                else {
+                    output.push_str(&adj[a][b].to_string());
+                    output.push(' '); 
+                }
+            }
+            output.push_str("\n\t");
+        }
+        output.push_str("\n</ds>\n");
+
+        for i in 0..n {
+            output.push_str("<adj>\n\t");
+            if adj[i][k] == 1000000000 {
+                output.push_str(&format!("{}, INF:", i));
+            }
+            else {
+                output.push_str(&format!("{}, {}:", i, adj[i][k]));
+            }
+            for j in 0..n {
+                if i == j {
+                    adj[i][j] = 0;
+                    continue;
+                }
+                if adj[i][j] == 1000000000 {
+                    output.push_str(&format!("\n\t {}, INF, ", j));
+                }
+                else {
+                    output.push_str(&format!("\n\t {}, {}, ", j, adj[i][j]));
+                }
+
+                let mut f: bool = false;
+                
+
+                if adj[i][k] < 1000000000 && adj[k][j] < 1000000000 {
+                    if adj[i][k] + adj[k][j] < adj[i][j] {
+                        f = true;
+                        adj[i][j] = adj[i][k] + adj[k][j];
+                    }
+                }
+                if f {
+                    output.push_str("1,")
+                }
+                else {
+                    output.push_str("0,")
+                }
+            }
+            output.push_str("\n</adj>\n");
+        }
+    }
+}
+
+
+fn make_graph(graph: &str) -> (usize, Vec<Vec<i32>>) {
+    let mut lines = Vec::new();
+
+    for line in graph.lines() {
+        lines.push(line.to_string());
+    }
+
+    let mut adj: Vec<Vec<i32>> = vec![vec![1000000000; lines.len()]; lines.len()];
+    for e in 0..lines.len() {
+        adj[e][e] = 0;
+    }
+    for line in &lines {
+        let mut iter = line.split('\n');
+        if let Some(node_str) = iter.next() {
+            let parts: Vec<&str> = node_str.split_whitespace().collect();
+            let mut node: usize = 0;
+            for i in 0..parts.len() {
+                if i == 0 {
+                    node = parts[i][..parts[i].len() - 1].parse::<usize>().unwrap() - 1;
+                    continue;
+                }
+                let parsed_values: Vec<i32> = parts[i]
+                    .split(',')
+                    .map(|part| part.parse::<i32>().unwrap())
+                    .collect();
+                eprintln!("{:?}", parsed_values, );
+                adj[node][parsed_values[0] as usize] = parsed_values[1];
+            }
+        }
+    }
+
+    (lines.len(), adj)
+}
+
+
+fn main() {
+    let graph = "1: 2,3 \n 2: 1,3 \n 3: 1,2";
+    let (v, mut adj) = make_graph(graph);
+    let s = 0;
+    let mut output = String::new();
+
+    let start_time = Instant::now();
+    floyd_warshall(v, &mut adj, s, &mut output);
+    let end_time = Instant::now();
+
+    let duration = end_time - start_time;
+    let time_taken = duration.as_micros();
+
+    let e = adj.iter().map(|i| i.len()).sum::<usize>();
+    println!("Time taken was: {}", time_taken);
+
+    output.push_str("<result>\n\t");
+    output.push_str(&format!("{} {} {} {}\n\t", time_taken, v, e, s));
+
+    for a in 0..v {
+        for b in 0..v {
+            if adj[a][b] == 1000000000 {
+                output.push_str("INF ");
+            }
+            else {
+                output.push_str(&format!("{} ", adj[a][b]));
+            }
+        }
+        output.push_str("\n\t");
+    }
+
+    output.push_str("\n\t");
+
+    output.push_str("\n</result>");
+    println!("Output is {}", output);
+}
+
+
+
+
+            Johnson's algorithm:
+use std::collections::BinaryHeap;
+use std::cmp::Ordering;
+
+#[derive(Debug, Eq, PartialEq, Clone)]
+struct Node {
+    dist: i32,
+    vertex: usize,
+}
+
+impl Ord for Node {
+    fn cmp(&self, other: &Self) -> Ordering {
+        other.dist.cmp(&self.dist)
+    }
+}
+
+impl PartialOrd for Node {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+fn min_distance(dist: &Vec<i32>, visit: &Vec<bool>) -> usize {
+    let mut minimum = i32::MAX;
+    let mut min_vertex = 0;
+
+    for (vertex, &distance) in dist.iter().enumerate() {
+        if minimum > distance && !visit[vertex] {
+            minimum = distance;
+            min_vertex = vertex;
+        }
+    }
+
+    min_vertex
+}
+
+fn dijkstra(V: usize, adj: &Vec<Vec<(usize, i32)>>, source: usize, output: &mut String) -> (Vec<i32>, Vec<i32>) {
+    let mut dist_to = vec![i32::MAX; V];
+    let mut pred: Vec<i32> = vec![-1; V];
+    dist_to[source] = 0;
+
+    let mut pq = BinaryHeap::new();
+    pq.push(Node { dist: 0, vertex: source });
+
+    while let Some(Node { dist, vertex }) = pq.pop() {
+        output.push_str("<source>\n\t");
+        output.push_str(&vertex.to_string());
+        output.push_str("\n</source>\n");
+
+        let copy = pq.clone();
+        output.push_str("<ds2>\n\t"); // begin <ds2>
+        for node in copy.into_sorted_vec().iter() {
+            output.push_str(&format!("{} {}", node.dist, node.vertex));
+            output.push(' ');
+        }
+        output.push_str("\n\t");
+        for &d in &dist_to {
+            if d == i32::MAX {
+                output.push_str("INF");
+            } else {
+                output.push_str(&format!("{} ", d));
+            }
+        }
+        output.push_str("\n\t");
+        for &p in &pred {
+            output.push_str(&format!("{} ", p));
+        }
+        output.push_str("\n</ds2>\n");
+
+        output.push_str("<adj2>\n\t");
+        output.push_str(&format!("{}, {}: ", vertex, dist));
+
+        for &(v, w) in &adj[vertex] {
+            output.push_str(&format!("{} {}, ", v, w));
+            let mut flag = false;
+
+            if dist + w < dist_to[v] {
+                dist_to[v] = dist + w;
+                pq.push(Node { dist: dist_to[v], vertex: v });
+                pred[v] = vertex as i32;
+                flag = true;
+            }
+
+            if flag {
+                output.push_str(&format!("1, {}, {}", pred[v], dist_to[v]));
+            } else {
+                output.push_str("0, -1, -1");
+            }
+        }
+        output.push_str("\n</adj2>\n"); // adj ends here
+    }
+
+    (dist_to, pred)
+}
+
+fn bellman_ford_algorithm(V: usize, edges: &mut Vec<[usize; 3]>, source: usize, output: &mut String) -> Vec<i32> {
+    let mut dist_to = vec![i32::MAX; V + 1];
+    let mut pred: Vec<i32> = vec![-1; V + 1];
+    dist_to[source] = 0;
+
+    // adding a new source node
+    // and creating an edge from that node to all the nodes with weight as 0.
+    println!("{}", V);
+    for i in 0..V {
+        edges.push([V, i, 0]);
+    }
+
+    // tranverse of nodes-1 on edge list
+    for _ in 0..V - 1 {
+        // source: from youtube -> code babbar
+
+        // iterating over the edges
+        for j in 0..edges.len() {
+            let u = edges[j][0]; // source node
+            let v = edges[j][1]; // destination node
+            let w = edges[j][2]; // weight between the nodes
+
+            output.push_str("<ds>\n\t"); // begin <ds>
+            output.push_str(&format!("{}, {}", u, dist_to[u]));
+            output.push(' ');
+
+            output.push_str("\n\t");
+            for &d in &dist_to {
+                // Putting dist to output
+                if d == i32::MAX {
+                    output.push_str("INF ");
+                } else {
+                    output.push_str(&format!("{} ", d));
+                }
+            }
+            output.push_str("\n\t");
+            for &p in &pred {
+                // putting pred to output
+                output.push_str(&format!("{} ", p));
+            }
+            output.push_str("\n</ds>\n"); // <ds> stops here
+
+            output.push_str("<adj>\n\t"); // Adj begins here
+            output.push_str(&format!("{}, {}: ", u, dist_to[u]));
+
+            // element whether the prev dist is larger than current or not.
+            // If current distance is smaller, push it into the queue.
+
+            let mut flag = false;
+            if dist_to[u] != i32::MAX && dist_to[u] + (w as i32) < dist_to[v] {
+                dist_to[v] = dist_to[u] + (w as i32);
+                pred[v] = u as i32;
+                flag = true;
+            }
+
+            // This is for output gen logic
+            if flag {
+                // outputing different things depending on comparison result
+                output.push_str(&format!("1, {}, {}", pred[v], dist_to[v]));
+            } else {
+                output.push_str("0, -1, -1");
+            }
+
+            output.push_str("\n</adj>\n"); // adj ends here
+        }
+    }
+
+    // check for a negative weight cycle
+    let mut flag = false;
+    for _ in 0..V - 1 {
+        for j in 0..edges.len() {
+            let u = edges[j][0];
+            let v = edges[j][1];
+            let w = edges[j][2];
+
+            if dist_to[u] != i32::MAX && dist_to[u] + (w as i32) < dist_to[v] {
+                flag = true;
+            }
+        }
+    }
+
+    if flag {
+        println!("Negative weight cycle was discovered");
+    }
+    dist_to
+}
+
+fn go_back_dir(path: &str, levels: usize) -> String {
+    let mut res = String::new();
+    let mut count = 0;
+
+    for c in path.chars().rev() {
+        if count == levels {
+            res.insert(0, c);
+        }
+
+        if c == '\\' {
+            count += 1;
+        }
+    }
+
+    res
+}
+
+
+fn restore_path(s: usize, t: usize, p: &Vec<i32>) -> Vec<usize> {
+    // This function makes out the path from any node to source,
+    // and then reverses it to be a path from source to the node.
+    let mut path = Vec::new();
+
+    let mut v = t;
+    while v != s {
+        path.push(v);
+        v = p[v] as usize;
+    }
+    path.push(s);
+    path.reverse();
+
+    path
+}
+
+fn johnson_algorithm(V: usize, graph: &Vec<Vec<i32>>, output: &mut String, t_count: &mut i64) {
+    let start_time = std::time::Instant::now(); // starting the timing clock
+    let mut edges = Vec::new();
+
+    // creating an edges vector from the graph matrix
+    for i in 0..graph.len() {
+        for j in 0..graph[i].len() {
+            if i != j && graph[i][j] != i32::MAX && graph[i][j] != 0 {
+                edges.push([i, j, graph[i][j] as usize]);
+            }
+        }
+    }
+
+    // calling bellman ford to get the weights for each node.
+    // weight of each node will be the shortest distance between
+    // that node and the new source node we are adding to the graph
+    let alter_weights = bellman_ford_algorithm(V, &mut edges, V, output);
+
+    // making new graph for altered weights
+    let mut altered_graph = vec![vec![i32::MAX; graph.len()]; graph.len()];
+
+    // making a new graph by reweighting the edges
+    // to convert negative edges to positive edges
+    for i in 0..graph.len() {
+        for j in 0..graph[i].len() {
+            if graph[i][j] != 0 {
+                // new weight = old weight + weight(node1) - weight(node2)
+                altered_graph[i][j] = graph[i][j] + alter_weights[i] - alter_weights[j];
+            }
+        }
+    }
+
+    // converting the adjacency matrix into adjacency list
+    // for passing it to dijkstra
+    let mut adj = vec![vec![]; V];
+    for i in 0..altered_graph.len() {
+        for j in 0..altered_graph[i].len() {
+            if i != j && altered_graph[i][j] != i32::MAX {
+                adj[i].push((j, altered_graph[i][j]));
+            }
+        }
+    }
+
+    let end_time = std::time::Instant::now();
+    let duration = end_time.duration_since(start_time);
+    *t_count += duration.as_micros() as i64;
+
+    // apply dijkstra by taking each node as a source node
+    // to find all pair shortest paths
+    for source in 0..graph.len() {
+        println!("\n\nShortest Distance with vertex {} as the source:", source);
+
+        let start_time = std::time::Instant::now();
+        let temp = dijkstra(graph.len(), &adj, source, output);
+        let end_time = std::time::Instant::now();
+        let duration = end_time.duration_since(start_time);
+        *t_count += duration.as_micros() as i64;
+
+        let dists = temp.0;
+        let pred = temp.1;
+
+        output.push_str("<dijk-result>\n\t");
+        output.push_str(&format!("{}, {}\n\t", V, source));
+
+        for i in &pred {
+            output.push_str(&format!("{} ", i));
+        }
+        output.push_str("\n\t");
+
+        for i in 0..V {
+            output.push_str(&format!("{} ", dists[i]));
+        }
+        output.push_str("\n</dijk-result>\n");
+    }
+    // Storing the result for the front end to read
+}
+
+
+fn make_graph(graph: &str) -> (usize, Vec<Vec<i32>>) {
+    let mut lines = Vec::new();
+
+    for line in graph.lines() {
+        lines.push(line.to_string());
+    }
+
+    let mut adj: Vec<Vec<i32>> = vec![vec![i32::MAX; lines.len()]; lines.len()];
+    for e in 0..lines.len() {
+        adj[e][e] = 0;
+    }
+    for line in &lines {
+        let mut iter = line.split('\n');
+        if let Some(node_str) = iter.next() {
+            let parts: Vec<&str> = node_str.split_whitespace().collect();
+            let mut node: usize = 0;
+            for i in 0..parts.len() {
+                if i == 0 {
+                    node = parts[i][..parts[i].len() - 1].parse::<usize>().unwrap() - 1;
+                    continue;
+                }
+                let parsed_values: Vec<i32> = parts[i]
+                    .split(',')
+                    .map(|part| part.parse::<i32>().unwrap())
+                    .collect();
+                eprintln!("{:?}", parsed_values, );
+                adj[node][parsed_values[0] as usize] = parsed_values[1];
+            }
+        }
+    }
+
+    (lines.len(), adj)
+}
+
+fn main() {
+    let lines = "0 123 456: 1,2 2,3\n1 789 123: 2,4 3,5\n2 456 789: 0,6 1,7";
+    let graph = make_graph(lines);
+    let V: usize = graph.0;
+    let adj = graph.1;
+    let mut output: String = String::from("");
+    let mut t_count = 0;
+
+    johnson_algorithm(V, &adj, &mut output, &mut t_count);
+
+    let mut E = 0;
+    for i in 0..adj.len() {
+        for j in 0..adj[0].len() {
+            if (adj[i][j] != i32::MAX) {
+                E += 1;
+            }
+        }
+    }
+     // TODO: make source change depending on the request
+    let S  = adj.len();
+    output += "<result>\n\t";
+    output += &format!("{} {} {} {}\n", t_count, V, E, S);
+    output += "</result>"
+
+}
+
+
+
+
+        SPFA:
+use std::collections::VecDeque;
+use std::time::Instant;
+
+fn spfa(
+    s: usize,
+    d: &mut Vec<i32>,
+    adj: &mut Vec<Vec<(usize, i32)>>,
+    p: &mut Vec<i32>,
+    output: &mut String,
+) -> (bool) {
+    let n = adj.len();
+    let mut cnt = vec!(0; n);
+    let mut inqueue: Vec<bool> = vec!(false; n);
+    let mut q: VecDeque<usize> = VecDeque::new();
+
+    d[s] = 0;
+    q.push_front(s);
+    inqueue[s] = true;
+
+    while !q.is_empty() {
+        output.push_str("<ds>\n\t");
+        for (_, element) in q.iter().enumerate() {
+            output.push_str(&format!("{} ", element));
+        }
+        output.push_str("\n\t");
+
+        for i in 0..d.len() {
+            if d[i] == i32::MAX {
+                output.push_str("INF ")
+            }
+            else {
+                output.push_str(&format!("{} ", d[i]));
+            }
+        }
+        output.push_str("\n\t");
+        for i in 0..p.len() {
+            output.push_str(&format!("{} ", p[i]));
+        }
+
+        output.push_str("\n\t");
+        for i in 0..inqueue.len() {
+            output.push_str(&format!("{} ", inqueue[i]));
+        }
+        output.push_str("\n</ds>\n");
+
+        let v = q.pop_front().unwrap();
+
+        q.pop_back();
+        inqueue[v] = false;
+
+        output.push_str("<adj>\n\t");
+        if (d[v] == i32::MAX) {
+            output.push_str(&format!("{}, INF:", v));
+        }
+        else {
+            output.push_str(&format!("{}, {}:", v, d[v]));
+        }
+
+        for (index, element) in adj[v].iter().enumerate() {
+            let to = element.0;
+            let len = element.1;
+
+            output.push_str(&format!("\n\t{}, {}, ", to, len));
+
+            let mut f = false;
+
+            if d[v] + len < d[to] {
+                d[to] = d[v] + len;
+                p[to] = v as i32;
+                if !inqueue[to] {
+                    q.push_front(to);
+                    inqueue[to] = true;
+                    cnt[to] += 1;
+                    f = true;
+                    if cnt[to] > n {
+                        return false;
+                    }
+                }
+            }
+
+            if f {
+                output.push_str(&format!("1, {}, {}", p[to], d[to]));
+            }
+            else {
+                output.push_str("0, -1, -1");
+            }
+        }
+        output.push_str("\n</adj>\n");
+    }
+    return true;
+}
+
+
+fn make_graph(graph: &str) -> (usize, Vec<Vec<(usize, i32)>>) {
+    let mut lines = Vec::new();
+
+    for line in graph.lines() {
+        lines.push(line.to_string());
+    }
+
+    let mut adj: Vec<Vec<(usize, i32)>> = vec![vec![]; lines.len()];
+    for line in &lines {
+        let mut iter = line.split('\n');
+        if let Some(node_str) = iter.next() {
+            let parts: Vec<&str> = node_str.split_whitespace().collect();
+            let mut node: usize = 0;
+            for i in 0..parts.len() {
+                if i == 0 {
+                    node = parts[i][..parts[i].len() - 1].parse::<usize>().unwrap() - 1;
+                    continue;
+                }
+                let parsed_values: Vec<i32> = parts[i]
+                    .split(',')
+                    .map(|part| part.parse::<i32>().unwrap())
+                    .collect();
+
+                adj[node].push((parsed_values[0] as usize, parsed_values[1]));
+            }
+        }
+    }
+
+    (lines.len(), adj)
+}
+
+fn main() {
+    let inp = String::from("0 123 456: 1,2 2,3\n1 789 123: 2,4 3,5\n2 456 789: 0,6 1,7");
+    let gout = make_graph(&inp);
+    let V = gout.0;
+    let mut adj = gout.1;
+    let S = 0;
+    let t = 0;
+    let mut output = String::from("");
+    let mut dist = vec!(i32::MAX; V);
+    let mut pred = vec!(-1; V);
+    let start_time = Instant::now();
+    spfa(S, &mut dist, &mut adj, &mut pred,  &mut output);
+    let end_time = Instant::now();
+
+    let duration = end_time - start_time;
+    let time_taken = duration.as_micros();
+    let mut E = 0;
+    for (_, element) in adj.iter().enumerate() {
+        E += element.len();
+    }
+
+    output += "<result>\n\t";
+
+    output += &format!("{} {} {} {}", time_taken, V, E, S);
+
+    for (_, element) in pred.iter().enumerate() {
+        output += &format!("{}", element);
+    }
+    output += "\n\t";
+    for (_, element) in dist.iter().enumerate() {
+        output += &format!("{}", element);
+    }
+    output += "\n</result>\n";
+
+}
+
+
+
+
+
+        Yen's K:
+use std::time::Instant;
+
+use std::collections::{BinaryHeap};
+
+#[derive(Debug, Eq, PartialEq, Clone)]
+struct State {
+    cost: i32,
+    node: usize,
+}
+
+impl Ord for State {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        other.cost.cmp(&self.cost)
+    }
+}
+
+impl PartialOrd for State {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+fn dijkstra(
+    V: usize,
+    adj: &Vec<Vec<(usize, i32)>>,
+    S: usize,
+    D: usize,
+    output: &mut String,
+) -> Vec<usize> {
+    let mut dist_to: Vec<i32> = vec![i32::MAX; V];
+    let mut pred: Vec<i32> = vec![-1; V];
+    let mut pq = BinaryHeap::new();
+
+    dist_to[S] = 0;
+    pq.push(State { cost: 0, node: S });
+
+    while let Some(State { cost, node }) = pq.pop() {
+        let copy = pq.clone(); // Copy the priority queue for output
+
+        output.push_str("<ds>\n\t");
+        for State { cost, node } in copy {
+            output.push_str(&format!("{},{} ", cost, node));
+        }
+        output.push_str("\n\t");
+
+        for d in &dist_to {
+            if *d == i32::MAX {
+                output.push_str("INF ");
+            } else {
+                output.push_str(&format!("{} ", d));
+            }
+        }
+
+        output.push_str("\n\t");
+        for &p in &pred {
+            output.push_str(&format!("{} ", p));
+        }
+
+        output.push_str("\n</ds>\n");
+
+        if node == D {
+            break;
+        }
+
+        output.push_str("<adj>\n\t");
+        output.push_str(&format!("{}, {}: ", node, cost));
+
+        for &(v, w) in &adj[node] {
+            output.push_str(&format!("\n\t{}, {}, ", v, w));
+            let new_dist = cost + w;
+
+            if new_dist < dist_to[v] {
+                dist_to[v] = new_dist;
+                pq.push(State { cost: new_dist, node: v });
+                pred[v] = node as i32;
+            }
+
+            if new_dist < dist_to[v] {
+                output.push_str(&format!("1, {}, {}", pred[v], dist_to[v]));
+            } else {
+                output.push_str("0, -1, -1");
+            }
+        }
+        output.push_str("\n</adj>\n");
+    }
+
+    let mut path = Vec::new();
+    let mut v: i32 = D as i32;
+    while v != -1 {
+        path.push(v as usize);
+        v = pred[v as usize];
+    }
+
+    path.reverse();
+
+    path
+}
+
+fn yen(
+    V: usize,
+    adj: &Vec<Vec<(usize, i32)>>,
+    S: usize,
+    D: usize,
+    output: &mut String,
+    k: usize,
+) -> Vec<Vec<usize>> {
+    let mut k_shortest_paths = Vec::new();
+
+    for _ in 0..k {
+        let path = dijkstra(V, adj, S, D, output);
+
+        if path.is_empty() {
+            break;
+        }
+
+        k_shortest_paths.push(path.clone());
+
+        output.push_str("<path>");
+        for (u, v) in path.iter().zip(path.iter().skip(1)) {
+            output.push_str(&format!("\n\t{}, {}: ", u, v));
+            if let Some(idx) = adj[*u]
+                .iter()
+                .position(|&(neighbor, _)| neighbor == *v)
+            {
+                adj[*u].remove(idx);
+            }
+        }
+        output.push_str("\n</path>\n");
+    }
+
+    k_shortest_paths
+}
+
+
+fn make_graph(graph: &str) -> (usize, Vec<Vec<(usize, i32)>>) {
+    let mut lines = Vec::new();
+
+    for line in graph.lines() {
+        lines.push(line.to_string());
+    }
+
+    let mut adj: Vec<Vec<(usize, i32)>> = vec![vec![]; lines.len()];
+    for line in &lines {
+        let mut iter = line.split('\n');
+        if let Some(node_str) = iter.next() {
+            let parts: Vec<&str> = node_str.split_whitespace().collect();
+            let mut node: usize = 0;
+            for i in 0..parts.len() {
+                if i == 0 {
+                    node = parts[i][..parts[i].len() - 1].parse::<usize>().unwrap() - 1;
+                    continue;
+                }
+                let parsed_values: Vec<i32> = parts[i]
+                    .split(',')
+                    .map(|part| part.parse::<i32>().unwrap())
+                    .collect();
+
+                adj[node].push((parsed_values[0] as usize, parsed_values[1]));
+            }
+        }
+    }
+
+    (lines.len(), adj)
+}
+
+fn main() {
+    let inp = String::from("0 123 456: 1,2 2,3\n1 789 123: 2,4 3,5\n2 456 789: 0,6 1,7");
+    let gout = make_graph(&inp);
+    let V = gout.0;
+    let mut adj = gout.1;
+    // TODO: ALL OF THIS NEEDS TO BE taken in from the request
+    let S = 0;
+    let k = 0;
+    let D = V - 1;
+    let mut output = String::from("");
+    let mut dist = vec!(i32::MAX; V);
+    let mut pred = vec!(-1; V);
+
+    let start_time = Instant::now();
+    yen(V, &adj, S, D, &mut output, k);
+    let end_time = Instant::now();
+
+    let duration = end_time - start_time;
+    let time_taken = duration.as_micros();
+    let mut E = 0;
+    for (_, element) in adj.iter().enumerate() {
+        E += element.len();
+    }
+
+    output += "<result>\n\t";
+
+    output += &format!("{} {} {} {}", time_taken, V, E, S);
+
+    for (_, element) in pred.iter().enumerate() {
+        output += &format!("{}", element);
+    }
+    output += "\n\t";
+    for (_, element) in dist.iter().enumerate() {
+        output += &format!("{}", element);
+    }
+    output += "\n</result>\n";
+
+}
