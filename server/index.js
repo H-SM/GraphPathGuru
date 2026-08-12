@@ -58,6 +58,39 @@ function extractResult(output) {
   return match ? match[1].trim() : "";
 }
 
+// Rough auxiliary-space estimate, in KB, based on the element counts each
+// algorithm's own data structures actually hold for this input size (not a
+// measured value — neither the original C++ nor this port ever tracked real
+// memory usage). Assumes 4 bytes/element (i32-sized). V/E here are the raw
+// input node/edge counts, matching what the user actually submitted.
+const BYTES_PER_ELEMENT = 4;
+function estimateSpaceKB(algoID, V, E) {
+  let elements;
+  switch (algoID) {
+    case 0: // Dijkstra: dist + pred + adjacency (neighbor,weight) + heap entries
+      elements = 2 * V + 3 * E;
+      break;
+    case 1: // Bellman-Ford: dist + pred + edge list (u,v,w)
+      elements = 2 * V + 3 * E;
+      break;
+    case 2: // SPFA: dist + pred + cnt + inqueue + adjacency
+      elements = 5 * V + 2 * E;
+      break;
+    case 3: // Floyd-Warshall: V x V distance matrix
+      elements = V * V;
+      break;
+    case 4: // Johnson: two V x V matrices (original + reweighted) + adjacency
+      elements = 2 * V * V + 2 * E;
+      break;
+    case 5: // Yen: dist + pred + adjacency + k stored paths (k=2)
+      elements = 4 * V + 2 * E;
+      break;
+    default:
+      elements = V + E;
+  }
+  return Math.round(((elements * BYTES_PER_ELEMENT) / 1024) * 100) / 100;
+}
+
 // Shared by Dijkstra, Bellman-Ford, and SPFA: all three emit the same
 // <ds>/<adj> tag shape, so a single parser covers all three algorithms.
 function parseGenericOutput(fileContent) {
@@ -269,6 +302,95 @@ function parseJohnsonOutput(fileContent) {
   return { result, checkNode, distance, distance_curr, curr_node, source };
 }
 
+// Matches the sentinel each algorithm's Rust core uses for "unreached" in
+// its dist array (see rust_algos/src/{dijkstra,bellman_ford,spfa}.rs).
+const INT_MAX_SENTINEL = 2147483647;
+const BILLION_SENTINEL = 1000000000;
+
+// Dijkstra/Bellman-Ford/SPFA all emit "{summary}\n\t{pred...}\n\t{dist...}"
+// as their <result> content — pull the pred/dist arrays out of it.
+function parsePredDistFromResult(rawResultText) {
+  const lines = rawResultText
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+  const pred = (lines[1] || "").split(/\s+/).filter(Boolean).map(Number);
+  const dist = (lines[2] || "").split(/\s+/).filter(Boolean).map(Number);
+  return { pred, dist };
+}
+
+// Walks a pred array backward from `dest` to `source`. Returns [] if dest
+// is unreachable (per `sentinel`) or the walk doesn't actually land on
+// source (malformed/negative-cycle-truncated data).
+function reconstructFromPredDist(pred, dist, source, dest, sentinel) {
+  if (dest < 0 || dest >= dist.length) return [];
+  if (dest !== source && dist[dest] >= sentinel) return [];
+
+  const path = [];
+  const seen = new Set();
+  let cur = dest;
+  while (cur !== -1 && cur !== undefined && !seen.has(cur)) {
+    seen.add(cur);
+    path.push(cur);
+    if (cur === source) break;
+    cur = pred[cur];
+  }
+  path.reverse();
+  return path[0] === source ? path : [];
+}
+
+// Johnson emits one <dijk-result>{V},{sourceIndex}\n\t{pred}\n\t{dist}</dijk-result>
+// block per source node (reweighted graph, but shortest-path structure is
+// preserved by the reweighting, so pred still reconstructs a real shortest
+// path in the original graph). Find the block for the requested source.
+function extractJohnsonPath(output, source, destination) {
+  const blocks = output.match(/<dijk-result>[\s\S]*?<\/dijk-result>/g) || [];
+  for (const block of blocks) {
+    const inner = block.match(/<dijk-result>([\s\S]*?)<\/dijk-result>/)[1];
+    const lines = inner
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+    const srcIdx = Number((lines[0] || "").split(",")[1]);
+    if (srcIdx !== source) continue;
+
+    const pred = (lines[1] || "").split(/\s+/).filter(Boolean).map(Number);
+    const dist = (lines[2] || "").split(/\s+/).filter(Boolean).map(Number);
+    return reconstructFromPredDist(pred, dist, source, destination, INT_MAX_SENTINEL);
+  }
+  return [];
+}
+
+// Floyd-Warshall's shortest path is already reconstructed in Rust (see
+// run_floyd_warshall) and appended as a <shortest-path> block.
+function extractFloydPath(output) {
+  const m = output.match(/<shortest-path>([\s\S]*?)<\/shortest-path>/);
+  if (!m) return [];
+  return m[1].trim().split(/\s+/).filter(Boolean).map(Number);
+}
+
+function computeShortestPath(algoID, output, rawResult, source, destination, yenParsed) {
+  switch (algoID) {
+    case 0:
+    case 1: {
+      const { pred, dist } = parsePredDistFromResult(rawResult);
+      return reconstructFromPredDist(pred, dist, source, destination, INT_MAX_SENTINEL);
+    }
+    case 2: {
+      const { pred, dist } = parsePredDistFromResult(rawResult);
+      return reconstructFromPredDist(pred, dist, source, destination, BILLION_SENTINEL);
+    }
+    case 3:
+      return extractFloydPath(output);
+    case 4:
+      return extractJohnsonPath(output, source, destination);
+    case 5:
+      return (yenParsed.path && yenParsed.path[0]) || [];
+    default:
+      return [];
+  }
+}
+
 // Runs the requested algorithm entirely in-memory (no exec, no file I/O) and
 // returns everything the frontend needs to render the result and animate it
 // in a single response.
@@ -277,7 +399,11 @@ app.post("/perform-algo", (req, res) => {
     const { nodes, edges, algoID } = req.body;
     const V = nodes.length;
     const { adj, graph } = buildGraph(nodes, edges);
-    const source = 0;
+
+    const clamp = (n, fallback) =>
+      Number.isInteger(n) && n >= 0 && n < V ? n : fallback;
+    const source = clamp(req.body.source, 0);
+    const destination = clamp(req.body.destination, Math.max(V - 1, 0));
 
     let output;
     switch (algoID) {
@@ -291,13 +417,13 @@ app.post("/perform-algo", (req, res) => {
         output = algos.run_spfa(V, adj, source);
         break;
       case 3:
-        output = algos.run_floyd_warshall(V, adj, source);
+        output = algos.run_floyd_warshall(V, adj, source, destination);
         break;
       case 4:
         output = algos.run_johnson(V, adj);
         break;
       case 5:
-        output = algos.run_yen(V, adj, source, Math.max(V - 1, 0), 2);
+        output = algos.run_yen(V, adj, source, destination, 2);
         break;
       default:
         res.status(400).json({ error: "Unknown algoID" });
@@ -309,7 +435,14 @@ app.post("/perform-algo", (req, res) => {
     // different thing from `resultText` (the human-readable <result> block,
     // used only for the saved-graph history display) — keep them under
     // distinct keys so the spread below can't clobber either.
-    const resultText = extractResult(output);
+    const rawResult = extractResult(output);
+    // The space estimate is appended as its own tagged line (rather than a
+    // new DB field) so saved history keeps working without a schema change;
+    // HistoryItem.jsx extracts it by the "spaceEstimateKB" marker, not by
+    // position, since the summary line's field count already differs across
+    // algorithms.
+    const spaceEstimateKB = estimateSpaceKB(algoID, V, edges.length);
+    const resultText = `${rawResult}\nspaceEstimateKB ${spaceEstimateKB}`;
 
     // Johnson's output interleaves two phases in one string: the plain
     // <ds>/<adj> Bellman-Ford reweighting trace (parsed generically, same
@@ -327,7 +460,17 @@ app.post("/perform-algo", (req, res) => {
       parsed = parseGenericOutput(output);
     }
 
-    res.status(200).json({ success: true, graph, resultText, ...parsed });
+    const shortestPath = computeShortestPath(algoID, output, rawResult, source, destination, parsed);
+
+    res.status(200).json({
+      success: true,
+      graph,
+      resultText,
+      source,
+      destination,
+      shortestPath,
+      ...parsed,
+    });
   } catch (error) {
     console.error("Error:", error);
     res.status(500).json({ error: "Failed to run algorithm" });

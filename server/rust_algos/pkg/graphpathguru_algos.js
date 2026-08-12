@@ -48,17 +48,22 @@ function run_dijkstra(v, adj, source) {
 exports.run_dijkstra = run_dijkstra;
 
 /**
- * Port of `Floyd_warshall_source.cpp`'s `main()`.
+ * Port of `Floyd_warshall_source.cpp`'s `main()`. Also reconstructs the
+ * source->destination shortest path via a successor matrix maintained
+ * alongside the (faithfully-ported) distance computation — see
+ * `floyd_warshall::build_next_matrix` — and appends it as a `<path>` block
+ * after `</result>` (space-separated node ids, empty if unreachable).
  * @param {number} v
  * @param {any} adj
  * @param {number} source
+ * @param {number} destination
  * @returns {string}
  */
-function run_floyd_warshall(v, adj, source) {
+function run_floyd_warshall(v, adj, source, destination) {
     let deferred1_0;
     let deferred1_1;
     try {
-        const ret = wasm.run_floyd_warshall(v, adj, source);
+        const ret = wasm.run_floyd_warshall(v, adj, source, destination);
         deferred1_0 = ret[0];
         deferred1_1 = ret[1];
         return getStringFromWasm0(ret[0], ret[1]);

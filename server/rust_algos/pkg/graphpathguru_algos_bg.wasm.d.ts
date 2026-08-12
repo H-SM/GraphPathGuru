@@ -4,7 +4,7 @@ export const memory: WebAssembly.Memory;
 export const init_panic_hook: () => void;
 export const run_bellman_ford: (a: number, b: any, c: number) => [number, number];
 export const run_dijkstra: (a: number, b: any, c: number) => [number, number];
-export const run_floyd_warshall: (a: number, b: any, c: number) => [number, number];
+export const run_floyd_warshall: (a: number, b: any, c: number, d: number) => [number, number];
 export const run_johnson: (a: number, b: any) => [number, number];
 export const run_spfa: (a: number, b: any, c: number) => [number, number];
 export const run_yen: (a: number, b: any, c: number, d: number, e: number) => [number, number];

@@ -1,5 +1,6 @@
+import { highlightShortestPath } from "./pathHighlight";
+
 var currentNode = 0;
-var currentEdge = 1;
 var index = 0;
 var pathVal = 0;
 
@@ -10,6 +11,7 @@ var distance_curr = []; // distance of the current node
 var curr_node = []; // current node from which the distance of all adjacent nodes is calculated
 var path = [];
 var checkEdges = [];
+var shortestPath = [];
 
 // coloring the nodes of the graph
 const colorNode = (nodes, nodeId, color) => {
@@ -97,6 +99,7 @@ const visualise = async (nodes, edges, setNodes, setEdges) => {
     setEdges(
       colorEdge(updatedEdges, "-1", "-1", distance_curr, distance, false)
     );
+    highlightShortestPath(shortestPath, setNodes, setEdges);
     return;
   }
 
@@ -119,7 +122,7 @@ const visualise = async (nodes, edges, setNodes, setEdges) => {
     setNodes(colorNode(updatedNodes, checkNode[currentNode][index], "blue"));
 
     // changing edge to animated and adding labels
-    if (checkNode[currentNode][index] != undefined) {
+    if (checkNode[currentNode][index] !== undefined) {
       setEdges(
         colorEdge(
           edges,
@@ -150,16 +153,14 @@ const visualise = async (nodes, edges, setNodes, setEdges) => {
       }
 
       if (
-        checkNode[currentNode].length == 0 ||
-        index == checkNode[currentNode].length - 1
+        checkNode[currentNode].length === 0 ||
+        index === checkNode[currentNode].length - 1
       ) {
         index = 0;
         currentNode++;
       } else {
         index++;
       }
-
-      currentEdge++;
     }, 2000);
 
     visualise(nodes, edges, setNodes, setEdges);
@@ -170,7 +171,6 @@ const visualiseYenK = async (nodes, edges, setNodes, setEdges, algoData) => {
   console.log("Yenk visualised !");
 
   currentNode = 0;
-  currentEdge = 1;
   index = 0;
   pathVal = 0;
 
@@ -180,6 +180,7 @@ const visualiseYenK = async (nodes, edges, setNodes, setEdges, algoData) => {
   distance_curr = algoData.distance_curr;
   curr_node = algoData.curr_node;
   path = algoData.path;
+  shortestPath = algoData.shortestPath;
 
   visualise(nodes, edges, setNodes, setEdges);
 };

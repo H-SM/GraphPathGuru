@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
 import logo from "../assets/logo.png";
 import userContext from "../context/User/userContext";
 import { useNavigate } from "react-router-dom";
@@ -26,7 +26,7 @@ const Forgot = (props) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (password != cpassword) {
+    if (password !== cpassword) {
       showAlert("Recheck your new password!", "warning");
       return;
     }
@@ -56,11 +56,11 @@ const Forgot = (props) => {
   };
 
   const onChange = (e) => {
-    if (e.target.name == "email") {
+    if (e.target.name === "email") {
       setEmail(e.target.value);
-    } else if (e.target.name == "password") {
+    } else if (e.target.name === "password") {
       setpassword(e.target.value);
-    } else if (e.target.name == "cpassword") {
+    } else if (e.target.name === "cpassword") {
       setcpassword(e.target.value);
     }
   };

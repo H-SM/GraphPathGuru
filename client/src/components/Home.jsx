@@ -34,6 +34,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import UserSection from "./UserSection";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
+import VisualizationLegend from "./VisualizationLegend";
+import AlgoResultPanel from "./AlgoResultPanel";
 
 import visualiseYenK from "./AlgoVisualise/YenK";
 import visualiseDjikstra from "./AlgoVisualise/Djikstra";
@@ -128,7 +130,7 @@ const AddNodeOnEdgeDrop = () => {
     };
     setEdges((els) => addEdge(redEdge, els));
     console.log(edges);
-  }, []);
+  }, [edges, setEdges]);
 
   // it runs when we start the connection of edge from source node
   const onConnectStart = useCallback((_, { nodeId }) => {
@@ -174,13 +176,13 @@ const AddNodeOnEdgeDrop = () => {
         console.log(edges);
       }
     },
-    [project]
+    [project, edges, setEdges, setNodes]
   );
 
   // it runs when we delete a node or edge
   const onNodesDelete = useCallback(
     (deleted) => {
-      const id = setId();
+      setId();
       setEdges(
         deleted.reduce((acc, node) => {
           const incomers = getIncomers(node, nodes, edges);
@@ -203,7 +205,7 @@ const AddNodeOnEdgeDrop = () => {
         }, edges)
       );
     },
-    [nodes, edges]
+    [nodes, edges, setEdges]
   );
 
   // it is used for the selection of edges for assigning them weights
@@ -278,7 +280,13 @@ const AddNodeOnEdgeDrop = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ nodes, edges, algoID: algoMap[algoID] }),
+        body: JSON.stringify({
+          nodes,
+          edges,
+          algoID: algoMap[algoID],
+          source: parseInt(node1, 10),
+          destination: parseInt(node2, 10),
+        }),
       });
 
       if (!req.ok) {
@@ -507,6 +515,10 @@ const AddNodeOnEdgeDrop = () => {
             </option>
           </select>
 
+          <p className="text-gray-500 text-xs -mt-2">
+            From/To set the algorithm's start/end node for Visualize, and
+            which edge "Change" edits.
+          </p>
           <div className="gap-3 flex w-full justify-evenly">
             <div>
               <label
@@ -573,6 +585,8 @@ const AddNodeOnEdgeDrop = () => {
           </button>
         </div>
       </div>
+      <AlgoResultPanel algoData={algoData} algoName={algoID} />
+      <VisualizationLegend />
     </>
   );
 };

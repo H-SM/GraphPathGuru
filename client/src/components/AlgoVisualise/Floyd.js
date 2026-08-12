@@ -1,5 +1,6 @@
+import { highlightShortestPath } from "./pathHighlight";
+
 var currentNode = 0;
-var currentEdge = 1;
 var index = 0;
 var nodeVal = -1;
 var temp = -1;
@@ -7,9 +8,8 @@ var temp = -1;
 var checkNode = []; // the nodes to check
 var result = []; // result whether 1 or 0
 var distance = []; // it is the adjacency matrix after each iteration of k
-var distance_curr = []; // distance of the current node from k
 var curr_node = []; // current node from which the distance of all adjacent nodes is calculated
-var path = [];
+var shortestPath = [];
 
 // coloring the nodes of the graph
 const colorNode = (nodes, nodeId, color) => {
@@ -104,6 +104,7 @@ const visualise = async (nodes, edges, setNodes, setEdges) => {
     setEdges(
       colorEdge(edges, nodeVal.toString(), "-1", "-1", distance[0], false)
     );
+    highlightShortestPath(shortestPath, setNodes, setEdges);
     return;
   }
 
@@ -120,7 +121,7 @@ const visualise = async (nodes, edges, setNodes, setEdges) => {
     setNodes(colorNode(updatedNodes2, checkNode[currentNode][index], "blue"));
 
     // changing edge to animated and adding labels
-    if (checkNode[currentNode][index] != undefined) {
+    if (checkNode[currentNode][index] !== undefined) {
       try {
         setEdges(
           colorEdge(
@@ -158,16 +159,14 @@ const visualise = async (nodes, edges, setNodes, setEdges) => {
       }
 
       if (
-        checkNode[currentNode].length == 0 ||
-        index == checkNode[currentNode].length - 1
+        checkNode[currentNode].length === 0 ||
+        index === checkNode[currentNode].length - 1
       ) {
         index = 0;
         currentNode++;
       } else {
         index++;
       }
-
-      currentEdge++;
     }, 2000);
 
     visualise(nodes, edges, setNodes, setEdges);
@@ -179,7 +178,6 @@ const visualiseFloyd = async (nodes, edges, setNodes, setEdges, algoData) => {
   console.log("Floyd visualised !");
 
   currentNode = 0;
-  currentEdge = 1;
   index = 0;
   nodeVal = -1;
   temp = -1;
@@ -187,8 +185,8 @@ const visualiseFloyd = async (nodes, edges, setNodes, setEdges, algoData) => {
   result = algoData.result;
   checkNode = algoData.checkNode;
   distance = algoData.distance;
-  distance_curr = algoData.distance_curr;
   curr_node = algoData.curr_node;
+  shortestPath = algoData.shortestPath;
 
   visualise(nodes, edges, setNodes, setEdges);
 };

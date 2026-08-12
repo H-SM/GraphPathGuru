@@ -138,16 +138,22 @@ pub fn run_spfa(v: usize, adj: JsValue, source: usize) -> String {
     output
 }
 
-/// Port of `Floyd_warshall_source.cpp`'s `main()`.
+/// Port of `Floyd_warshall_source.cpp`'s `main()`. Also reconstructs the
+/// source->destination shortest path via a successor matrix maintained
+/// alongside the (faithfully-ported) distance computation — see
+/// `floyd_warshall::build_next_matrix` — and appends it as a `<path>` block
+/// after `</result>` (space-separated node ids, empty if unreachable).
 #[wasm_bindgen]
-pub fn run_floyd_warshall(v: usize, adj: JsValue, source: usize) -> String {
+pub fn run_floyd_warshall(v: usize, adj: JsValue, source: usize, destination: usize) -> String {
     let adj = parse_adj(adj);
     let mut matrix = floyd_warshall::build_matrix(v, &adj);
+    let mut next = floyd_warshall::build_next_matrix(v);
+    floyd_warshall::init_next_matrix(&mut next, &matrix);
     let e = v * v; // matches the original's row-count-based (not edge-count) E
     let mut output = String::new();
 
     let start = js_sys::Date::now();
-    floyd_warshall::floyd_warshall_core(&mut matrix, &mut output);
+    floyd_warshall::floyd_warshall_core(&mut matrix, &mut next, &mut output);
     let time_taken = elapsed_micros(start);
 
     output.push_str("<result>\n\t");
@@ -159,6 +165,13 @@ pub fn run_floyd_warshall(v: usize, adj: JsValue, source: usize) -> String {
         output.push_str("\n\t");
     }
     output.push_str("\n</result>\n");
+
+    let path = floyd_warshall::path_from_next(&next, source, destination);
+    output.push_str("<shortest-path>\n\t");
+    for node in &path {
+        output.push_str(&format!("{} ", node));
+    }
+    output.push_str("\n</shortest-path>\n");
 
     output
 }

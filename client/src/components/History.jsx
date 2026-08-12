@@ -166,7 +166,7 @@ const History = (props) => {
                             scope="col"
                             className="py-[0.875rem] pl-[1rem] pr-[0.75rem] text-left text-[0.875rem] leading-5 font-bold text-opacity-100 text-gray-700 px-6"
                           >
-                            Space Taken
+                            Space Taken (est.)
                           </th>
                           <th
                             scope="col"

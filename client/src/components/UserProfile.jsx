@@ -13,6 +13,7 @@ const UserProfile = () => {
 
   useEffect(() => {
     getuserinfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const calculateTimeAgo = (dateString) => {

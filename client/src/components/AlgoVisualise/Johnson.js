@@ -1,17 +1,16 @@
-import ReactFlow, { MarkerType } from "reactflow";
+import { MarkerType } from "reactflow";
+import { highlightShortestPath } from "./pathHighlight";
 
 var currentNode = 0;
-var currentEdge = 1;
 var index = 0;
-var pathVal = 0;
 
 var checkNode = []; // the nodes to check
 var result = []; // result whether 1 or 0
 var distance = []; // distance of current node from source
 var distance_curr = []; // distance of the current node
 var curr_node = []; // current node from which the distance of all adjacent nodes is calculated
-var path = [];
 var source = [];
+var shortestPath = [];
 // holds the per-source Dijkstra phase data (<ds2>/<adj2>/<source> tags),
 // bridged from visualiseJohnson into visualiseJ once the reweighting
 // animation (driven by the plain <ds>/<adj> phase data) completes.
@@ -42,13 +41,13 @@ const colorEdge = (edges, sourceEdge, destinationEdge, animated) => {
         ...edge,
         animated: animated,
         label:
-          (distance_curr[currentNode] == 1e9
+          (distance_curr[currentNode] === 1e9
             ? "INF"
             : distance_curr[currentNode].toString()) +
           " + " +
           edge.label +
           " < " +
-          (distance[currentNode][checkNode[currentNode][index]] == 1e9
+          (distance[currentNode][checkNode[currentNode][index]] === 1e9
             ? "INF"
             : distance[currentNode][checkNode[currentNode][index]].toString()),
       };
@@ -199,7 +198,7 @@ const visualise = async (nodes, edges, setNodes, setEdges, updatedEdges) => {
     setNodes(colorNode(updatedNodes, checkNode[currentNode][index], "blue"));
 
     // changing edge to animated and adding labels
-    if (checkNode[currentNode][index] != undefined) {
+    if (checkNode[currentNode][index] !== undefined) {
       setEdges(
         colorEdge(
           edges,
@@ -230,16 +229,14 @@ const visualise = async (nodes, edges, setNodes, setEdges, updatedEdges) => {
       }
 
       if (
-        checkNode[currentNode].length == 0 ||
-        index == checkNode[currentNode].length - 1
+        checkNode[currentNode].length === 0 ||
+        index === checkNode[currentNode].length - 1
       ) {
         index = 0;
         currentNode++;
       } else {
         index++;
       }
-
-      currentEdge++;
     }, 2000);
 
     await visualise(nodes, edges, setNodes, setEdges, updatedEdges);
@@ -259,6 +256,7 @@ const visualiseD = async (nodes, edges, setNodes, setEdges, source) => {
     const updatedNodes = highlightNode(nodes, "-1");
     setNodes(colorNode(updatedNodes, "-1", "white"));
     setEdges(colorEdge(edges, "-1", "-1", distance_curr, distance, true));
+    highlightShortestPath(shortestPath, setNodes, setEdges);
     return;
   }
 
@@ -269,7 +267,7 @@ const visualiseD = async (nodes, edges, setNodes, setEdges, source) => {
     setNodes(colorNode(updatedNodes2, checkNode[currentNode][index], "blue"));
 
     // changing edge to animated and adding labels
-    if (checkNode[currentNode][index] != undefined) {
+    if (checkNode[currentNode][index] !== undefined) {
       setEdges(
         colorEdge(
           edges,
@@ -302,16 +300,14 @@ const visualiseD = async (nodes, edges, setNodes, setEdges, source) => {
       }
 
       if (
-        checkNode[currentNode].length == 0 ||
-        index == checkNode[currentNode].length - 1
+        checkNode[currentNode].length === 0 ||
+        index === checkNode[currentNode].length - 1
       ) {
         index = 0;
         currentNode++;
       } else {
         index++;
       }
-
-      currentEdge++;
     }, 2000);
 
     await visualiseD(nodes, edges, setNodes, setEdges, source);
@@ -323,9 +319,7 @@ const visualiseJ = async (nodes, edges, setNodes, setEdges) => {
   console.log("johnson visualised !");
 
   currentNode = 0;
-  currentEdge = 1;
   index = 0;
-  pathVal = 0;
 
   result = johnsonData.result;
   checkNode = johnsonData.checkNode;
@@ -339,9 +333,7 @@ const visualiseJ = async (nodes, edges, setNodes, setEdges) => {
 
 const visualiseJohnson = async (nodes, edges, setNodes, setEdges, algoData) => {
   currentNode = 0;
-  currentEdge = 1;
   index = 0;
-  pathVal = 0;
 
   result = algoData.result;
   checkNode = algoData.checkNode;
@@ -349,6 +341,7 @@ const visualiseJohnson = async (nodes, edges, setNodes, setEdges, algoData) => {
   distance_curr = algoData.distance_curr;
   curr_node = algoData.curr_node;
   johnsonData = algoData.johnson;
+  shortestPath = algoData.shortestPath;
 
   const { updatedNodes, newEdges } = await addExtraNode(
     nodes,

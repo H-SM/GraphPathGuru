@@ -8,6 +8,7 @@ const UserSection = () => {
   const { userData, getuserinfo } = context;
   useEffect(() => {
     getuserinfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   let navigate = useNavigate();
   return (
