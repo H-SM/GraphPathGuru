@@ -1,0 +1,11 @@
+{
+  "name": "graphpathguru-algos",
+  "version": "0.1.0",
+  "files": [
+    "graphpathguru_algos_bg.wasm",
+    "graphpathguru_algos.js",
+    "graphpathguru_algos.d.ts"
+  ],
+  "main": "graphpathguru_algos.js",
+  "types": "graphpathguru_algos.d.ts"
+}

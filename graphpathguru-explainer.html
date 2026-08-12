@@ -1,0 +1,1011 @@
+<title>GraphPathGuru: the Rust/WASM rewrite, explained</title>
+<style>
+  :root {
+    --paper: #f6f4f0;
+    --paper-raised: #ffffff;
+    --ink: #211d18;
+    --ink-dim: #6b6357;
+    --rule: #ddd7cc;
+    --accent: #b8542e;
+    --accent-soft: #f0dcc9;
+    --red: #dc4c42;
+    --blue: #3272c7;
+    --green: #2e9159;
+    --gold: #b3791b;
+    --code-bg: #efeadf;
+    --shadow: 0 1px 2px rgba(33,29,24,0.06), 0 4px 14px rgba(33,29,24,0.05);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #18150f;
+      --paper-raised: #211d16;
+      --ink: #ede6d9;
+      --ink-dim: #a79c89;
+      --rule: #3a3327;
+      --accent: #e08356;
+      --accent-soft: #3b2a1e;
+      --red: #e56a5f;
+      --blue: #7aa8e8;
+      --green: #64c891;
+      --gold: #e0a83f;
+      --code-bg: #241f17;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #18150f;
+    --paper-raised: #211d16;
+    --ink: #ede6d9;
+    --ink-dim: #a79c89;
+    --rule: #3a3327;
+    --accent: #e08356;
+    --accent-soft: #3b2a1e;
+    --red: #e56a5f;
+    --blue: #7aa8e8;
+    --green: #64c891;
+    --gold: #e0a83f;
+    --code-bg: #241f17;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.35);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: Georgia, "Iowan Old Style", "Palatino Linotype", "Book Antiqua", serif;
+    font-weight: 600;
+    line-height: 1.25;
+    text-wrap: balance;
+    color: var(--ink);
+  }
+
+  code, pre, .mono, .tag, table.matrix, .kbd {
+    font-family: ui-monospace, "Cascadia Code", "SF Mono", Consolas, "Liberation Mono", monospace;
+  }
+
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible, summary:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  /* ---------- Page shell ---------- */
+  .shell {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    gap: 0;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  nav.toc {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 2.5rem 1.25rem 2rem 1.5rem;
+    border-right: 1px solid var(--rule);
+  }
+
+  nav.toc .brand {
+    font-family: Georgia, serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    margin-bottom: 0.25rem;
+  }
+  nav.toc .brand .crab { margin-right: 0.4rem; }
+  nav.toc .kicker {
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 1.5rem;
+    display: block;
+  }
+
+  nav.toc ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+  }
+  nav.toc li a {
+    display: block;
+    padding: 0.3rem 0.5rem;
+    border-radius: 6px;
+    color: var(--ink-dim);
+    text-decoration: none;
+    font-size: 0.87rem;
+  }
+  nav.toc li a:hover { background: var(--accent-soft); color: var(--ink); }
+  nav.toc li.sub a { padding-left: 1.1rem; font-size: 0.82rem; }
+  nav.toc .divider { height: 1px; background: var(--rule); margin: 0.9rem 0.5rem; }
+
+  main {
+    padding: 3rem clamp(1.25rem, 4vw, 4rem) 6rem;
+    min-width: 0;
+  }
+
+  .prose { max-width: 68ch; }
+  .wide { max-width: 900px; }
+
+  header.hero {
+    max-width: 68ch;
+    margin-bottom: 3rem;
+  }
+  header.hero .eyebrow {
+    font-size: 0.78rem;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 0.9rem;
+    display: block;
+  }
+  header.hero h1 {
+    font-size: clamp(2rem, 4vw, 2.7rem);
+    margin: 0 0 0.9rem;
+  }
+  header.hero p.lede {
+    font-size: 1.12rem;
+    color: var(--ink-dim);
+    margin: 0;
+  }
+
+  section { margin-top: 4rem; scroll-margin-top: 1.5rem; }
+  section > h2 {
+    font-size: 1.55rem;
+    margin: 0 0 0.3rem;
+    padding-top: 0.2rem;
+    border-top: 1px solid var(--rule);
+    padding-top: 1.6rem;
+  }
+  section > .section-kicker {
+    display: block;
+    font-size: 0.76rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+    margin-bottom: 0.6rem;
+  }
+  h3 { font-size: 1.2rem; margin: 2.2rem 0 0.7rem; }
+  h4 { font-size: 1rem; margin: 1.6rem 0 0.5rem; color: var(--ink); }
+
+  p { margin: 0 0 1rem; }
+  .prose p, .prose li { max-width: 68ch; }
+  ul, ol.steps { padding-left: 1.3rem; }
+  li { margin-bottom: 0.4rem; }
+
+  strong { font-weight: 650; }
+
+  .lead-in {
+    font-size: 1.05rem;
+    color: var(--ink-dim);
+    max-width: 68ch;
+  }
+
+  /* ---------- Cards / callouts ---------- */
+  .card {
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    padding: 1.3rem 1.5rem;
+  }
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 0 8px 8px 0;
+    padding: 0.9rem 1.2rem;
+    margin: 1.2rem 0;
+    max-width: 68ch;
+    font-size: 0.95rem;
+  }
+  .callout .callout-label {
+    font-weight: 700;
+    font-size: 0.76rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 0.3rem;
+  }
+
+  /* ---------- Code ---------- */
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    border-radius: 8px;
+    padding: 0.9rem 1.1rem;
+    overflow-x: auto;
+    font-size: 0.83rem;
+    line-height: 1.55;
+    max-width: 900px;
+  }
+  code.inline {
+    background: var(--code-bg);
+    border: 1px solid var(--rule);
+    border-radius: 4px;
+    padding: 0.05rem 0.35rem;
+    font-size: 0.87em;
+  }
+  .file-path {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  /* ---------- Tables ---------- */
+  .table-wrap { overflow-x: auto; max-width: 900px; }
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.9rem;
+  }
+  table.matrix { font-size: 0.85rem; }
+  th, td {
+    border: 1px solid var(--rule);
+    padding: 0.5rem 0.7rem;
+    text-align: left;
+    font-variant-numeric: tabular-nums;
+  }
+  th {
+    background: var(--code-bg);
+    font-weight: 650;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+    color: var(--ink-dim);
+  }
+  table.matrix th, table.matrix td { text-align: center; }
+  table.matrix td.diag { color: var(--ink-dim); }
+  table.matrix td.changed { color: var(--accent); font-weight: 700; }
+
+  /* ---------- Figures / diagrams ---------- */
+  figure {
+    margin: 1.6rem 0 2rem;
+    max-width: 900px;
+  }
+  figure svg {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  figure.full-bleed svg {
+    background: var(--paper-raised);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+  }
+  figcaption {
+    font-size: 0.85rem;
+    color: var(--ink-dim);
+    margin-top: 0.6rem;
+    max-width: 68ch;
+  }
+
+  /* ---------- Legend chips ---------- */
+  .legend-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem 1.1rem;
+    margin: 1rem 0 1.6rem;
+    max-width: 900px;
+  }
+  .legend-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.87rem;
+  }
+  .swatch {
+    width: 0.8rem;
+    height: 0.8rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1px solid rgba(0,0,0,0.15);
+  }
+
+  /* ---------- Algorithm section shell ---------- */
+  .algo-head {
+    display: flex;
+    align-items: baseline;
+    gap: 0.9rem;
+    flex-wrap: wrap;
+  }
+  .algo-num {
+    font-family: Georgia, serif;
+    font-size: 1rem;
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .stat-row {
+    display: flex;
+    gap: 1.6rem;
+    flex-wrap: wrap;
+    margin: 0.9rem 0 1.4rem;
+    padding: 0.85rem 1.1rem;
+    background: var(--code-bg);
+    border-radius: 8px;
+    max-width: 900px;
+  }
+  .stat { font-size: 0.85rem; }
+  .stat .stat-label {
+    display: block;
+    color: var(--ink-dim);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.15rem;
+  }
+  .stat .stat-value { font-family: ui-monospace, monospace; font-weight: 600; }
+
+  /* ---------- Trace tables ---------- */
+  .trace td:first-child, .trace th:first-child { white-space: nowrap; }
+
+  /* ---------- Files map ---------- */
+  .filemap { max-width: 900px; }
+  .filemap dt {
+    font-family: ui-monospace, monospace;
+    color: var(--accent);
+    font-size: 0.88rem;
+    margin-top: 0.7rem;
+  }
+  .filemap dd {
+    margin: 0.15rem 0 0;
+    color: var(--ink-dim);
+    font-size: 0.9rem;
+  }
+
+  footer {
+    max-width: 68ch;
+    margin-top: 5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+    color: var(--ink-dim);
+    font-size: 0.85rem;
+  }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 900px) {
+    .shell { grid-template-columns: 1fr; }
+    nav.toc {
+      position: static;
+      height: auto;
+      border-right: none;
+      border-bottom: 1px solid var(--rule);
+      padding: 1.25rem 1.25rem 1rem;
+    }
+    nav.toc ol { flex-direction: row; flex-wrap: wrap; }
+    nav.toc .divider { display: none; }
+    nav.toc li.sub { display: none; }
+    main { padding: 2rem 1.25rem 4rem; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { scroll-behavior: auto !important; }
+  }
+</style>
+
+<div class="shell">
+  <nav class="toc" aria-label="Table of contents">
+    <span class="brand"><span class="crab" aria-hidden="true">🦀</span>GraphPathGuru</span>
+    <span class="kicker">Architecture &amp; algorithms notebook</span>
+    <ol>
+      <li><a href="#why">Why this changed</a></li>
+      <li><a href="#wasm">What WASM actually is</a></li>
+      <li><a href="#flow">One request, start to finish</a></li>
+      <li><a href="#files">Where everything lives</a></li>
+      <li class="divider"></li>
+      <li><a href="#example">The example graph</a></li>
+      <li><a href="#dijkstra">1. Dijkstra</a></li>
+      <li><a href="#bellman-ford">2. Bellman-Ford</a></li>
+      <li><a href="#spfa">3. SPFA</a></li>
+      <li><a href="#floyd-warshall">4. Floyd-Warshall</a></li>
+      <li><a href="#johnson">5. Johnson's algorithm</a></li>
+      <li><a href="#yen">6. Yen's k shortest paths</a></li>
+      <li class="divider"></li>
+      <li><a href="#compare">Side-by-side comparison</a></li>
+      <li><a href="#legend">Reading the animation</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <span class="eyebrow">How the rewrite works</span>
+      <h1>From a Windows .exe to Rust running inside Node</h1>
+      <p class="lede">This is the long version — what actually changed under the hood when the six algorithms moved off C++ binaries and onto WebAssembly, and a proper walkthrough of each algorithm with a worked example, so the code stops being a black box.</p>
+    </header>
+
+    <!-- ============ WHY ============ -->
+    <section id="why" class="prose">
+      <span class="section-kicker">Background</span>
+      <h2>Why this changed</h2>
+      <p>The <code class="inline">/perform-algo</code> route used to shell out to a compiled C++ program — one <code class="inline">.exe</code> per algorithm — that read the graph from <code class="inline">server/file io/input.txt</code> and wrote its step-by-step trace to <code class="inline">server/file io/output.txt</code>.</p>
+      <p>Two things made that unworkable as a real, deployed app:</p>
+      <ul>
+        <li><strong>The binaries only run on Windows.</strong> A production server is essentially always Linux, and a Windows <code class="inline">.exe</code> simply won't execute there — full stop.</li>
+        <li><strong>Every request shared the same two files.</strong> There was one <code class="inline">input.txt</code> and one <code class="inline">output.txt</code> for the entire server. Two people running the visualizer at the same moment would silently overwrite each other's graphs.</li>
+      </ul>
+      <p>The fix addresses both at once: every algorithm is now a <strong>Rust</strong> function, compiled to <strong>WebAssembly</strong>, and loaded straight into the Node.js process. There's no external program to spawn and no file to share — a request comes in, the algorithm runs entirely in memory using only that request's own data, and a response goes out. Nothing is left behind for the next request to trip over.</p>
+
+      <figure class="full-bleed">
+        <svg viewBox="0 0 900 300" role="img" aria-label="Before: browser talks to Express, which spawns a Windows-only Dijkstra.exe that reads and writes a file shared by every user. After: browser talks to Express, which calls a Rust function compiled to WebAssembly directly in-process, with no shared state.">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor" />
+            </marker>
+          </defs>
+          <text x="20" y="28" font-size="12" letter-spacing="0.06em" fill="var(--ink-dim)" style="text-transform:uppercase">Before</text>
+          <g transform="translate(0,40)" font-family="ui-monospace, monospace" font-size="12">
+            <rect x="20" y="0" width="110" height="46" rx="6" fill="none" stroke="currentColor"/>
+            <text x="75" y="27" text-anchor="middle">Browser</text>
+            <line x1="130" y1="23" x2="188" y2="23" stroke="currentColor" marker-end="url(#arrow)"/>
+            <rect x="190" y="0" width="120" height="46" rx="6" fill="none" stroke="currentColor"/>
+            <text x="250" y="27" text-anchor="middle">Express</text>
+            <line x1="310" y1="23" x2="368" y2="23" stroke="currentColor" marker-end="url(#arrow)"/>
+            <text x="339" y="14" text-anchor="middle" font-size="10" fill="var(--ink-dim)">execFile()</text>
+            <rect x="370" y="0" width="150" height="46" rx="6" fill="none" stroke="var(--red)" stroke-dasharray="4 3"/>
+            <text x="445" y="20" text-anchor="middle" fill="var(--red)">Dijkstra.exe</text>
+            <text x="445" y="35" text-anchor="middle" font-size="9.5" fill="var(--red)">Windows-only</text>
+            <line x1="520" y1="23" x2="578" y2="23" stroke="currentColor" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+            <text x="549" y="14" text-anchor="middle" font-size="10" fill="var(--ink-dim)">reads / writes</text>
+            <rect x="580" y="0" width="230" height="46" rx="6" fill="none" stroke="var(--red)" stroke-dasharray="4 3"/>
+            <text x="695" y="20" text-anchor="middle" fill="var(--red)">file io/input.txt, output.txt</text>
+            <text x="695" y="35" text-anchor="middle" font-size="9.5" fill="var(--red)">one shared copy, for everyone</text>
+          </g>
+          <line x1="20" y1="130" x2="880" y2="130" stroke="var(--rule)"/>
+          <text x="20" y="163" font-size="12" letter-spacing="0.06em" fill="var(--ink-dim)" style="text-transform:uppercase">Now</text>
+          <g transform="translate(0,175)" font-family="ui-monospace, monospace" font-size="12">
+            <rect x="20" y="0" width="110" height="46" rx="6" fill="none" stroke="currentColor"/>
+            <text x="75" y="27" text-anchor="middle">Browser</text>
+            <line x1="130" y1="23" x2="188" y2="23" stroke="currentColor" marker-end="url(#arrow)"/>
+            <rect x="190" y="0" width="120" height="46" rx="6" fill="none" stroke="currentColor"/>
+            <text x="250" y="27" text-anchor="middle">Express</text>
+            <line x1="310" y1="23" x2="368" y2="23" stroke="currentColor" marker-end="url(#arrow)"/>
+            <text x="339" y="14" text-anchor="middle" font-size="10" fill="var(--ink-dim)">in-process call</text>
+            <rect x="370" y="0" width="230" height="46" rx="6" fill="none" stroke="var(--green)"/>
+            <text x="485" y="20" text-anchor="middle" fill="var(--green)">WASM: dijkstra.rs</text>
+            <text x="485" y="35" text-anchor="middle" font-size="9.5" fill="var(--green)">runs inside the Node process</text>
+            <line x1="600" y1="23" x2="658" y2="23" stroke="currentColor" marker-end="url(#arrow)"/>
+            <text x="629" y="14" text-anchor="middle" font-size="10" fill="var(--ink-dim)">returns a string</text>
+            <rect x="660" y="0" width="150" height="46" rx="6" fill="none" stroke="var(--green)"/>
+            <text x="735" y="20" text-anchor="middle" fill="var(--green)">local variables</text>
+            <text x="735" y="35" text-anchor="middle" font-size="9.5" fill="var(--green)">only, per request</text>
+          </g>
+        </svg>
+      </figure>
+      <figcaption>The old path routed every request through one shared pair of files on disk; the new path never touches disk at all — everything lives in variables scoped to that one function call, so concurrent users can't see each other's data.</figcaption>
+    </section>
+
+    <!-- ============ WASM ============ -->
+    <section id="wasm" class="prose">
+      <span class="section-kicker">Background</span>
+      <h2>What WASM actually is</h2>
+      <p><strong>WebAssembly (WASM)</strong> is a compact binary instruction format that runs at close to native speed, inside a sandbox. It was originally built so browsers could run heavy code fast, but Node.js can load and execute <code class="inline">.wasm</code> files directly too — no browser required. That's what makes running Rust inside the Express server possible at all.</p>
+      <p>Rust compiles to WASM cleanly because it has no garbage collector and no runtime to drag along — the output is small and fast. Two tools make the Rust ↔ JavaScript boundary usable:</p>
+      <ul>
+        <li><code class="inline">wasm-bindgen</code> — generates the "glue" that lets JavaScript call a Rust function and hand it real data (arrays, numbers, strings), not just raw bytes.</li>
+        <li><code class="inline">wasm-pack</code> — the build tool that runs the whole pipeline: compile Rust for the <code class="inline">wasm32</code> target, run <code class="inline">wasm-bindgen</code> over the output, and produce a ready-to-use package.</li>
+      </ul>
+      <p>Running <code class="inline">wasm-pack build --target nodejs --release</code> inside <span class="file-path">server/rust_algos/</span> produces <span class="file-path">server/rust_algos/pkg/</span>, which contains:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>File</th><th>What it is</th></tr></thead>
+          <tbody>
+            <tr><td><code class="inline">graphpathguru_algos_bg.wasm</code></td><td>The actual compiled Rust — a binary, not readable text.</td></tr>
+            <tr><td><code class="inline">graphpathguru_algos.js</code></td><td>The generated JS wrapper: plain functions like <code class="inline">run_dijkstra(v, adj, source)</code> that internally load the <code class="inline">.wasm</code> and hand your arguments across the boundary.</td></tr>
+            <tr><td><code class="inline">graphpathguru_algos.d.ts</code></td><td>TypeScript type definitions for the same functions.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout">
+        <span class="callout-label">Why the compiled output is committed to git</span>
+        Exactly like the old <code class="inline">.exe</code> files were checked in, the compiled <code class="inline">pkg/</code> folder is committed too. That means the deployed server never needs Rust or <code class="inline">wasm-pack</code> installed — it just needs Node, and it <code class="inline">require()</code>s the pre-built module like any other npm package. You only rebuild when you actually change algorithm logic in one of the <code class="inline">.rs</code> files.
+      </div>
+    </section>
+
+    <!-- ============ FLOW ============ -->
+    <section id="flow" class="wide">
+      <span class="section-kicker">Background</span>
+      <h2>One request, start to finish</h2>
+      <p class="lead-in">Concretely, here's everything that happens between you clicking <strong>Save</strong> and the results panel updating, for Dijkstra specifically — the other five follow the same shape.</p>
+
+      <figure class="full-bleed">
+        <svg viewBox="0 0 900 300" role="img" aria-label="Flow diagram: browser sends nodes and edges to Express; buildGraph turns them into an adjacency list; run_dijkstra crosses into WASM via serde-wasm-bindgen; Rust's dijkstra_core builds a tagged trace string; parseGenericOutput turns that string into JS objects with regexes; Express returns one JSON response.">
+          <defs>
+            <marker id="arrow2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor" />
+            </marker>
+          </defs>
+          <g font-family="ui-monospace, monospace" font-size="11.5">
+            <!-- row 1 -->
+            <rect x="20" y="20" width="170" height="58" rx="7" fill="none" stroke="currentColor"/>
+            <text x="105" y="44" text-anchor="middle" font-weight="600">Browser</text>
+            <text x="105" y="60" text-anchor="middle" font-size="10" fill="var(--ink-dim)">POST /perform-algo</text>
+
+            <line x1="190" y1="49" x2="238" y2="49" stroke="currentColor" marker-end="url(#arrow2)"/>
+
+            <rect x="240" y="20" width="200" height="58" rx="7" fill="none" stroke="currentColor"/>
+            <text x="340" y="44" text-anchor="middle" font-weight="600">buildGraph()</text>
+            <text x="340" y="60" text-anchor="middle" font-size="10" fill="var(--ink-dim)">nodes/edges → adjacency list</text>
+
+            <line x1="440" y1="49" x2="488" y2="49" stroke="currentColor" marker-end="url(#arrow2)"/>
+
+            <rect x="490" y="20" width="230" height="58" rx="7" fill="none" stroke="var(--accent)"/>
+            <text x="605" y="44" text-anchor="middle" font-weight="600" fill="var(--accent)">algos.run_dijkstra()</text>
+            <text x="605" y="60" text-anchor="middle" font-size="10" fill="var(--accent)">JS → WASM, via serde-wasm-bindgen</text>
+
+            <!-- turn down -->
+            <line x1="605" y1="78" x2="605" y2="112" stroke="currentColor" marker-end="url(#arrow2)"/>
+
+            <!-- row 2 -->
+            <rect x="490" y="114" width="230" height="58" rx="7" fill="none" stroke="var(--accent)"/>
+            <text x="605" y="138" text-anchor="middle" font-weight="600" fill="var(--accent)">dijkstra_core() in Rust</text>
+            <text x="605" y="154" text-anchor="middle" font-size="10" fill="var(--accent)">builds a tagged trace string</text>
+
+            <line x1="490" y1="143" x2="442" y2="143" stroke="currentColor" marker-end="url(#arrow2)"/>
+
+            <rect x="240" y="114" width="200" height="58" rx="7" fill="none" stroke="currentColor"/>
+            <text x="340" y="138" text-anchor="middle" font-weight="600">parseGenericOutput()</text>
+            <text x="340" y="154" text-anchor="middle" font-size="10" fill="var(--ink-dim)">regexes pull out JS objects</text>
+
+            <line x1="240" y1="143" x2="192" y2="143" stroke="currentColor" marker-end="url(#arrow2)"/>
+
+            <rect x="20" y="114" width="170" height="58" rx="7" fill="none" stroke="var(--green)"/>
+            <text x="105" y="138" text-anchor="middle" font-weight="600" fill="var(--green)">JSON response</text>
+            <text x="105" y="154" text-anchor="middle" font-size="10" fill="var(--green)">result, shortestPath, ...</text>
+          </g>
+        </svg>
+      </figure>
+      <figcaption>Everything below the accent-colored boxes happens inside the compiled Rust; everything else is plain JavaScript in <span class="file-path">server/index.js</span>. One HTTP round trip, no intermediate storage.</figcaption>
+
+      <ol class="steps prose">
+        <li><strong>Browser → Express.</strong> <span class="file-path">Home.jsx</span> sends <code class="inline">{ nodes, edges, algoID, source, destination }</code> as JSON.</li>
+        <li><strong>Build the adjacency list.</strong> <code class="inline">buildGraph()</code> turns the React Flow nodes/edges into <code class="inline">adj[i] = [[neighbor, weight], ...]</code> — plain nested arrays.</li>
+        <li><strong>Cross into WASM.</strong> <code class="inline">algos.run_dijkstra(V, adj, source)</code> is called. <code class="inline">serde-wasm-bindgen</code> deserializes that JS array straight into Rust's <code class="inline">Vec&lt;Vec&lt;(usize, i32)&gt;&gt;</code> — no manual parsing needed on either side.</li>
+        <li><strong>Rust runs the algorithm.</strong> As it runs, it builds up one big string recording every step — who got compared to whom, and whether the comparison improved anything. That's the same "tagged" format the original C++ used, kept on purpose so the existing frontend animation logic didn't need to change.</li>
+        <li><strong>The string comes back as a plain JS string.</strong> No object, no class — just text.</li>
+        <li><strong>JavaScript parses it.</strong> <code class="inline">parseGenericOutput()</code> (or the Floyd/Johnson/Yen-specific variant) runs regexes over that string to build the JSON the frontend actually wants: <code class="inline">result</code>, <code class="inline">checkNode</code>, <code class="inline">distance</code>, <code class="inline">curr_node</code>, and now also <code class="inline">shortestPath</code>.</li>
+        <li><strong>One response, done.</strong> Express sends it all back in a single JSON object, and the browser both saves it to history and animates it.</li>
+      </ol>
+
+      <h4>What that tagged string looks like</h4>
+      <p class="lead-in">Trimmed example, for the 2-node graph <code class="inline">0 → 1</code> (weight 5), source 0:</p>
+      <pre>&lt;ds&gt;
+	0,0
+	0 INF
+	-1 -1
+&lt;/ds&gt;
+&lt;adj&gt;
+	0, 0:
+	1, 5, 1, 0, 5
+&lt;/adj&gt;
+&lt;result&gt;
+	1000 2 1 0
+	-1 0
+	0 5
+&lt;/result&gt;</pre>
+      <p><code class="inline">&lt;ds&gt;</code> is a snapshot of the algorithm's internal state at that step (its queue, its distances so far, its predecessors) — that's what drives the "compare" label you see mid-animation. <code class="inline">&lt;adj&gt;</code> records one node's outgoing edges being checked, and whether each one improved anything (the <code class="inline">1</code>/<code class="inline">0</code> flags). <code class="inline">&lt;result&gt;</code> is the final summary: time taken, node count, edge count, source, then the predecessor and distance arrays. It's not pretty, but it's exactly what the frontend was already built to parse, so keeping it meant the six-file animation layer needed zero rewrites.</p>
+    </section>
+
+    <!-- ============ FILES ============ -->
+    <section id="files" class="prose">
+      <span class="section-kicker">Background</span>
+      <h2>Where everything lives</h2>
+      <dl class="filemap">
+        <dt>server/rust_algos/src/dijkstra.rs</dt>
+        <dd>The shared, full-traversal Dijkstra core. Reused three ways: as-is for algorithm 1, wrapped with path reconstruction for Yen, and re-tagged (<code class="inline">&lt;ds2&gt;</code>/<code class="inline">&lt;adj2&gt;</code>) inside Johnson's per-source loop.</dd>
+        <dt>server/rust_algos/src/bellman_ford.rs</dt>
+        <dd>The edge-relaxation core, reused as-is for algorithm 2 and again (with a virtual source node) as Johnson's reweighting pass.</dd>
+        <dt>server/rust_algos/src/spfa.rs</dt>
+        <dd>The queue-based relaxation used by algorithm 3.</dd>
+        <dt>server/rust_algos/src/floyd_warshall.rs</dt>
+        <dd>The all-pairs DP for algorithm 4, plus the successor-matrix path reconstruction added alongside it.</dd>
+        <dt>server/rust_algos/src/johnson.rs</dt>
+        <dd>Wires the Bellman-Ford reweighting pass into V calls to the Dijkstra core, one per source node.</dd>
+        <dt>server/rust_algos/src/yen.rs</dt>
+        <dd>Runs Dijkstra repeatedly, removing the previous path's edges each time, to find k distinct shortest paths.</dd>
+        <dt>server/rust_algos/src/lib.rs</dt>
+        <dd>The six <code class="inline">#[wasm_bindgen]</code> entry points — <code class="inline">run_dijkstra</code>, <code class="inline">run_bellman_ford</code>, etc. — the only functions JavaScript can actually call.</dd>
+        <dt>server/index.js</dt>
+        <dd>Builds the adjacency list, calls the right WASM function for the chosen algorithm, parses its output, reconstructs the shortest path, and returns everything as one response.</dd>
+      </dl>
+    </section>
+
+    <!-- ============ EXAMPLE GRAPH ============ -->
+    <section id="example" class="wide">
+      <span class="section-kicker">The algorithms</span>
+      <h2>One example graph, used throughout</h2>
+      <p class="lead-in">To make the six algorithms comparable, every section below starts from the same small graph — 4 nodes, 5 directed edges, source node 0, destination node 3.</p>
+
+      <figure class="full-bleed">
+        <svg viewBox="0 0 520 300" role="img" aria-label="Directed graph with 4 nodes: 0 to 1 weight 4, 0 to 2 weight 1, 2 to 1 weight 1, 1 to 3 weight 1, 2 to 3 weight 5.">
+          <defs>
+            <marker id="ga" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor" />
+            </marker>
+          </defs>
+          <g stroke="currentColor" fill="none">
+            <line x1="88" y1="150" x2="300" y2="76" marker-end="url(#ga)"/>
+            <line x1="88" y1="150" x2="190" y2="234" marker-end="url(#ga)"/>
+            <line x1="205" y1="222" x2="308" y2="90" marker-end="url(#ga)"/>
+            <line x1="335" y1="70" x2="440" y2="140" marker-end="url(#ga)"/>
+            <line x1="215" y1="248" x2="430" y2="152" marker-end="url(#ga)"/>
+          </g>
+          <g font-family="ui-monospace, monospace" font-size="12.5" fill="var(--ink-dim)">
+            <text x="185" y="100">4</text>
+            <text x="115" y="205">1</text>
+            <text x="260" y="165">1</text>
+            <text x="395" y="95">1</text>
+            <text x="335" y="220">5</text>
+          </g>
+          <g font-family="ui-monospace, monospace" font-size="15" font-weight="700">
+            <circle cx="70" cy="150" r="24" fill="var(--paper-raised)" stroke="currentColor" stroke-width="2"/>
+            <text x="70" y="156" text-anchor="middle">0</text>
+            <circle cx="320" cy="60" r="24" fill="var(--paper-raised)" stroke="currentColor" stroke-width="2"/>
+            <text x="320" y="66" text-anchor="middle">1</text>
+            <circle cx="190" cy="250" r="24" fill="var(--paper-raised)" stroke="currentColor" stroke-width="2"/>
+            <text x="190" y="256" text-anchor="middle">2</text>
+            <circle cx="460" cy="150" r="24" fill="var(--paper-raised)" stroke="currentColor" stroke-width="2"/>
+            <text x="460" y="156" text-anchor="middle">3</text>
+          </g>
+        </svg>
+      </figure>
+      <figcaption>Node 0 is the source in every worked example; node 3 is the destination. The tempting-looking direct route 0→1→3 costs 5; the actual cheapest route is 0→2→1→3, costing 3.</figcaption>
+    </section>
+
+    <!-- ============ 1. DIJKSTRA ============ -->
+    <section id="dijkstra" class="prose">
+      <div class="algo-head"><span class="algo-num">1</span><h2 style="border:none;padding-top:0;margin:0">Dijkstra</h2></div>
+      <div class="stat-row">
+        <div class="stat"><span class="stat-label">Handles negative weights</span><span class="stat-value">No</span></div>
+        <div class="stat"><span class="stat-label">Finds</span><span class="stat-value">source → all nodes</span></div>
+        <div class="stat"><span class="stat-label">Time</span><span class="stat-value">O((V+E) log V)</span></div>
+        <div class="stat"><span class="stat-label">Rust file</span><span class="stat-value">dijkstra.rs</span></div>
+      </div>
+      <p>Dijkstra is greedy: always expand whichever known-reachable node currently has the smallest distance, on the logic that once you've popped a node with the smallest distance in the queue, nothing still in the queue can possibly offer it a cheaper route later. That guarantee only holds if edge weights are non-negative — a negative edge could undercut a "final" distance after the fact, which is exactly why Bellman-Ford and SPFA exist for graphs that need it.</p>
+      <p>The mechanism is a min-priority queue, ordered by distance:</p>
+      <ol class="steps">
+        <li>Seed the queue with <code class="inline">(distance 0, source)</code>. Every other node starts at infinity.</li>
+        <li>Pop the smallest-distance entry. Its distance is now final.</li>
+        <li>For each of its outgoing edges, check whether going through this node beats the neighbor's current best distance. If so, update it and push the neighbor back onto the queue.</li>
+        <li>Repeat until the queue is empty.</li>
+      </ol>
+
+      <h4>Trace on the example graph</h4>
+      <div class="table-wrap">
+        <table class="trace">
+          <thead><tr><th>Pop</th><th>Relax</th><th>Result</th></tr></thead>
+          <tbody>
+            <tr><td><code class="inline">(0, node 0)</code></td><td>0→1 (w4), 0→2 (w1)</td><td>dist[1]=4, dist[2]=1</td></tr>
+            <tr><td><code class="inline">(1, node 2)</code></td><td>2→1 (w1): 1+1=2 &lt; 4</td><td>dist[1]=2 <em>(beats the earlier 4)</em>, dist[3]=1+5=6</td></tr>
+            <tr><td><code class="inline">(2, node 1)</code></td><td>1→3 (w1): 2+1=3 &lt; 6</td><td>dist[3]=3</td></tr>
+            <tr><td><code class="inline">(3, node 3)</code></td><td>no outgoing edges</td><td>—</td></tr>
+            <tr><td colspan="3">Stale queue entries for node 1 (dist 4) and node 3 (dist 6) get popped too, but change nothing — this is the same lazy-deletion behavior the original C++ had, and it's why you sometimes see a node get compared more than once in the animation.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Result:</strong> <code class="inline">dist = [0, 2, 1, 3]</code>, shortest path <code class="inline">0 → 2 → 1 → 3</code>, total weight <strong>3</strong>. Notice node 1's distance was corrected from 4 down to 2 mid-run — that's the moment the animation colors it blue again after it already looked settled.</p>
+      <div class="callout">
+        <span class="callout-label">In the animation</span>
+        Red is the node just popped off the queue; blue is the neighbor being checked against it; green means that check just improved a distance, black means it didn't. The gold highlight that appears at the end traces the actual winning path — here, <code class="inline">0 → 2 → 1 → 3</code>.
+      </div>
+    </section>
+
+    <!-- ============ 2. BELLMAN-FORD ============ -->
+    <section id="bellman-ford" class="prose">
+      <div class="algo-head"><span class="algo-num">2</span><h2 style="border:none;padding-top:0;margin:0">Bellman-Ford</h2></div>
+      <div class="stat-row">
+        <div class="stat"><span class="stat-label">Handles negative weights</span><span class="stat-value">Yes</span></div>
+        <div class="stat"><span class="stat-label">Finds</span><span class="stat-value">source → all nodes</span></div>
+        <div class="stat"><span class="stat-label">Time</span><span class="stat-value">O(V · E)</span></div>
+        <div class="stat"><span class="stat-label">Rust file</span><span class="stat-value">bellman_ford.rs</span></div>
+      </div>
+      <p>Where Dijkstra is clever about which edge to check next, Bellman-Ford is deliberately dumb: it checks <em>every single edge</em>, in whatever order they were given, and repeats that full pass <code class="inline">V - 1</code> times. That's less efficient, but it comes with a real advantage — it never assumes a distance is final until it's actually done, so it works correctly even with negative edge weights, and after those V-1 passes it can run one more pass to check whether anything can <em>still</em> improve. If it can, there's a negative cycle (a loop that keeps getting cheaper forever), and no shortest path actually exists.</p>
+
+      <h4>Trace on the example graph</h4>
+      <p>Edge list, in order: <code class="inline">(0,1,4)</code>, <code class="inline">(0,2,1)</code>, <code class="inline">(2,1,1)</code>, <code class="inline">(1,3,1)</code>, <code class="inline">(2,3,5)</code>. 4 nodes means 3 full passes — but here everything's already settled after the first:</p>
+      <div class="table-wrap">
+        <table class="trace">
+          <thead><tr><th>Edge checked</th><th>Relax?</th><th>Running distances</th></tr></thead>
+          <tbody>
+            <tr><td>0→1 (4)</td><td>0+4 &lt; ∞ → yes</td><td>[0, 4, ∞, ∞]</td></tr>
+            <tr><td>0→2 (1)</td><td>0+1 &lt; ∞ → yes</td><td>[0, 4, 1, ∞]</td></tr>
+            <tr><td>2→1 (1)</td><td>1+1=2 &lt; 4 → yes</td><td>[0, 2, 1, ∞]</td></tr>
+            <tr><td>1→3 (1)</td><td>2+1=3 &lt; ∞ → yes</td><td>[0, 2, 1, 3]</td></tr>
+            <tr><td>2→3 (5)</td><td>1+5=6, not &lt; 3 → no</td><td>[0, 2, 1, 3]</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Passes 2 and 3 check every edge again and find nothing left to improve — that's the negative-cycle check passing cleanly. <strong>Result:</strong> the same <code class="inline">dist = [0, 2, 1, 3]</code>, same path, same weight <strong>3</strong> as Dijkstra found — as it should, since both are computing the same real quantity, just by different rules.</p>
+    </section>
+
+    <!-- ============ 3. SPFA ============ -->
+    <section id="spfa" class="prose">
+      <div class="algo-head"><span class="algo-num">3</span><h2 style="border:none;padding-top:0;margin:0">SPFA</h2></div>
+      <div class="stat-row">
+        <div class="stat"><span class="stat-label">Handles negative weights</span><span class="stat-value">Yes</span></div>
+        <div class="stat"><span class="stat-label">Finds</span><span class="stat-value">source → all nodes</span></div>
+        <div class="stat"><span class="stat-label">Time</span><span class="stat-value">O(V · E) worst case, faster in practice</span></div>
+        <div class="stat"><span class="stat-label">Rust file</span><span class="stat-value">spfa.rs</span></div>
+      </div>
+      <p><strong>S</strong>hortest <strong>P</strong>ath <strong>F</strong>aster <strong>A</strong>lgorithm is Bellman-Ford with one targeted change: instead of blindly re-checking every edge on every pass, it keeps a queue of "nodes whose distance just changed." Only a node's own outgoing edges get re-checked, and only when that node is actually pulled off the queue — so edges that couldn't possibly improve (because nothing upstream of them changed) never get touched. Same worst-case guarantee as Bellman-Ford, same tolerance for negative weights, usually far fewer comparisons in graphs that aren't adversarial.</p>
+
+      <h4>Trace on the example graph</h4>
+      <div class="table-wrap">
+        <table class="trace">
+          <thead><tr><th>Pop</th><th>Relax</th><th>Queue after</th></tr></thead>
+          <tbody>
+            <tr><td>node 0</td><td>0→1: dist[1]=4 · 0→2: dist[2]=1</td><td>[1, 2]</td></tr>
+            <tr><td>node 1</td><td>1→3: dist[3]=5</td><td>[2, 3]</td></tr>
+            <tr><td>node 2</td><td>2→1: 1+1=2 &lt; 4, dist[1]=2 → re-queued · 2→3: 1+5=6, not &lt; 5</td><td>[3, 1]</td></tr>
+            <tr><td>node 3</td><td>no outgoing edges</td><td>[1]</td></tr>
+            <tr><td>node 1 <em>(again, dist now 2)</em></td><td>1→3: 2+1=3 &lt; 5, dist[3]=3 → re-queued</td><td>[3]</td></tr>
+            <tr><td>node 3</td><td>no outgoing edges</td><td>[]</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><strong>Result:</strong> <code class="inline">dist = [0, 2, 1, 3]</code> — identical to both algorithms above, reached in 6 pops instead of Bellman-Ford's 15 edge checks (3 passes × 5 edges). That gap is the entire point of SPFA: same answer, less wasted work, on graphs where most nodes settle quickly.</p>
+    </section>
+
+    <!-- ============ 4. FLOYD-WARSHALL ============ -->
+    <section id="floyd-warshall" class="wide">
+      <div class="algo-head"><span class="algo-num">4</span><h2 style="border:none;padding-top:0;margin:0">Floyd-Warshall</h2></div>
+      <div class="stat-row">
+        <div class="stat"><span class="stat-label">Handles negative weights</span><span class="stat-value">Yes (no negative cycles)</span></div>
+        <div class="stat"><span class="stat-label">Finds</span><span class="stat-value">every node → every node</span></div>
+        <div class="stat"><span class="stat-label">Time</span><span class="stat-value">O(V³)</span></div>
+        <div class="stat"><span class="stat-label">Rust file</span><span class="stat-value">floyd_warshall.rs</span></div>
+      </div>
+      <p class="prose">The first three algorithms all answer "shortest path from <em>one</em> source." Floyd-Warshall answers a bigger question at once: the shortest path between <em>every pair</em> of nodes, simultaneously. It works entirely on a V×V distance matrix, and its logic is a single, almost suspiciously simple idea, tried for every possible "middle" node <code class="inline">k</code> in turn:</p>
+      <div class="callout prose">
+        <span class="callout-label">The one rule</span>
+        For every pair <code class="inline">(i, j)</code>: is going <code class="inline">i → k → j</code> cheaper than the best <code class="inline">i → j</code> route found so far? If so, replace it.
+      </div>
+      <p class="prose">Do that for <code class="inline">k = 0</code>, then <code class="inline">k = 1</code>, then every other node in turn, and by the time every node has had a turn being the "middle," the matrix holds every pair's true shortest distance — because any real shortest path is just a sequence of such middle-node hops, and this tries all of them systematically.</p>
+
+      <h4>Trace on the example graph</h4>
+      <p class="prose">Starting matrix — direct edges only, <code class="inline">∞</code> where there's no edge, <code class="inline">0</code> on the diagonal:</p>
+      <div class="table-wrap">
+        <table class="matrix">
+          <thead><tr><th></th><th>0</th><th>1</th><th>2</th><th>3</th></tr></thead>
+          <tbody>
+            <tr><th>0</th><td class="diag">0</td><td>4</td><td>1</td><td>∞</td></tr>
+            <tr><th>1</th><td>∞</td><td class="diag">0</td><td>∞</td><td>1</td></tr>
+            <tr><th>2</th><td>∞</td><td>1</td><td class="diag">0</td><td>5</td></tr>
+            <tr><th>3</th><td>∞</td><td>∞</td><td>∞</td><td class="diag">0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="prose"><code class="inline">k = 0</code>: nothing points <em>into</em> node 0, so nothing can route through it — no changes.</p>
+      <p class="prose"><code class="inline">k = 1</code>: node 1 reaches node 3 directly (weight 1). Anything that can reach node 1 can now also reach node 3 through it: <code class="inline">0→1→3 = 4+1 = 5</code> beats <code class="inline">0→3 = ∞</code>, and <code class="inline">2→1→3 = 1+1 = 2</code> beats <code class="inline">2→3 = 5</code>.</p>
+      <div class="table-wrap">
+        <table class="matrix">
+          <thead><tr><th></th><th>0</th><th>1</th><th>2</th><th>3</th></tr></thead>
+          <tbody>
+            <tr><th>0</th><td class="diag">0</td><td>4</td><td>1</td><td class="changed">5</td></tr>
+            <tr><th>1</th><td>∞</td><td class="diag">0</td><td>∞</td><td>1</td></tr>
+            <tr><th>2</th><td>∞</td><td>1</td><td class="diag">0</td><td class="changed">2</td></tr>
+            <tr><th>3</th><td>∞</td><td>∞</td><td>∞</td><td class="diag">0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="prose"><code class="inline">k = 2</code>: node 2 now reaches node 3 in 2 (just updated above). Node 0 reaches node 2 in 1: <code class="inline">0→2→3 = 1+2 = 3</code> beats the current <code class="inline">0→3 = 5</code>. Node 0 also reaches node 1 more cheaply through 2: <code class="inline">0→2→1 = 1+1 = 2</code> beats <code class="inline">0→1 = 4</code>.</p>
+      <div class="table-wrap">
+        <table class="matrix">
+          <thead><tr><th></th><th>0</th><th>1</th><th>2</th><th>3</th></tr></thead>
+          <tbody>
+            <tr><th>0</th><td class="diag">0</td><td class="changed">2</td><td>1</td><td class="changed">3</td></tr>
+            <tr><th>1</th><td>∞</td><td class="diag">0</td><td>∞</td><td>1</td></tr>
+            <tr><th>2</th><td>∞</td><td>1</td><td class="diag">0</td><td>2</td></tr>
+            <tr><th>3</th><td>∞</td><td>∞</td><td>∞</td><td class="diag">0</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="prose"><code class="inline">k = 3</code>: node 3 has no outgoing edges, so it can't be anyone's middle hop — no changes. Final row for node 0: <code class="inline">[0, 2, 1, 3]</code> — <strong>dist[0][3] = 3</strong>, matching every single-source algorithm above, but this time it came bundled with the answer for every other pair too (e.g. dist[2][3] = 2) for free.</p>
+      <div class="callout prose">
+        <span class="callout-label">Trade-off</span>
+        That completeness is also the cost: O(V³) time and a full V×V matrix in memory regardless of how sparse the graph is. Fine for the small graphs this tool visualizes; not what you'd reach for on a graph with 100,000 nodes and only a few edges each — that's Johnson's whole reason to exist.
+      </div>
+    </section>
+
+    <!-- ============ 5. JOHNSON ============ -->
+    <section id="johnson" class="wide">
+      <div class="algo-head"><span class="algo-num">5</span><h2 style="border:none;padding-top:0;margin:0">Johnson's algorithm</h2></div>
+      <div class="stat-row">
+        <div class="stat"><span class="stat-label">Handles negative weights</span><span class="stat-value">Yes (no negative cycles)</span></div>
+        <div class="stat"><span class="stat-label">Finds</span><span class="stat-value">every node → every node</span></div>
+        <div class="stat"><span class="stat-label">Time</span><span class="stat-value">O(V² log V + V·E)</span></div>
+        <div class="stat"><span class="stat-label">Rust file</span><span class="stat-value">johnson.rs</span></div>
+      </div>
+      <p class="prose">Johnson's answers the same question as Floyd-Warshall — every pair's shortest path — but takes a different bet: on a graph where edges are sparse (E is much smaller than V²), running fast Dijkstra V times beats one slow O(V³) sweep, <em>if</em> Dijkstra could only be trusted with negative weights. Johnson's makes that trade possible in two phases.</p>
+
+      <h4>Phase 1 — reweight so nothing is negative</h4>
+      <p class="prose">Add one temporary node <code class="inline">S</code> with a free (weight 0) edge to every real node, then run Bellman-Ford from <code class="inline">S</code> — it tolerates negative weights, so this is safe even if the real graph has some. That gives every node <code class="inline">v</code> a number <code class="inline">h(v)</code>: the cheapest cost to reach it from <code class="inline">S</code>. Every real edge <code class="inline">(u, v, w)</code> is then rewritten as <code class="inline">w + h(u) − h(v)</code>. That formula isn't arbitrary — it's guaranteed to always land at zero or above, because <code class="inline">h(v)</code> can never be more than <code class="inline">h(u) + w</code> in the first place (if it were, Bellman-Ford would have routed through <code class="inline">u</code> to get a cheaper <code class="inline">h(v)</code>). Zero or positive is exactly what Dijkstra needs.</p>
+
+      <h4>Phase 2 — run ordinary Dijkstra, V times</h4>
+      <p class="prose">With every edge now non-negative, plain Dijkstra runs safely from each of the V nodes in turn. Whatever distance it finds just needs one cheap correction to convert back to a real distance: <code class="inline">real(u,v) = dijkstra(u,v) + h(v) − h(u)</code>.</p>
+
+      <h4>Worked example — this one needs a negative edge</h4>
+      <p class="prose">The main 4-node graph has no negative weights, so reweighting it would be a no-op. Here's a 3-node graph where it actually matters: <code class="inline">0→1</code> (weight 2), <code class="inline">1→2</code> (weight <strong>−5</strong>), <code class="inline">0→2</code> (weight 10).</p>
+
+      <figure class="full-bleed">
+        <svg viewBox="0 0 560 210" role="img" aria-label="Three real nodes 0, 1, 2 with a negative edge from 1 to 2, plus a virtual source S connected to all three by free zero-weight edges.">
+          <defs>
+            <marker id="gb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor" />
+            </marker>
+          </defs>
+          <g stroke="currentColor" fill="none">
+            <line x1="180" y1="130" x2="278" y2="70" marker-end="url(#gb)"/>
+            <line x1="302" y1="70" x2="400" y2="130" marker-end="url(#gb)" stroke="var(--red)"/>
+            <path d="M180,145 Q300,190 400,145" marker-end="url(#gb)"/>
+          </g>
+          <g stroke="var(--accent)" stroke-dasharray="3 3" fill="none">
+            <line x1="70" y1="60" x2="150" y2="115"/>
+            <line x1="70" y1="60" x2="278" y2="65"/>
+            <line x1="70" y1="60" x2="395" y2="118"/>
+          </g>
+          <g font-family="ui-monospace, monospace" font-size="12">
+            <text x="215" y="90" fill="var(--ink-dim)">2</text>
+            <text x="345" y="90" fill="var(--red)">−5</text>
+            <text x="290" y="200" fill="var(--ink-dim)">10</text>
+            <text x="90" y="90" fill="var(--accent)">0</text>
+            <text x="230" y="45" fill="var(--accent)">0</text>
+            <text x="245" y="130" fill="var(--accent)">0</text>
+          </g>
+          <g font-family="ui-monospace, monospace" font-size="14" font-weight="700">
+            <circle cx="70" cy="45" r="22" fill="var(--paper-raised)" stroke="var(--accent)" stroke-width="2"/>
+            <text x="70" y="50" text-anchor="middle" fill="var(--accent)">S</text>
+            <circle cx="160" cy="130" r="22" fill="var(--paper-raised)" stroke="currentColor" stroke-width="2"/>
+            <text x="160" y="136" text-anchor="middle">0</text>
+            <circle cx="290" cy="55" r="22" fill="var(--paper-raised)" stroke="currentColor" stroke-width="2"/>
+            <text x="290" y="61" text-anchor="middle">1</text>
+            <circle cx="410" cy="130" r="22" fill="var(--paper-raised)" stroke="currentColor" stroke-width="2"/>
+            <text x="410" y="136" text-anchor="middle">2</text>
+          </g>
+        </svg>
+      </figure>
+      <figcaption>Dashed gold edges are the virtual source Johnson's adds temporarily, purely to compute a safe <code class="inline">h(v)</code> for each node.</figcaption>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Node</th><th>h(v) — cheapest from S</th><th>Cheapest route</th></tr></thead>
+          <tbody>
+            <tr><td>0</td><td>0</td><td>S→0 direct</td></tr>
+            <tr><td>1</td><td>0</td><td>S→1 direct</td></tr>
+            <tr><td>2</td><td>−5</td><td>S→1→2 (0 + −5)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="prose">Reweighted edges, using <code class="inline">w + h(u) − h(v)</code>:</p>
+      <ul class="prose">
+        <li><code class="inline">0→1</code>: 2 + 0 − 0 = <strong>2</strong></li>
+        <li><code class="inline">1→2</code>: −5 + 0 − (−5) = <strong>0</strong> — no longer negative</li>
+        <li><code class="inline">0→2</code>: 10 + 0 − (−5) = <strong>15</strong></li>
+      </ul>
+      <p class="prose">Dijkstra on this reweighted graph from node 0 finds <code class="inline">dist'[1] = 2</code>, <code class="inline">dist'[2] = 2</code> (via <code class="inline">0→1→2</code>). Converting back — <code class="inline">real(0,v) = dist'(v) + h(v)</code> since <code class="inline">h(0) = 0</code> — gives <code class="inline">real(0,1) = 2</code> and <code class="inline">real(0,2) = 2 + (−5) = <strong>−3</strong></code>. Check it directly: <code class="inline">0→1→2 = 2 + (−5) = −3</code>. It matches, negative total distance and all — something plain Dijkstra could never have gotten right on its own.</p>
+    </section>
+
+    <!-- ============ 6. YEN ============ -->
+    <section id="yen" class="wide">
+      <div class="algo-head"><span class="algo-num">6</span><h2 style="border:none;padding-top:0;margin:0">Yen's k shortest paths</h2></div>
+      <div class="stat-row">
+        <div class="stat"><span class="stat-label">Handles negative weights</span><span class="stat-value">No (built on Dijkstra)</span></div>
+        <div class="stat"><span class="stat-label">Finds</span><span class="stat-value">the k best source → destination paths</span></div>
+        <div class="stat"><span class="stat-label">Time</span><span class="stat-value">O(k · V (E + V log V))</span></div>
+        <div class="stat"><span class="stat-label">Rust file</span><span class="stat-value">yen.rs</span></div>
+      </div>
+      <p class="prose">Every algorithm so far returns <em>the</em> shortest path. Yen's answers a different question: what are the <code class="inline">k</code> best <em>distinct</em> paths between a specific source and destination? The mechanism is almost embarrassingly direct: run Dijkstra to get the best path, delete the edges it used, run Dijkstra again on what's left to get the next-best alternative, and repeat until you have k paths or no path remains at all.</p>
+
+      <h4>Worked example</h4>
+      <p class="prose">This needs a graph with a genuine second option, so the main example gets one extra edge: a direct <code class="inline">0 → 3</code> route, weight 10 — worse than the main path, but real. Requesting k = 2:</p>
+
+      <figure class="full-bleed">
+        <svg viewBox="0 0 520 320" role="img" aria-label="The example graph with an added direct edge from 0 to 3, weight 10. The first path found, 0 to 2 to 1 to 3, is highlighted in gold; the second path, the direct 0 to 3 edge, is highlighted in blue.">
+          <defs>
+            <marker id="gc" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="currentColor" />
+            </marker>
+            <marker id="gc-gold" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--gold)" />
+            </marker>
+            <marker id="gc-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" fill="var(--blue)" />
+            </marker>
+          </defs>
+          <g fill="none">
+            <line x1="88" y1="150" x2="300" y2="76" stroke="currentColor" marker-end="url(#gc)"/>
+            <line x1="88" y1="150" x2="190" y2="234" stroke="var(--gold)" stroke-width="3" marker-end="url(#gc-gold)"/>
+            <line x1="205" y1="222" x2="308" y2="90" stroke="var(--gold)" stroke-width="3" marker-end="url(#gc-gold)"/>
+            <line x1="335" y1="70" x2="440" y2="140" stroke="var(--gold)" stroke-width="3" marker-end="url(#gc-gold)"/>
+            <line x1="215" y1="248" x2="430" y2="152" stroke="currentColor" marker-end="url(#gc)"/>
+            <path d="M75,172 Q260,290 445,170" stroke="var(--blue)" stroke-width="3" marker-end="url(#gc-blue)"/>
+          </g>
+          <g font-family="ui-monospace, monospace" font-size="12.5" fill="var(--ink-dim)">
+            <text x="185" y="100">4</text>
+            <text x="112" y="205" fill="var(--gold)" font-weight="700">1</text>
+            <text x="255" y="165" fill="var(--gold)" font-weight="700">1</text>
+            <text x="395" y="95" fill="var(--gold)" font-weight="700">1</text>
+            <text x="335" y="220">5</text>
+            <text x="255" y="278" fill="var(--blue)" font-weight="700">10</text>
+          </g>
+          <g font-family="ui-monospace, monospace" font-size="15" font-weight="700">
+            <circle cx="70" cy="150" r="24" fill="var(--paper-raised)" stroke="currentColor" stroke-width="2"/>
+            <text x="70" y="156" text-anchor="middle">0</text>
+            <circle cx="320" cy="60" r="24" fill="var(--paper-raised)" stroke="currentColor" stroke-width="2"/>
+            <text x="320" y="66" text-anchor="middle">1</text>
+            <circle cx="190" cy="250" r="24" fill="var(--paper-raised)" stroke="currentColor" stroke-width="2"/>
+            <text x="190" y="256" text-anchor="middle">2</text>
+            <circle cx="460" cy="150" r="24" fill="var(--paper-raised)" stroke="currentColor" stroke-width="2"/>
+            <text x="460" y="156" text-anchor="middle">3</text>
+          </g>
+        </svg>
+      </figure>
+      <figcaption>Gold: path 1, found first, weight 3. Blue: path 2, found after path 1's edges are removed, weight 10.</figcaption>
+
+      <ol class="steps prose">
+        <li><strong>Iteration 1.</strong> Dijkstra on the full graph finds <code class="inline">0 → 2 → 1 → 3</code>, weight 3 — same winning path as every algorithm above. Its three edges (<code class="inline">0→2</code>, <code class="inline">2→1</code>, <code class="inline">1→3</code>) are removed.</li>
+        <li><strong>Iteration 2.</strong> With those edges gone, node 2 is no longer reachable from node 0 at all, and node 1 has no outgoing edges left. The only surviving route from 0 to 3 is the direct edge, weight 10 — so that becomes path 2.</li>
+        <li><strong>Iteration 3</strong> would run if k were 3, but by then the graph has nothing left connecting 0 to 3, so Yen's stops early rather than returning a fabricated result.</li>
+      </ol>
+      <p class="prose">The <strong>shortest</strong> of the k paths returned — always the first one found, since each iteration only gets more constrained than the last — is what the app highlights in gold after the animation, exactly like the single-source algorithms.</p>
+    </section>
+
+    <!-- ============ COMPARISON ============ -->
+    <section id="compare" class="wide">
+      <span class="section-kicker">Reference</span>
+      <h2>Side by side</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Algorithm</th><th>Answers</th><th>Negative weights</th><th>Time</th><th>Space (this app's estimate)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Dijkstra</td><td>source → all</td><td>No</td><td>O((V+E) log V)</td><td>2V + 3E</td></tr>
+            <tr><td>Bellman-Ford</td><td>source → all</td><td>Yes</td><td>O(V · E)</td><td>2V + 3E</td></tr>
+            <tr><td>SPFA</td><td>source → all</td><td>Yes</td><td>O(V · E) worst case</td><td>5V + 2E</td></tr>
+            <tr><td>Floyd-Warshall</td><td>all → all</td><td>Yes*</td><td>O(V³)</td><td>V²</td></tr>
+            <tr><td>Johnson's</td><td>all → all</td><td>Yes*</td><td>O(V² log V + V·E)</td><td>2V² + 2E</td></tr>
+            <tr><td>Yen's</td><td>k best, source → destination</td><td>No</td><td>O(k · V (E + V log V))</td><td>4V + 2E</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="prose" style="max-width:900px">* No negative <em>cycles</em> — a loop that keeps getting cheaper forever breaks the notion of a "shortest" path entirely, for any algorithm. The space column is the rough, labeled estimate <span class="file-path">server/index.js</span>'s <code class="inline">estimateSpaceKB()</code> computes per algorithm for the history table — not a measured value, since nothing here (old or new) ever actually profiled memory use; it's sized off what each algorithm's own data structures hold for a given node/edge count.</p>
+    </section>
+
+    <!-- ============ LEGEND ============ -->
+    <section id="legend" class="prose">
+      <span class="section-kicker">Reference</span>
+      <h2>Reading the animation</h2>
+      <p>The same color language repeats across all six visualizations, and appears in-app too, in the collapsible panel under the graph editor.</p>
+      <div class="legend-row">
+        <div class="legend-chip"><span class="swatch" style="background:#fff;border-color:var(--ink-dim)"></span>Unvisited</div>
+        <div class="legend-chip"><span class="swatch" style="background:var(--red)"></span>Current node being expanded</div>
+        <div class="legend-chip"><span class="swatch" style="background:var(--blue)"></span>Neighbor being compared</div>
+        <div class="legend-chip"><span class="swatch" style="background:var(--green)"></span>Comparison improved a distance</div>
+        <div class="legend-chip"><span class="swatch" style="background:#000"></span>Comparison changed nothing</div>
+        <div class="legend-chip"><span class="swatch" style="background:var(--gold)"></span>Part of the final shortest path</div>
+      </div>
+      <p>That last one — the gold highlight — is new: once an algorithm's animation finishes, the actual shortest path it found gets traced in gold on top of whatever colors the step-by-step comparisons left behind. Source and destination now come from the <strong>From</strong> / <strong>To</strong> dropdowns on the dashboard, which used to only control which edge the weight editor targeted.</p>
+    </section>
+
+    <footer>
+      Written to accompany the Rust/WASM migration of <code class="inline">/perform-algo</code>. Every number and trace on this page was independently verified against the running app, including a 5-node graph with a cycle where all six algorithms were checked against a hand-computed ground truth.
+    </footer>
+  </main>
+</div>

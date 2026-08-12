@@ -1,10 +1,7 @@
-const { execFile } = require("child_process");
-const path = require("path");
-const fs = require("fs");
-const os = require("os");
 const express = require("express");
 var cors = require("cors");
 const connectToMongo = require("./db");
+const algos = require("./rust_algos/pkg/graphpathguru_algos.js");
 
 connectToMongo();
 const app = express();
@@ -19,163 +16,117 @@ app.get("/", (req, res) => {
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/graph", require("./routes/graph"));
 
-app.post("/write-file", (req, res) => {
-  let output = "";
-  try {
-    const { nodes, edges } = req.body;
+// Builds the adjacency list (indexed by node id, matching the existing
+// convention that node ids are sequential "0".."V-1" strings) and a
+// human-readable display string for the saved-graph history feature.
+function buildGraph(nodes, edges) {
+  const V = nodes.length;
+  const adj = Array.from({ length: V }, () => []);
+  let graph = "";
 
-    const mp = {};
-    let w = 0;
-    for (var i = 0; i < nodes.length; i++) {
-      let node = nodes[i];
-      mp[node.id] = [];
-    }
-    for (var i = 0; i < edges.length; i++) {
-      let edge = edges[i];
-      w = edge.label == undefined ? -1 : edge.label;
-      mp[edge.source].push([edge.target, w]);
-    }
-    console.log(mp);
-    for (var i = 0; i < nodes.length; i++) {
-      let node = nodes[i];
-      output += node.id;
-
-      output +=
-        " " +
-        Math.floor(node.position.x).toString() +
-        " " +
-        Math.floor(node.position.y).toString() +
-        ": ";
-      if (mp)
-        for (let j = 0; j < mp[node.id].length; j++) {
-          output += mp[node.id][j][0] + "," + mp[node.id][j][1] + " ";
-        }
-      output += "\n";
-    }
-    fs.writeFileSync("./file io/input.txt", output);
-    res.status(200).json({ success: true, graph: output });
-  } catch (error) {
-    console.error("Error:", error);
-    res.status(500).json({ error: "Failed to save data to file" });
+  for (const edge of edges) {
+    // The frontend's own animation code temporarily overwrites edge.label
+    // with a descriptive string (e.g. "0 + -1 < -1") while visualizing, and
+    // that mutated state can still be present on a later Save. parseInt
+    // (like the old C++ pipeline's stoi) reads the leading numeric prefix
+    // and tolerates that; a label with no numeric prefix at all falls back
+    // to the existing "unweighted" sentinel.
+    const parsed = edge.label === undefined ? NaN : parseInt(edge.label, 10);
+    const weight = Number.isNaN(parsed) ? -1 : parsed;
+    adj[parseInt(edge.source, 10)].push([parseInt(edge.target, 10), weight]);
   }
-});
 
-
-// run c++ backend
-app.post("/perform-algo", (req, res) => {
-  // Specify the path to your C++ executable
-  console.log("I made the perform-algo POST call!");
-  const id = req.body.algoID;
-  console.log("The algo ID is ", id);
-  const algo_execs = [
-    "./Dijkstra/Dijkstra.exe",
-    "./Bellman_Ford/Bellman.exe",
-    "./SPFA/SPFA.exe",
-    "./Floyd_Warshall/Floyd_warshall.exe",
-    "./Johnson/Johnson.exe",
-    "./Yen/Yen.exe",
-  ];
-  let algoExecutable = algo_execs[id];
-  console.log("Executing the algo:", algoExecutable);
-  // Execute the C++ program
-  execFile(algoExecutable, (error, stdout, stderr) => {
-    if (error) {
-      console.error("Error:", error);
-      res.status(500).send("An error occurred during execution.");
-      return;
+  for (const node of nodes) {
+    graph +=
+      node.id +
+      " " +
+      Math.floor(node.position.x).toString() +
+      " " +
+      Math.floor(node.position.y).toString() +
+      ": ";
+    for (const [target, weight] of adj[parseInt(node.id, 10)]) {
+      graph += target + "," + weight + " ";
     }
+    graph += "\n";
+  }
 
-    if (stderr) {
-      console.error("StdError:", stderr);
-      res.status(500).send("An error occurred during execution.");
-      return;
-    }
+  return { adj, graph };
+}
 
-    // Process the output if needed
-    console.log("C++ program output:", stdout);
-    let res_string = "";
-    const lines = fs.readFileSync("./file io/output.txt", "utf-8");
-    let f = 1;
-    console.log("LINES BEGIN HERE");
-    let temp = "";
-    for (let i = lines.length-1; i >= 0; i--) {
-      temp += lines[i];
-      if (i > 6 && lines.slice(i,i+6) === "result") {
-        if (f === 1) {
-          f -= 1;
-          continue;
-        }
-        temp += lines[i-1];
-        res_string = temp.split('').reverse().join('');
-        // console.log(res_string);
-        break;
-      }
-    }
-    
-    // Send a response to the client
-    res.status(200).json({ success: true, result: res_string });
-  });
-});
+function extractResult(output) {
+  const match = output.match(/<result>([\s\S]*?)<\/result>/);
+  return match ? match[1].trim() : "";
+}
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
+// Rough auxiliary-space estimate, in KB, based on the element counts each
+// algorithm's own data structures actually hold for this input size (not a
+// measured value — neither the original C++ nor this port ever tracked real
+// memory usage). Assumes 4 bytes/element (i32-sized). V/E here are the raw
+// input node/edge counts, matching what the user actually submitted.
+const BYTES_PER_ELEMENT = 4;
+function estimateSpaceKB(algoID, V, E) {
+  let elements;
+  switch (algoID) {
+    case 0: // Dijkstra: dist + pred + adjacency (neighbor,weight) + heap entries
+      elements = 2 * V + 3 * E;
+      break;
+    case 1: // Bellman-Ford: dist + pred + edge list (u,v,w)
+      elements = 2 * V + 3 * E;
+      break;
+    case 2: // SPFA: dist + pred + cnt + inqueue + adjacency
+      elements = 5 * V + 2 * E;
+      break;
+    case 3: // Floyd-Warshall: V x V distance matrix
+      elements = V * V;
+      break;
+    case 4: // Johnson: two V x V matrices (original + reweighted) + adjacency
+      elements = 2 * V * V + 2 * E;
+      break;
+    case 5: // Yen: dist + pred + adjacency + k stored paths (k=2)
+      elements = 4 * V + 2 * E;
+      break;
+    default:
+      elements = V + E;
+  }
+  return Math.round(((elements * BYTES_PER_ELEMENT) / 1024) * 100) / 100;
+}
 
-// app.get("/read-file", (req, res) => {
-//     const lines = fs.readFileSync("./file io/output.txt", "utf-8");
-
-// }
-
-app.get("/read-file", (req, res) => {
-  const fileContent = fs.readFileSync("./file io/output.txt", "utf-8");
-
-  const regex = /<adj>([\s\S]*?)<\/adj>/g;
-
+// Shared by Dijkstra, Bellman-Ford, and SPFA: all three emit the same
+// <ds>/<adj> tag shape, so a single parser covers all three algorithms.
+function parseGenericOutput(fileContent) {
   const adjDataArray = [];
-
+  const regex = /<adj>([\s\S]*?)<\/adj>/g;
   let match;
   while ((match = regex.exec(fileContent)) !== null) {
-    const adjData = match[1].trim();
-    adjDataArray.push(adjData);
+    adjDataArray.push(match[1].trim());
   }
 
-  console.log(adjDataArray);
-
   const result = [];
-  const checkNode = []; // New array to store third values
+  const checkNode = [];
   const distance_curr = [];
   const curr_node = [];
 
   for (const line of adjDataArray) {
-    const match = line.match(/^(\d+)/); // Regular expression to match the first number
-    if (match) {
-      const firstNumber = parseInt(match[1], 10);
-      curr_node.push(firstNumber);
-    }
+    const m = line.match(/^(\d+)/);
+    if (m) curr_node.push(parseInt(m[1], 10));
   }
 
   adjDataArray.forEach((row) => {
     const lines = row.split("\n");
     const values = [];
     const thirdValues = [];
-
     const numbersBeforeColon = [];
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      const match = line.match(/(\d+):/); // Regular expression to match the number before ':'
-      if (match) {
-        const number = parseInt(match[1], 10); // Extract and convert to an integer
-        numbersBeforeColon.push(number);
-      }
+      const m = line.match(/(\d+):/);
+      if (m) numbersBeforeColon.push(parseInt(m[1], 10));
 
       if (i > 0) {
         const parts = lines[i].split("\t")[1];
         if (parts) {
-          const firstNumericValue = parseInt(parts.split(",")[0], 10);
-          const thirdNumericValue = parseInt(parts.split(",")[2], 10);
-          values.push(firstNumericValue);
-          thirdValues.push(thirdNumericValue);
+          values.push(parseInt(parts.split(",")[0], 10));
+          thirdValues.push(parseInt(parts.split(",")[2], 10));
         }
       }
     }
@@ -186,95 +137,78 @@ app.get("/read-file", (req, res) => {
   });
 
   const distance = [];
-
   const dsMatches = fileContent.match(/<ds>[\s\S]*?<\/ds>/g);
-
   if (dsMatches) {
     const dsArray = dsMatches.map((ds) => {
       const dsContent = ds.match(/<ds>([\s\S]*?)<\/ds>/)[1].trim();
-      const dsLines = dsContent.split("\n");
-      return dsLines.map((line) =>
+      return dsContent.split("\n").map((line) =>
         line
           .trim()
           .split(/\s+/)
           .map((val) => (val === "INF" ? "INF" : parseInt(val, 10)))
       );
     });
-
-    for (let i = 0; i < dsArray.length; i++) {
-      distance.push(dsArray[i][1]);
-    }
+    for (const ds of dsArray) distance.push(ds[1]);
   }
 
   // to remove the undefined (0) error due to timeout function
   checkNode.push([]);
   result.push([]);
 
-  console.log(distance);
-  console.log(checkNode);
-  console.log(result);
-  console.log(distance_curr);
-  console.log(curr_node);
+  return { result, checkNode, distance, distance_curr, curr_node };
+}
 
-  const responseData = {
-    result,
-    checkNode,
-    distance,
-    distance_curr,
-    curr_node,
-  };
+function parseYenOutput(fileContent) {
+  const base = parseGenericOutput(fileContent);
 
-  res.json(responseData);
-});
+  // <result> content is "\t{time V E S k}\n\t\n\t{path1}\n\t{path2}...\n" —
+  // the first "\n\t"-delimited line is the summary, not a path.
+  const resultMatch = fileContent.match(/<result>([\s\S]*?)<\/result>/);
+  const lines = (resultMatch ? resultMatch[1] : "")
+    .split("\n\t")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+  const path = lines
+    .slice(1)
+    .map((line) => line.split(" ").filter(Boolean).map(Number));
 
-app.get("/read-file-YenK", (req, res) => {
-  const fileContent = fs.readFileSync("./file io/output.txt", "utf-8");
+  return { ...base, path };
+}
 
-  const regex = /<adj>([\s\S]*?)<\/adj>/g;
-
+function parseFloydOutput(fileContent) {
   const adjDataArray = [];
-
+  const regex = /<adj>([\s\S]*?)<\/adj>/g;
   let match;
   while ((match = regex.exec(fileContent)) !== null) {
-    const adjData = match[1].trim();
-    adjDataArray.push(adjData);
+    adjDataArray.push(match[1].trim());
   }
 
   const result = [];
-  const checkNode = []; // New array to store third values
+  const checkNode = [];
   const distance_curr = [];
   const curr_node = [];
 
   for (const line of adjDataArray) {
-    const match = line.match(/^(\d+)/); // Regular expression to match the first number
-    if (match) {
-      const firstNumber = parseInt(match[1], 10);
-      curr_node.push(firstNumber);
-    }
+    const m = line.match(/^(\d+)/);
+    if (m) curr_node.push(parseInt(m[1], 10));
   }
 
   adjDataArray.forEach((row) => {
     const lines = row.split("\n");
     const values = [];
     const thirdValues = [];
-
     const numbersBeforeColon = [];
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      const match = line.match(/(\d+):/); // Regular expression to match the number before ':'
-      if (match) {
-        const number = parseInt(match[1], 10); // Extract and convert to an integer
-        numbersBeforeColon.push(number);
-      }
+      const m = line.match(/(\d+):/);
+      if (m) numbersBeforeColon.push(parseInt(m[1], 10));
 
       if (i > 0) {
         const parts = lines[i].split("\t")[1];
         if (parts) {
-          const firstNumericValue = parseInt(parts.split(",")[0], 10);
-          const thirdNumericValue = parseInt(parts.split(",")[2], 10);
-          values.push(firstNumericValue);
-          thirdValues.push(thirdNumericValue);
+          values.push(parseInt(parts.split(",")[0], 10));
+          thirdValues.push(parseInt(parts.split(",")[2], 10));
         }
       }
     }
@@ -284,200 +218,54 @@ app.get("/read-file-YenK", (req, res) => {
     distance_curr.push(numbersBeforeColon);
   });
 
-  const distance = [];
-
-  const dsMatches = fileContent.match(/<ds>[\s\S]*?<\/ds>/g);
-
-  if (dsMatches) {
-    const dsArray = dsMatches.map((ds) => {
-      const dsContent = ds.match(/<ds>([\s\S]*?)<\/ds>/)[1].trim();
-      const dsLines = dsContent.split("\n");
-      return dsLines.map((line) =>
-        line
-          .trim()
-          .split(/\s+/)
-          .map((val) => (val === "INF" ? "INF" : parseInt(val, 10)))
-      );
-    });
-
-    for (let i = 0; i < dsArray.length; i++) {
-      distance.push(dsArray[i][1]);
-    }
-  }
-
-  const pathData = fileContent.match(/<result>[\s\S]*?<\/result>/g);
-
-  const matches = pathData[0].match(/\t(.*?)\r/g);
-
-  const path = matches.map((match) => match.trim().split(" ").map(Number));
-
-  // to remove the undefined (0) error due to timeout function
-  checkNode.push([]);
-  result.push([]);
-
-  console.log(distance);
-  console.log(checkNode);
-  console.log(result);
-
-  console.log(curr_node);
-  console.log(path);
-
-  const responseData = {
-    result,
-    checkNode,
-    distance,
-    distance_curr,
-    curr_node,
-    path,
-  };
-
-  res.json(responseData);
-});
-
-app.get("/read-file-Floyd", (req, res) => {
-  const fileContent = fs.readFileSync("./file io/output.txt", "utf-8");
-
-  const regex = /<adj>([\s\S]*?)<\/adj>/g;
-
-  const adjDataArray = [];
-
-  let match;
-  while ((match = regex.exec(fileContent)) !== null) {
-    const adjData = match[1].trim();
-    adjDataArray.push(adjData);
-  }
-
-  const result = [];
-  const checkNode = []; // New array to store third values
-  const distance_curr = [];
-  const curr_node = [];
-
-  for (const line of adjDataArray) {
-    const match = line.match(/^(\d+)/); // Regular expression to match the first number
-    if (match) {
-      const firstNumber = parseInt(match[1], 10);
-      curr_node.push(firstNumber);
-    }
-  }
-
-  adjDataArray.forEach((row) => {
-    const lines = row.split("\n");
-    const values = [];
-    const thirdValues = [];
-
-    const numbersBeforeColon = [];
-
-    for (let i = 0; i < lines.length; i++) {
-      const line = lines[i];
-      const match = line.match(/(\d+):/); // Regular expression to match the number before ':'
-      if (match) {
-        const number = parseInt(match[1], 10); // Extract and convert to an integer
-        numbersBeforeColon.push(number);
-      }
-
-      if (i > 0) {
-        const parts = lines[i].split("\t")[1];
-        if (parts) {
-          const firstNumericValue = parseInt(parts.split(",")[0], 10);
-          const thirdNumericValue = parseInt(parts.split(",")[2], 10);
-          values.push(firstNumericValue);
-          thirdValues.push(thirdNumericValue);
-        }
-      }
-    }
-
-    checkNode.push(values);
-    result.push(thirdValues);
-    distance_curr.push(numbersBeforeColon);
-  });
-
-  const dsMatches = fileContent.match(/<ds>[\s\S]*?<\/ds>/g);
-
+  const dsMatches = fileContent.match(/<ds>[\s\S]*?<\/ds>/g) || [];
   const distance = dsMatches.map((str) => {
-    const lines = str.split("\r\n\t"); // Split by '\r\n\t' to get individual lines
-
-    // Remove first and last empty elements
+    const lines = str.split("\n\t");
     lines.shift();
     lines.pop();
-
-    return lines.map((line) => {
-      const values = line.split(" "); // Split each line by space
-      return values.filter((val) => val !== ""); // Remove empty values
-    });
+    return lines.map((line) => line.split(" ").filter((val) => val !== ""));
   });
 
-  // to remove the undefined (0) error due to timeout function
   checkNode.push([]);
   result.push([]);
 
-  console.log(distance);
-  console.log(checkNode);
-  console.log(result);
+  return { result, checkNode, distance, distance_curr, curr_node };
+}
 
-  console.log(curr_node);
-  console.log(path);
-
-  const responseData = {
-    result,
-    checkNode,
-    distance,
-    distance_curr,
-    curr_node,
-  };
-
-  res.json(responseData);
-});
-
-app.get("/read-file-Johnson", (req, res) => {
-  const fileContent = fs.readFileSync("./file io/output.txt", "utf-8");
-
-  const regex = /<adj2>([\s\S]*?)<\/adj2>/g;
-
+function parseJohnsonOutput(fileContent) {
   const adjDataArray = [];
-
+  const regex = /<adj2>([\s\S]*?)<\/adj2>/g;
   let match;
   while ((match = regex.exec(fileContent)) !== null) {
-    const adjData = match[1].trim();
-    adjDataArray.push(adjData);
+    adjDataArray.push(match[1].trim());
   }
 
-  console.log(adjDataArray);
-
   const result = [];
-  const checkNode = []; // New array to store third values
+  const checkNode = [];
   const distance_curr = [];
   const curr_node = [];
 
   for (const line of adjDataArray) {
-    const match = line.match(/^(\d+)/); // Regular expression to match the first number
-    if (match) {
-      const firstNumber = parseInt(match[1], 10);
-      curr_node.push(firstNumber);
-    }
+    const m = line.match(/^(\d+)/);
+    if (m) curr_node.push(parseInt(m[1], 10));
   }
 
   adjDataArray.forEach((row) => {
     const lines = row.split("\n");
     const values = [];
     const thirdValues = [];
-
     const numbersBeforeColon = [];
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      const match = line.match(/(\d+):/); // Regular expression to match the number before ':'
-      if (match) {
-        const number = parseInt(match[1], 10); // Extract and convert to an integer
-        numbersBeforeColon.push(number);
-      }
+      const m = line.match(/(\d+):/);
+      if (m) numbersBeforeColon.push(parseInt(m[1], 10));
 
       if (i > 0) {
         const parts = lines[i].split("\t")[1];
         if (parts) {
-          const firstNumericValue = parseInt(parts.split(",")[0], 10);
-          const thirdNumericValue = parseInt(parts.split(",")[2], 10);
-          values.push(firstNumericValue);
-          thirdValues.push(thirdNumericValue);
+          values.push(parseInt(parts.split(",")[0], 10));
+          thirdValues.push(parseInt(parts.split(",")[2], 10));
         }
       }
     }
@@ -488,57 +276,205 @@ app.get("/read-file-Johnson", (req, res) => {
   });
 
   const distance = [];
-
   const dsMatches = fileContent.match(/<ds2>[\s\S]*?<\/ds2>/g);
-
   if (dsMatches) {
     const dsArray = dsMatches.map((ds) => {
       const dsContent = ds.match(/<ds2>([\s\S]*?)<\/ds2>/)[1].trim();
-      const dsLines = dsContent.split("\n");
-      return dsLines.map((line) =>
+      return dsContent.split("\n").map((line) =>
         line
           .trim()
           .split(/\s+/)
           .map((val) => (val === "INF" ? "INF" : parseInt(val, 10)))
       );
     });
-
-    for (let i = 0; i < dsArray.length; i++) {
-      distance.push(dsArray[i][1]);
-    }
+    for (const ds of dsArray) distance.push(ds[1]);
   }
 
-  const dsMatches1 = fileContent.match(/<source>[\s\S]*?<\/source>/g);
-
-  const source = dsMatches1.map((str) => {
-    const match = str.match(/\t(\d+)\r/);
-    if (match && match[1]) {
-      return parseInt(match[1]);
-    }
-    return null;
+  const sourceMatches = fileContent.match(/<source>[\s\S]*?<\/source>/g) || [];
+  const source = sourceMatches.map((str) => {
+    const m = str.match(/\t(\d+)/);
+    return m && m[1] ? parseInt(m[1], 10) : null;
   });
 
-  // to remove the undefined (0) error due to timeout function
   checkNode.push([]);
   result.push([]);
 
-  console.log(distance);
-  console.log(checkNode);
-  console.log(result);
-  console.log(distance_curr);
-  console.log(curr_node);
-  console.log(source);
+  return { result, checkNode, distance, distance_curr, curr_node, source };
+}
 
-  const responseData = {
-    result,
-    checkNode,
-    distance,
-    distance_curr,
-    curr_node,
-    source,
-  };
+// Matches the sentinel each algorithm's Rust core uses for "unreached" in
+// its dist array (see rust_algos/src/{dijkstra,bellman_ford,spfa}.rs).
+const INT_MAX_SENTINEL = 2147483647;
+const BILLION_SENTINEL = 1000000000;
 
-  res.json(responseData);
+// Dijkstra/Bellman-Ford/SPFA all emit "{summary}\n\t{pred...}\n\t{dist...}"
+// as their <result> content — pull the pred/dist arrays out of it.
+function parsePredDistFromResult(rawResultText) {
+  const lines = rawResultText
+    .split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.length > 0);
+  const pred = (lines[1] || "").split(/\s+/).filter(Boolean).map(Number);
+  const dist = (lines[2] || "").split(/\s+/).filter(Boolean).map(Number);
+  return { pred, dist };
+}
+
+// Walks a pred array backward from `dest` to `source`. Returns [] if dest
+// is unreachable (per `sentinel`) or the walk doesn't actually land on
+// source (malformed/negative-cycle-truncated data).
+function reconstructFromPredDist(pred, dist, source, dest, sentinel) {
+  if (dest < 0 || dest >= dist.length) return [];
+  if (dest !== source && dist[dest] >= sentinel) return [];
+
+  const path = [];
+  const seen = new Set();
+  let cur = dest;
+  while (cur !== -1 && cur !== undefined && !seen.has(cur)) {
+    seen.add(cur);
+    path.push(cur);
+    if (cur === source) break;
+    cur = pred[cur];
+  }
+  path.reverse();
+  return path[0] === source ? path : [];
+}
+
+// Johnson emits one <dijk-result>{V},{sourceIndex}\n\t{pred}\n\t{dist}</dijk-result>
+// block per source node (reweighted graph, but shortest-path structure is
+// preserved by the reweighting, so pred still reconstructs a real shortest
+// path in the original graph). Find the block for the requested source.
+function extractJohnsonPath(output, source, destination) {
+  const blocks = output.match(/<dijk-result>[\s\S]*?<\/dijk-result>/g) || [];
+  for (const block of blocks) {
+    const inner = block.match(/<dijk-result>([\s\S]*?)<\/dijk-result>/)[1];
+    const lines = inner
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.length > 0);
+    const srcIdx = Number((lines[0] || "").split(",")[1]);
+    if (srcIdx !== source) continue;
+
+    const pred = (lines[1] || "").split(/\s+/).filter(Boolean).map(Number);
+    const dist = (lines[2] || "").split(/\s+/).filter(Boolean).map(Number);
+    return reconstructFromPredDist(pred, dist, source, destination, INT_MAX_SENTINEL);
+  }
+  return [];
+}
+
+// Floyd-Warshall's shortest path is already reconstructed in Rust (see
+// run_floyd_warshall) and appended as a <shortest-path> block.
+function extractFloydPath(output) {
+  const m = output.match(/<shortest-path>([\s\S]*?)<\/shortest-path>/);
+  if (!m) return [];
+  return m[1].trim().split(/\s+/).filter(Boolean).map(Number);
+}
+
+function computeShortestPath(algoID, output, rawResult, source, destination, yenParsed) {
+  switch (algoID) {
+    case 0:
+    case 1: {
+      const { pred, dist } = parsePredDistFromResult(rawResult);
+      return reconstructFromPredDist(pred, dist, source, destination, INT_MAX_SENTINEL);
+    }
+    case 2: {
+      const { pred, dist } = parsePredDistFromResult(rawResult);
+      return reconstructFromPredDist(pred, dist, source, destination, BILLION_SENTINEL);
+    }
+    case 3:
+      return extractFloydPath(output);
+    case 4:
+      return extractJohnsonPath(output, source, destination);
+    case 5:
+      return (yenParsed.path && yenParsed.path[0]) || [];
+    default:
+      return [];
+  }
+}
+
+// Runs the requested algorithm entirely in-memory (no exec, no file I/O) and
+// returns everything the frontend needs to render the result and animate it
+// in a single response.
+app.post("/perform-algo", (req, res) => {
+  try {
+    const { nodes, edges, algoID } = req.body;
+    const V = nodes.length;
+    const { adj, graph } = buildGraph(nodes, edges);
+
+    const clamp = (n, fallback) =>
+      Number.isInteger(n) && n >= 0 && n < V ? n : fallback;
+    const source = clamp(req.body.source, 0);
+    const destination = clamp(req.body.destination, Math.max(V - 1, 0));
+
+    let output;
+    switch (algoID) {
+      case 0:
+        output = algos.run_dijkstra(V, adj, source);
+        break;
+      case 1:
+        output = algos.run_bellman_ford(V, adj, source);
+        break;
+      case 2:
+        output = algos.run_spfa(V, adj, source);
+        break;
+      case 3:
+        output = algos.run_floyd_warshall(V, adj, source, destination);
+        break;
+      case 4:
+        output = algos.run_johnson(V, adj);
+        break;
+      case 5:
+        output = algos.run_yen(V, adj, source, destination, 2);
+        break;
+      default:
+        res.status(400).json({ error: "Unknown algoID" });
+        return;
+    }
+
+    // NOTE: the parsers below each produce their own `result` field (the
+    // per-step relax-outcome array the frontend animates), which is a
+    // different thing from `resultText` (the human-readable <result> block,
+    // used only for the saved-graph history display) — keep them under
+    // distinct keys so the spread below can't clobber either.
+    const rawResult = extractResult(output);
+    // The space estimate is appended as its own tagged line (rather than a
+    // new DB field) so saved history keeps working without a schema change;
+    // HistoryItem.jsx extracts it by the "spaceEstimateKB" marker, not by
+    // position, since the summary line's field count already differs across
+    // algorithms.
+    const spaceEstimateKB = estimateSpaceKB(algoID, V, edges.length);
+    const resultText = `${rawResult}\nspaceEstimateKB ${spaceEstimateKB}`;
+
+    // Johnson's output interleaves two phases in one string: the plain
+    // <ds>/<adj> Bellman-Ford reweighting trace (parsed generically, same
+    // as Dijkstra/Bellman-Ford/SPFA) and the per-source <ds2>/<adj2>/
+    // <source> Dijkstra trace (parsed separately, nested under `johnson`)
+    // — the frontend animates the former first, then the latter.
+    let parsed;
+    if (algoID === 3) {
+      parsed = parseFloydOutput(output);
+    } else if (algoID === 4) {
+      parsed = { ...parseGenericOutput(output), johnson: parseJohnsonOutput(output) };
+    } else if (algoID === 5) {
+      parsed = parseYenOutput(output);
+    } else {
+      parsed = parseGenericOutput(output);
+    }
+
+    const shortestPath = computeShortestPath(algoID, output, rawResult, source, destination, parsed);
+
+    res.status(200).json({
+      success: true,
+      graph,
+      resultText,
+      source,
+      destination,
+      shortestPath,
+      ...parsed,
+    });
+  } catch (error) {
+    console.error("Error:", error);
+    res.status(500).json({ error: "Failed to run algorithm" });
+  }
 });
 
 app.listen(port, () => {

@@ -30,6 +30,7 @@ const Settings = (props) => {
     context;
   useEffect(() => {
     getuserinfo();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   //looks over the changes in the info
   const handleSubmit = async (e) => {
