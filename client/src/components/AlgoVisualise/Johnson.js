@@ -1,19 +1,20 @@
-import ReactFlow, { MarkerType } from "reactflow";
+import { MarkerType } from "reactflow";
+import { highlightShortestPath } from "./pathHighlight";
 
 var currentNode = 0;
-var currentEdge = 1;
 var index = 0;
-var pathVal = 0;
-
-const host = process.env.REACT_APP_BACKEND_LOCALHOST;
 
 var checkNode = []; // the nodes to check
 var result = []; // result whether 1 or 0
 var distance = []; // distance of current node from source
 var distance_curr = []; // distance of the current node
 var curr_node = []; // current node from which the distance of all adjacent nodes is calculated
-var path = [];
 var source = [];
+var shortestPath = [];
+// holds the per-source Dijkstra phase data (<ds2>/<adj2>/<source> tags),
+// bridged from visualiseJohnson into visualiseJ once the reweighting
+// animation (driven by the plain <ds>/<adj> phase data) completes.
+var johnsonData = null;
 
 // coloring the nodes of the graph
 const colorNode = (nodes, nodeId, color) => {
@@ -40,13 +41,13 @@ const colorEdge = (edges, sourceEdge, destinationEdge, animated) => {
         ...edge,
         animated: animated,
         label:
-          (distance_curr[currentNode] == 1e9
+          (distance_curr[currentNode] === 1e9
             ? "INF"
             : distance_curr[currentNode].toString()) +
           " + " +
           edge.label +
           " < " +
-          (distance[currentNode][checkNode[currentNode][index]] == 1e9
+          (distance[currentNode][checkNode[currentNode][index]] === 1e9
             ? "INF"
             : distance[currentNode][checkNode[currentNode][index]].toString()),
       };
@@ -197,7 +198,7 @@ const visualise = async (nodes, edges, setNodes, setEdges, updatedEdges) => {
     setNodes(colorNode(updatedNodes, checkNode[currentNode][index], "blue"));
 
     // changing edge to animated and adding labels
-    if (checkNode[currentNode][index] != undefined) {
+    if (checkNode[currentNode][index] !== undefined) {
       setEdges(
         colorEdge(
           edges,
@@ -228,16 +229,14 @@ const visualise = async (nodes, edges, setNodes, setEdges, updatedEdges) => {
       }
 
       if (
-        checkNode[currentNode].length == 0 ||
-        index == checkNode[currentNode].length - 1
+        checkNode[currentNode].length === 0 ||
+        index === checkNode[currentNode].length - 1
       ) {
         index = 0;
         currentNode++;
       } else {
         index++;
       }
-
-      currentEdge++;
     }, 2000);
 
     await visualise(nodes, edges, setNodes, setEdges, updatedEdges);
@@ -257,6 +256,7 @@ const visualiseD = async (nodes, edges, setNodes, setEdges, source) => {
     const updatedNodes = highlightNode(nodes, "-1");
     setNodes(colorNode(updatedNodes, "-1", "white"));
     setEdges(colorEdge(edges, "-1", "-1", distance_curr, distance, true));
+    highlightShortestPath(shortestPath, setNodes, setEdges);
     return;
   }
 
@@ -267,7 +267,7 @@ const visualiseD = async (nodes, edges, setNodes, setEdges, source) => {
     setNodes(colorNode(updatedNodes2, checkNode[currentNode][index], "blue"));
 
     // changing edge to animated and adding labels
-    if (checkNode[currentNode][index] != undefined) {
+    if (checkNode[currentNode][index] !== undefined) {
       setEdges(
         colorEdge(
           edges,
@@ -300,16 +300,14 @@ const visualiseD = async (nodes, edges, setNodes, setEdges, source) => {
       }
 
       if (
-        checkNode[currentNode].length == 0 ||
-        index == checkNode[currentNode].length - 1
+        checkNode[currentNode].length === 0 ||
+        index === checkNode[currentNode].length - 1
       ) {
         index = 0;
         currentNode++;
       } else {
         index++;
       }
-
-      currentEdge++;
     }, 2000);
 
     await visualiseD(nodes, edges, setNodes, setEdges, source);
@@ -321,68 +319,44 @@ const visualiseJ = async (nodes, edges, setNodes, setEdges) => {
   console.log("johnson visualised !");
 
   currentNode = 0;
-  currentEdge = 1;
   index = 0;
-  pathVal = 0;
 
-  // fetching data for djikstra traversal
-  try {
-    const data = await fetch(`${host}/read-file-Johnson`);
-    if (!data.ok) {
-      throw new Error("Network response was not ok");
-    }
+  result = johnsonData.result;
+  checkNode = johnsonData.checkNode;
+  distance = johnsonData.distance;
+  distance_curr = johnsonData.distance_curr;
+  curr_node = johnsonData.curr_node;
+  source = johnsonData.source;
 
-    const responseData = await data.json();
-    result = responseData.result;
-    checkNode = responseData.checkNode;
-    distance = responseData.distance;
-    distance_curr = responseData.distance_curr;
-    curr_node = responseData.curr_node;
-    source = responseData.source;
-
-    await visualiseD(nodes, edges, setNodes, setEdges, source);
-  } catch (error) {
-    console.error("Error:", error);
-  }
+  await visualiseD(nodes, edges, setNodes, setEdges, source);
 };
 
-const visualiseJohnson = async (nodes, edges, setNodes, setEdges) => {
+const visualiseJohnson = async (nodes, edges, setNodes, setEdges, algoData) => {
   currentNode = 0;
-  currentEdge = 1;
   index = 0;
-  pathVal = 0;
 
-  // fetching data for bellmanford traversal
-  try {
-    const data = await fetch(`${host}/read-file`);
-    if (!data.ok) {
-      throw new Error("Network response was not ok");
-    }
+  result = algoData.result;
+  checkNode = algoData.checkNode;
+  distance = algoData.distance;
+  distance_curr = algoData.distance_curr;
+  curr_node = algoData.curr_node;
+  johnsonData = algoData.johnson;
+  shortestPath = algoData.shortestPath;
 
-    const responseData = await data.json();
-    result = responseData.result;
-    checkNode = responseData.checkNode;
-    distance = responseData.distance;
-    distance_curr = responseData.distance_curr;
-    curr_node = responseData.curr_node;
+  const { updatedNodes, newEdges } = await addExtraNode(
+    nodes,
+    edges,
+    setNodes,
+    setEdges
+  );
 
-    const { updatedNodes, newEdges } = await addExtraNode(
-      nodes,
-      edges,
-      setNodes,
-      setEdges
-    );
+  await setNodes(updatedNodes);
+  await setEdges(newEdges);
 
-    await setNodes(updatedNodes);
-    await setEdges(newEdges);
+  const updatedEdges = await reweightGraph(edges);
 
-    const updatedEdges = await reweightGraph(edges);
-
-    // visualing bellman ford
-    await visualise(updatedNodes, newEdges, setNodes, setEdges, updatedEdges);
-  } catch (error) {
-    console.error("Error:", error);
-  }
+  // visualing bellman ford
+  await visualise(updatedNodes, newEdges, setNodes, setEdges, updatedEdges);
 };
 
 export default visualiseJohnson;

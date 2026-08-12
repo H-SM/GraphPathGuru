@@ -8,14 +8,6 @@ const NavbarOut = () => {
   
   const [currentPage, setCurrentPage] = useState('');
 
-  const looker = () => {
-    if (localStorage.getItem('token')) {
-      navigate('/?section=graph');
-    } else {
-      navigate('/login');
-    }
-  }
-
   const docslooker = () => {
     if (currentPage !== 'docs') {
       navigate('/docs');

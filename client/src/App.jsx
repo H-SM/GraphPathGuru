@@ -10,7 +10,6 @@ import Alert from "./components/alert";
 import Grapher from "./components/Grapher";
 import NotFound from "./components/NotFound";
 import UserProfile from "./components/UserProfile";
-import ReactFlowProvider from "reactflow";
 import { useState } from "react";
 import Forgot from "./components/Forgot";
 

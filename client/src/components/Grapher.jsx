@@ -1,4 +1,4 @@
-import React, { useRef, useContext, useEffect, useState } from "react";
+import React, { useRef, useContext, useCallback, useEffect, useState } from "react";
 import NavbarOut from "./NavbarOut.jsx";
 import { useParams } from "react-router-dom";
 import graphContext from "../context/Graph/graphContext.js";
@@ -6,6 +6,7 @@ import userContext from "../context/User/userContext.js";
 import Box from "@mui/material/Box";
 import LinearProgress from "@mui/material/LinearProgress";
 import { UserCircleIcon } from "@heroicons/react/24/solid";
+import { parseGraphCounts, parseResultSummary } from "../utils/graphSummary";
 
 import ReactFlow, {
   useNodesState,
@@ -29,7 +30,7 @@ const Graphlet = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-  const makeNodesEdges = (gdata) => {
+  const makeNodesEdges = useCallback((gdata) => {
     const lines = gdata.split("\n");
 
     const newNodes = [];
@@ -125,13 +126,13 @@ const Graphlet = () => {
 
     setNodes(newNodes);
     setEdges(newEdges);
-  };
+  }, [setNodes, setEdges]);
 
   useEffect(() => {
     if (viewGraph.graph) {
       makeNodesEdges(viewGraph.graph);
     }
-  }, [viewGraph.graph]);
+  }, [viewGraph.graph, makeNodesEdges]);
 
   return (
     <>
@@ -178,29 +179,26 @@ const Grapher = () => {
     };
 
     fetchGraph();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
   const [numEdges, setNumEdges] = useState(0);
   const [numNodes, setNumNodes] = useState(0);
   const [tc, setTc] = useState("");
   const [sc, setSc] = useState("");
-  const [throughput, setThroughput] = useState("");
 
   useEffect(() => {
     if (showUser.length !== 0) {
-      // Extract TC and SC from the result string
-      // const resultArray = viewGraph.result
-      //   .split("\n")
-      //   .filter((item) => item.trim() !== "");
-      // setTc(resultArray[1]?.trim() || "N/A");
-      // setSc(resultArray[2]?.trim() || "N/A");
-      // calculateThroughput(tc, sc);
-      const resultArray = viewGraph.result.split("\n")[1].split(" ");
-      setTc(resultArray[0] || "N/A");
-      setNumNodes(resultArray[1] || "N/A");
-      setNumEdges(resultArray[2] || "N/A");
-      setSc(resultArray[3] || "N/A");
+      // Node/edge counts from the saved graph string (ground truth);
+      // time/space from the algorithm's result block.
+      const { numNodes, numEdges } = parseGraphCounts(viewGraph.graph);
+      const { tc, sc } = parseResultSummary(viewGraph.result);
+      setTc(tc);
+      setNumNodes(numNodes);
+      setNumEdges(numEdges);
+      setSc(sc);
     }
-  }, [showUser, viewGraph, tc, sc]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showUser, viewGraph]);
 
   function calculateTimeAgo(dateString) {
     const showUserDate = new Date(dateString);
@@ -243,6 +241,7 @@ const Grapher = () => {
 
       fetchUser();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [viewGraph]);
 
   //   useEffect(() => {
@@ -264,17 +263,6 @@ const Grapher = () => {
 
     return date.toLocaleString("en-US", options);
   };
-  //get no. of nodes and edges
-  function calculateThroughput(tc, sc) {
-    // Calculate throughput in Mbps
-    const timeInMilliseconds = parseFloat(tc, 10);
-    const spaceInMegabytes = parseFloat(sc, 10); // when I do this thing, it would be Kb
-    const throughputMbps = Math.ceil(
-      (spaceInMegabytes + 1) / (timeInMilliseconds / 1000)
-    );
-
-    setThroughput(`${throughputMbps} mbps`);
-  }
   return (
     <>
       {showUser.length !== 0 ? (
@@ -327,7 +315,8 @@ const Grapher = () => {
               </div>
               <p className="font-medium text-[15px] mt-2 flex flex-row gap-1">
                 Share this graph with others<span aria-hidden="true">→ </span>
-                <a
+                <button
+                  type="button"
                   onClick={() =>
                     navigator.clipboard.writeText(`${host}/graph/${id}`)
                   }
@@ -355,7 +344,7 @@ const Grapher = () => {
                       ></path>{" "}
                     </g>
                   </svg>
-                </a>
+                </button>
               </p>
             </div>
           </div>
@@ -422,10 +411,10 @@ const Grapher = () => {
                 </div>
                 <div key="6" className="mx-auto flex max-w-xs flex-col gap-y-4">
                   <dt className="text-base leading-7 text-gray-600">
-                    Space taken
+                    Space taken (est.)
                   </dt>
                   <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900 sm:text-5xl">
-                    {sc + "KB"}
+                    {sc !== "N/A" ? `~${sc} KB` : "N/A"}
                   </dd>
                 </div>
               </dl>

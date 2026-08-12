@@ -60,6 +60,7 @@ const CloudinaryUploadWidget = (props) => {
         uploadButton.removeEventListener("click", handleClick);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [handleUploadSuccess, changeimage, setUserData]);
 
   return (
