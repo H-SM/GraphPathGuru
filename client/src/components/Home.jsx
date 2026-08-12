@@ -42,7 +42,7 @@ import visualiseFloyd from "./AlgoVisualise/Floyd";
 import visualiseJohnson from "./AlgoVisualise/Johnson";
 import visualiseSPFA from "./AlgoVisualise/SPFA";
 
-const localhost = process.env.REACT_APP_BACKEND_LOCALHOST;
+const host = process.env.REACT_APP_BACKEND_HOST;
 
 const initialNodes = [
   {
@@ -72,6 +72,7 @@ const AddNodeOnEdgeDrop = () => {
   const { project } = useReactFlow();
 
   const [algoID, setAlgoID] = useState("Dijkstra");
+  const [algoData, setAlgoData] = useState(null);
 
   //context here
   const context = useContext(userContext);
@@ -81,24 +82,29 @@ const AddNodeOnEdgeDrop = () => {
   const { addgraph } = gContext;
 
   const startProcess = () => {
+    if (!algoData) {
+      alert("Save the graph first, then Visualize.");
+      return;
+    }
+
     switch (algoID) {
       case "Dijkstra":
-        visualiseDjikstra(nodes, edges, setNodes, setEdges);
+        visualiseDjikstra(nodes, edges, setNodes, setEdges, algoData);
         break;
       case "Bellman Ford":
-        visualiseBellman(nodes, edges, setNodes, setEdges);
+        visualiseBellman(nodes, edges, setNodes, setEdges, algoData);
         break;
       case "SPFA":
-        visualiseSPFA(nodes, edges, setNodes, setEdges);
+        visualiseSPFA(nodes, edges, setNodes, setEdges, algoData);
         break;
       case "Floyd Warshall":
-        visualiseFloyd(nodes, edges, setNodes, setEdges);
+        visualiseFloyd(nodes, edges, setNodes, setEdges, algoData);
         break;
       case "Johnson's Algorithm":
-        visualiseJohnson(nodes, edges, setNodes, setEdges);
+        visualiseJohnson(nodes, edges, setNodes, setEdges, algoData);
         break;
       case "Yen's K shortest Paths":
-        visualiseYenK(nodes, edges, setNodes, setEdges);
+        visualiseYenK(nodes, edges, setNodes, setEdges, algoData);
         break;
       default:
         // Handle default case
@@ -247,50 +253,6 @@ const AddNodeOnEdgeDrop = () => {
     setEdges(updatedEdges);
   };
 
-  // writing data to file
-  const writeFile = async () => {
-    const data = {
-      nodes: nodes,
-      edges: edges,
-    };
-    console.log("this is data\n", data);
-    const nexter = userData.graphs + 1;
-    const req_write = await fetch(`${localhost}/write-file`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
-
-    const response = await req_write.json();
-    console.log("Write file response is:", response.graph);
-
-    const res_string = await performAlgo();
-
-    console.log("perform algo response is:", res_string);
-    //TODO: async
-    changegraph(nexter);
-    const namer = `${algoID}-${userData.graphs}`;
-    if (namer.length < 0 || namer.length > 25) {
-      alert("name too big (0-25 characters). please make it smaller");
-    } else {
-      const samp_data = {
-        result: res_string,
-        graph: response.graph,
-        name: namer,
-        favourite: false,
-      };
-      console.log("This is sample data: ", samp_data);
-      addgraph(
-        samp_data.result,
-        samp_data.graph,
-        samp_data.name,
-        samp_data.favourite
-      );
-    }
-  };
-
   // Object to map the correct algo ID for back end
   const algoMap = {
     Dijkstra: 0,
@@ -301,43 +263,48 @@ const AddNodeOnEdgeDrop = () => {
     "Yen's K shortest Paths": 5,
   };
 
+  // Runs the selected algorithm on the backend (in-memory, no file writes)
+  // and saves the result to the user's graph history.
+  const writeFile = async () => {
+    if (algoID === "") {
+      return;
+    }
+
+    const nexter = userData.graphs + 1;
+
+    try {
+      const req = await fetch(`${host}/perform-algo`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ nodes, edges, algoID: algoMap[algoID] }),
+      });
+
+      if (!req.ok) {
+        throw new Error(`HTTP error! Status: ${req.status}`);
+      }
+
+      const response = await req.json();
+      setAlgoData(response);
+
+      changegraph(nexter);
+      const namer = `${algoID}-${userData.graphs}`;
+      if (namer.length < 0 || namer.length > 25) {
+        alert("name too big (0-25 characters). please make it smaller");
+      } else {
+        addgraph(response.resultText, response.graph, namer, false);
+      }
+    } catch (error) {
+      console.error("Error during writeFile:", error.message);
+    }
+  };
+
   // Drop down menu logic
   const selectAlgo = (event) => {
     const selectedValue = event.target.value;
     setAlgoID(selectedValue);
     console.log("This is val:", selectedValue, algoMap[algoID]);
-  };
-
-  // Algo POST call. Uses algoID use state variable to call the correct algorithm in backend
-  const performAlgo = async () => {
-    console.log(algoID);
-    if (algoID === "") {
-      return;
-    }
-
-    try {
-      const req = await fetch(`${localhost}/perform-algo`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ algoID: algoMap[algoID] }),
-      });
-
-      console.log(`${localhost}/perform-algo`, "pinged");
-
-      if (!req.ok) {
-        // Check if the HTTP response status is not in the range 200-299
-        throw new Error(`HTTP error! Status: ${req.status}`);
-      }
-
-      const response = await req.json();
-      return response.result;
-    } catch (error) {
-      console.error("Error during performAlgo:", error.message);
-      // Handle the error appropriately
-      return null; // or throw error if needed
-    }
   };
 
   // for flipping the node

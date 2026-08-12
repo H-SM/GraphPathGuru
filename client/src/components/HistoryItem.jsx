@@ -76,17 +76,15 @@ const HistoryItem = (props) => {
   //   console.log(graph._id);
   // },[props])
 
-  // Extract TC and SC from the result string
-  // const resultArray = graph.result
-  //   .split("\n")
-  //   .filter((item) => item.trim() !== "");
-  // const tc = resultArray[1]?.trim() || "N/A";
-  // const numNodes = resultArray[2]?.trim() || "N/A";
-  // const numEdges = resultArray[3]?.trim() || "N/A";
-  // const sc = resultArray[4]?.trim() || "N/A";
-
-  const resultArray = graph.result
-    .split("\n")[1].split(' ');
+  // Extract TC and SC from the result string. Most algorithms' summary
+  // line is the second line; Johnson's has no second line at all, so fall
+  // back to the first when there isn't one.
+  const resultLines = (graph.result || "")
+    .split("\n")
+    .filter((line) => line.trim() !== "");
+  const resultArray = (resultLines[1] || resultLines[0] || "")
+    .trim()
+    .split(/\s+/);
   const tc = resultArray[0] || "N/A";
   const numNodes = resultArray[1] || "N/A";
   const numEdges = resultArray[2] || "N/A";

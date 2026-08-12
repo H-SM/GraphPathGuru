@@ -4,8 +4,6 @@ var index = 0;
 var nodeVal = -1;
 var temp = -1;
 
-const host = process.env.REACT_APP_BACKEND_LOCALHOST;
-
 var checkNode = []; // the nodes to check
 var result = []; // result whether 1 or 0
 var distance = []; // it is the adjacency matrix after each iteration of k
@@ -176,7 +174,7 @@ const visualise = async (nodes, edges, setNodes, setEdges) => {
   }, 5000);
 };
 
-const visualiseFloyd = async (nodes, edges, setNodes, setEdges) => {
+const visualiseFloyd = async (nodes, edges, setNodes, setEdges, algoData) => {
 
   console.log("Floyd visualised !");
 
@@ -186,24 +184,11 @@ const visualiseFloyd = async (nodes, edges, setNodes, setEdges) => {
   nodeVal = -1;
   temp = -1;
 
-  await fetch(`${host}/read-file-Floyd`)
-    .then((response) => {
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-      return response.json();
-    })
-    .then((data) => {
-      // console.log('Received data:', data.distance_curr);
-      result = data.result;
-      checkNode = data.checkNode;
-      distance = data.distance;
-      distance_curr = data.distance_curr;
-      curr_node = data.curr_node;
-    })
-    .catch((error) => {
-      console.error("Error:", error);
-    });
+  result = algoData.result;
+  checkNode = algoData.checkNode;
+  distance = algoData.distance;
+  distance_curr = algoData.distance_curr;
+  curr_node = algoData.curr_node;
 
   visualise(nodes, edges, setNodes, setEdges);
 };
