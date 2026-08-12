@@ -26,7 +26,6 @@ import userContext from "../context/User/userContext";
 import graphContext from "../context/Graph/graphContext";
 import Navbar from "./Navbar";
 import HeroSection from "./HeroSection";
-import AboutUs from "./aboutUs";
 import Footer from "./Footer";
 import TechStack from "./techStack";
 import History from "./History";
