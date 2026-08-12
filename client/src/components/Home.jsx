@@ -626,7 +626,7 @@ const Home = (props) => {
 
       <div className="w-full h-[20vh]"></div>
       <History showAlert={showAlert} />
-      <AboutUs />
+      {/* <AboutUs /> */}
       <TechStack />
       <Footer />
       <UserSection />
